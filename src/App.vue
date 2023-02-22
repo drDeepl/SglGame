@@ -1,22 +1,14 @@
-<template id="app">
-  <va-navbar color="secondary pa-0">
-    <template #left>
-      <v-navbar-item>SQL Game</v-navbar-item>
-    </template>
-
-    <template #right>
-      <va-button round size="small"
-        ><va-avatar color="danger">?</va-avatar></va-button
-      >
-      <v-navbar-item>Account</v-navbar-item>
-    </template>
-  </va-navbar>
+<template>
+  <div id="app">
+    <MainLayer />
+  </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-
+import MainLayer from "@/layers/MainLayer.vue";
 export default defineComponent({
+  components: { MainLayer },
   data() {
     return {};
   },

@@ -1,3 +1,11 @@
 .va-avatar {
-  border: 2px solid #fff;
+  border: 2px solid $color-white;
+}
+
+.va-navbar {
+  border-radius: $border-radius;
+  margin-top: -0.99em;
+}
+
+.va-modal_inner {
 }
