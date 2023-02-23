@@ -22,35 +22,54 @@
         </template>
         <va-dropdown-content class="flex flex-row">
           <va-button @click="onClickLogIn">Войти</va-button>
-          <va-button>Зарегистрироваться</va-button>
+          <va-button @click="onClickRegister">Зарегистрироваться</va-button>
         </va-dropdown-content>
       </va-dropdown>
     </template>
   </va-navbar>
-  <Form :itemModel="forms.logIn.model" :isActive="forms.logIn.active" />
+  <Form
+    v-if="forms.logIn.active"
+    title="Вход"
+    :itemModel="forms.logIn.model"
+    :isActive="forms.logIn.active"
+    :onClickCancelForm="onClickCancelLogin"
+    :onClickApplyForm="onClickApplyLogIn"
+  />
+  <Form
+    v-if="forms.register.active"
+    title="Регистрация"
+    :itemModel="forms.register.model"
+    :isActive="forms.register.active"
+    :onClickCancelForm="onClickCancelRegister"
+    :onClickApplyForm="onClickApplyRegister"
+  />
 </template>
 
 <script lang="ts">
-import ModelCreateUser from "@/models/model.user.create";
-import { defineComponent } from "vue";
-import { logR } from "@/service/utils";
-import Form from "@/components/Form.vue";
+import ModelCreateUser from '@/models/model.user.create';
+import {defineComponent} from 'vue';
+import {logR} from '@/service/utils';
+import Form from '@/components/Form.vue';
 export default defineComponent({
-  components: { Form },
+  components: {Form},
   data() {
     return {
       render: {
-        main: false,
+        main: false
       },
       activateBlock: {
-        avatar: false,
+        avatar: false
       },
       forms: {
         logIn: {
           model: new ModelCreateUser(),
-          active: false,
+          active: false
         },
-      },
+        register: {
+          model: new ModelCreateUser(),
+          active: true
+        }
+      }
     };
   },
   async created() {
@@ -59,13 +78,32 @@ export default defineComponent({
   },
   methods: {
     onClickAvatar() {
-      logR("warn", "NAVBAR: onClickAvatar");
+      logR('warn', 'NAVBAR: onClickAvatar');
       this.activateBlock.avatar = true;
     },
     onClickLogIn() {
-      logR("warn", "NAVBAR: onClickLogIn");
+      logR('warn', 'NAVBAR: onClickLogIn');
       this.forms.logIn.active = true;
     },
-  },
+    onClickCancelLogin() {
+      logR('warn', 'NAVBAR: onClickCancelLogin');
+      this.forms.logIn.active = false;
+    },
+    onClickApplyLogIn() {
+      logR('warn', 'NAVBAR: onClickApplyLogIn');
+    },
+    onClickRegister() {
+      logR('warn', 'onClickRegister');
+      this.forms.register.active = true;
+    },
+    onClickApplyRegister() {
+      logR('warn', 'NAVBAR: onCLickApplyRegister');
+      this.forms.register.active = false;
+    },
+    onClickCancelRegister() {
+      logR('warn', 'NAVBAR: onClickCancelRegister');
+      this.forms.register.active = false;
+    }
+  }
 });
 </script>

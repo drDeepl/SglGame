@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@vuestic/ag-grid-theme": "^1.0.3",
+    "@vuestic/tailwind": "^0.1.2",
     "maz-ui": "^3.6.12",
     "pinia": "^2.0.28",
     "sass": "^1.58.3",

@@ -1,38 +1,51 @@
 <template>
   <div>
-    <va-modal size="small" v-model="active" no-outside-dismiss class="ma-0">
+    <va-modal v-model="isActive" no-outside-dismiss class="ma-0">
       <template #content>
-        <va-card class="card-main-layer ma-0">
-          <va-card-title>Заголовок карты</va-card-title>
-          <v-card-content>
-            <va-form ref="form" class="flex flex-col">
-              <va-input
-                class="row align-space-around"
-                v-for="prop in Object.keys(itemModel.label)"
-                :key="prop"
-                v-model="dataForm[prop]"
-                :label="itemModel.label[prop]"
-              ></va-input>
+        <va-card class=" ma-0 card-main-layout-success">
+          <va-card-title class="pb-1">{{ title }}</va-card-title>
+
+          <v-card-content class="">
+            <va-form ref="form" class="ma-4 ">
+              <div class="form__wrapper">
+                <va-input
+                  class="mb-3"
+                  v-for="prop in Object.keys(itemModel.label)"
+                  :key="prop"
+                  v-model="dataForm[prop]"
+                  :label="itemModel.label[prop]"
+                  :loading="isLoad"
+                  :readonly="isLoad"
+                  :rules="
+                    rules.hasOwnProperty(prop) ? rules[prop] : rules['field']
+                  "
+                ></va-input>
+              </div>
             </va-form>
           </v-card-content>
-          <va-card-actions>
+          <va-card-actions class=" pt-1 mt-1">
             <va-button
               preset="secondary"
               border-color="success"
               class="mr-6 mb-2"
               text-color="success"
               round
+              :loading="isLoad"
+              @click="onClickApply"
             >
-              Принять
+              {{ labelActionBtn.apply }}
             </va-button>
+            <va-spacer></va-spacer>
             <va-button
+              :disabled="isLoad"
               preset="secondary"
               border-color="danger"
               class="mr-6 mb-2"
               text-color="danger"
               round
+              @click="onClickCancelForm"
             >
-              Закрыть
+              {{ labelActionBtn.cancel }}
             </va-button>
           </va-card-actions>
         </va-card>
@@ -42,23 +55,63 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-import { logR } from "@/service/utils";
+import {defineComponent} from 'vue';
+import {logR} from '@/service/utils';
 export default defineComponent({
   props: {
-    itemModel: { type: Object, required: true },
-    isActive: { type: Boolean, required: true },
+    title: {
+      type: String,
+      required: false,
+      default() {
+        return '';
+      }
+    },
+    itemModel: {type: Object, required: true},
+    isActive: {type: Boolean, required: true},
+    isSucces: {
+      type: Boolean,
+      required: false,
+      default() {
+        return false;
+      }
+    },
+    labelActionBtn: {
+      type: Object,
+      required: false,
+      default() {
+        return {apply: 'Принять', cancel: 'Закрыть'};
+      }
+    },
+    onClickApplyForm: {type: Function, required: true},
+    onClickCancelForm: {type: Function, required: true}
   },
   data() {
     return {
       dataForm: this.itemModel,
-      active: true,
+      isFormValid: false,
+      isLoad: false,
+      rules: {
+        field: [
+          (value: string) =>
+            value.trim().length > 0 || 'Поле необходимо заполнить'
+        ],
+        password: [
+          (value: string) =>
+            value.length > 10 || 'Пароль должен иметь не менее 10 символов'
+        ]
+      }
     };
   },
   methods: {
-    onClickApplyForm() {
-      logR("warn", "FORM: onCLickApplyForm");
-    },
-  },
+    onClickApply() {
+      logR('warn', 'FORM: onCLickApplyForm');
+      console.log(this.dataForm);
+      this.isLoad = true;
+      if (this.$refs.form.validate()) {
+        this.onClickApplyForm();
+        this.isLoad = false;
+      }
+    }
+  }
 });
 </script>
