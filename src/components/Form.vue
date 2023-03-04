@@ -1,11 +1,17 @@
 <template>
   <div>
-    <va-modal v-model="isActive" no-outside-dismiss class="ma-0">
+    <va-modal
+      v-model="isActive"
+      no-outside-dismiss
+      class="ma-0"
+      blur
+      :overlay="false"
+    >
       <template #content>
         <va-card class=" ma-0 card-main-layout-success">
           <va-card-title class="pb-1">{{ title }}</va-card-title>
 
-          <v-card-content class="">
+          <va-card-content class="">
             <va-form ref="form" class="ma-4 ">
               <div class="form__wrapper">
                 <va-input
@@ -22,7 +28,7 @@
                 ></va-input>
               </div>
             </va-form>
-          </v-card-content>
+          </va-card-content>
           <va-card-actions class=" pt-1 mt-1">
             <va-button
               preset="secondary"
@@ -97,7 +103,9 @@ export default defineComponent({
         ],
         password: [
           (value: string) =>
-            value.length > 10 || 'Пароль должен иметь не менее 10 символов'
+            value.length > 5 || 'Пароль должен иметь не менее 5 символов',
+          (value: string) =>
+            /[1-9]/.test(value) || 'Пароль должен содержать цифры.'
         ]
       }
     };
@@ -108,7 +116,7 @@ export default defineComponent({
       console.log(this.dataForm);
       this.isLoad = true;
       if (this.$refs.form.validate()) {
-        this.onClickApplyForm();
+        // this.onClickApplyForm(this.dataForm);
         this.isLoad = false;
       }
     }

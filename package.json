@@ -10,12 +10,17 @@
     "type-check": "vue-tsc --noEmit"
   },
   "dependencies": {
+    "@codemirror/lang-json": "^6.0.1",
     "@vuestic/ag-grid-theme": "^1.0.3",
     "@vuestic/tailwind": "^0.1.2",
+    "axios": "^1.3.4",
     "maz-ui": "^3.6.12",
     "pinia": "^2.0.28",
+    "prismjs": "^1.29.0",
     "sass": "^1.58.3",
     "vue": "^3.2.45",
+    "vue-code-highlight": "^0.7.8",
+    "vue-codemirror6": "^1.1.11",
     "vue-router": "^4.1.6",
     "vuestic-ui": "^1.5.0"
   },

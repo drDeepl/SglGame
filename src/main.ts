@@ -12,7 +12,9 @@ import 'vuestic-ui/styles/grid.css';
 import 'vuestic-ui/styles/reset.css';
 import 'vuestic-ui/styles/typography.css';
 
-const app = createApp(App);
+const app = createApp(App, {
+  compilerOptions: {isCustomElement: (tag: string) => tag.startsWith('va-')}
+});
 
 app.use(createPinia());
 app.use(router);

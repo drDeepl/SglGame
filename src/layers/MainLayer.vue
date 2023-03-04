@@ -5,7 +5,15 @@
     @mouseleave="() => ($data.activateBlock.avatar = false)"
   >
     <template #left>
-      <v-navbar-item>SQL Game</v-navbar-item>
+      <va-navbar-item>
+        <va-button>Помощь</va-button>
+      </va-navbar-item>
+      <va-navbar-item class="ml-2">
+        <va-button>О проекте</va-button>
+      </va-navbar-item>
+    </template>
+    <template #center>
+      <va-navbar-item><va-button>SQL Game</va-button></va-navbar-item>
     </template>
     <template #right>
       <va-dropdown
@@ -21,12 +29,36 @@
           </va-button>
         </template>
         <va-dropdown-content class="flex flex-row">
-          <va-button @click="onClickLogIn">Войти</va-button>
+          <va-button class="mr-2" @click="onClickLogIn">Войти</va-button>
           <va-button @click="onClickRegister">Зарегистрироваться</va-button>
         </va-dropdown-content>
       </va-dropdown>
     </template>
   </va-navbar>
+
+  <div class="choice-history mb-5">
+    <div
+      class="card-history-main-layer"
+      v-for="history in arrays.history"
+      :key="history"
+      @click="onClickHistory"
+    >
+      <va-card-title class="card-title-history"
+        >history {{ history }}</va-card-title
+      >
+    </div>
+  </div>
+  <div class="history-content__wrapper mt-5">
+    <!-- // TODO: Добавить в отдельный компонент -->
+
+    <va-input
+      v-model="game.step"
+      class="mb-6"
+      type="textarea"
+      placeholder="Введи запрос.."
+    />
+  </div>
+
   <Form
     v-if="forms.logIn.active"
     title="Вход"
@@ -50,12 +82,23 @@ import ModelCreateUser from '@/models/model.user.create';
 import {defineComponent} from 'vue';
 import {logR} from '@/service/utils';
 import Form from '@/components/Form.vue';
+// FIX: Настроить редактор кода
+// import CodeMirror from 'vue-codemirror6';
+// import {sql} from '@codemirror/lang-sql';
 export default defineComponent({
   components: {Form},
+
   data() {
     return {
       render: {
         main: false
+      },
+      tab: 0,
+      arrays: {
+        history: [1, 2, 3]
+      },
+      game: {
+        step: ''
       },
       activateBlock: {
         avatar: false
@@ -67,7 +110,7 @@ export default defineComponent({
         },
         register: {
           model: new ModelCreateUser(),
-          active: true
+          active: false
         }
       }
     };
@@ -96,13 +139,17 @@ export default defineComponent({
       logR('warn', 'onClickRegister');
       this.forms.register.active = true;
     },
-    onClickApplyRegister() {
+    onClickApplyRegister(dataForm: Object) {
       logR('warn', 'NAVBAR: onCLickApplyRegister');
+      console.log(dataForm);
       this.forms.register.active = false;
     },
     onClickCancelRegister() {
       logR('warn', 'NAVBAR: onClickCancelRegister');
       this.forms.register.active = false;
+    },
+    onClickHistory() {
+      logR('warn', 'NAVBAR: onClickHistory');
     }
   }
 });
