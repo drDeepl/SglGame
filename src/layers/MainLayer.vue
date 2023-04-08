@@ -50,13 +50,7 @@
   </div>
   <div class="history-content__wrapper mt-5">
     <!-- // TODO: Добавить в отдельный компонент -->
-
-    <va-input
-      v-model="game.step"
-      class="mb-6"
-      type="textarea"
-      placeholder="Введи запрос.."
-    />
+    <CodeBlock></CodeBlock>
   </div>
 
   <Form
@@ -81,12 +75,11 @@
 import ModelCreateUser from '@/models/model.user.create';
 import {defineComponent} from 'vue';
 import {logR} from '@/service/utils';
+
 import Form from '@/components/Form.vue';
-// FIX: Настроить редактор кода
-// import CodeMirror from 'vue-codemirror6';
-// import {sql} from '@codemirror/lang-sql';
+import CodeBlock from '@/UI/CodeBlock.vue';
 export default defineComponent({
-  components: {Form},
+  components: {Form, CodeBlock},
 
   data() {
     return {

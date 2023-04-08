@@ -5,12 +5,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-import MainLayer from "@/layers/MainLayer.vue";
+import {defineComponent} from 'vue';
+import MainLayer from '@/layers/MainLayer.vue';
 export default defineComponent({
-  components: { MainLayer },
+  components: {MainLayer},
   data() {
     return {};
-  },
+  }
 });
 </script>
