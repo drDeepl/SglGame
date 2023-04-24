@@ -1,0 +1,28 @@
+.card-main-layer {
+  border-radius: $border-radius !important;
+  max-width: 30em;
+}
+
+.card-main-layout-success {
+  border-top: 7.5px solid $color-green;
+}
+
+.card-history-main-layer {
+  height: 19vw;
+  width: 19vw;
+  border: 5px solid $color-white;
+  background-color: $beige-color;
+  cursor: pointer;
+  transform: rotate(5deg);
+  // transition: width 0.5s, height 0.5s;
+}
+
+.card-history-main-layer:nth-child(2n-1) {
+  transform: rotate(-5deg);
+}
+
+.card-history-main-layer:hover {
+  // width: 20vw;
+  // height: 20vw;
+  box-shadow: 5px 5px 5px 5px $color-grey-shadow;
+}

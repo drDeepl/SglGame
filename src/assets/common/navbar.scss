@@ -1,0 +1,23 @@
+.navbar__layout {
+  background-color: $color-grey !important;
+  border-radius: $border-radius;
+  width: 100%;
+  margin-top: -0.95em;
+}
+
+.navbar-content {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-around;
+  position: relative;
+  top: 0.5em;
+  padding: 1em 1em;
+}
+
+.user__avatar {
+  cursor: pointer;
+  border: 2px solid $color-white;
+}
+
+.user_menu {
+}
