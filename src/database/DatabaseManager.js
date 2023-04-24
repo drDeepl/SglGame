@@ -1,12 +1,18 @@
-import sqlWasm from "!!file-loader?name=sql-wasm-[contenthash].wasm!sql.js/dist/sql-wasm.wasm";
-const initSqlJs = require("sql.js");
+import initSqlJs from '!!file-loader?name=sql-wasm-[contenthash].wasm!sql.js/dist/sql-wasm.wasm';
+// const fs = require('fs');
+
+// const initSqlJs = require('./sql-wasm.js');
+// const initSqlJs = require('sql-wasm.js');
+
+// import {baseUrl} from '@/_config';
 
 class DatabaseManager {
-  async createDatabase() {
-    const SQL = await initSqlJs({ locateFile: () => sqlWasm });
-    this.db = new SQL.Database();
+  async createDatabaseFromFile() {
+    initSqlJs().then(function (SQL) {
+      // Load the db
+      this.db = new SQL.Database(filebuffer);
+    });
   }
-
   async executeQuery(query) {
     return this.db.exec(query);
   }

@@ -111,7 +111,10 @@ export default defineComponent( {
   async created() {
     this.render.main = true;
     this.render.main = false;
-    console.log(DatabaseManager);
+    const query = "SELECT * FROM person";
+    await DatabaseManager.createDatabaseFromFile("sql-murder-mystery.db");
+    const res = await DatabaseManager.executeQuery(query);
+    console.log(res)
   },
   data(){
     return{
@@ -145,6 +148,7 @@ export default defineComponent( {
       onClickAvatar() {
       logR('warn', 'NAVBAR: onClickAvatar');
       this.activateBlock.avatar = true;
+
     },
     onClickLogIn() {
       logR('warn', 'NAVBAR: onClickLogIn');
