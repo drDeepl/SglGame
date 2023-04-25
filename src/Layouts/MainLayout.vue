@@ -1,37 +1,4 @@
 <template>
-  <!-- <va-progress-circle v-if="render.main" indeterminate /> -->
-  <!-- <va-navbar @mouseleave="() => ($data.activateBlock.avatar = false)">
-    <template #left>
-      <va-navbar-item>
-        <va-button>Помощь</va-button>
-      </va-navbar-item>
-      <va-navbar-item class="ml-2">
-        <va-button>О проекте</va-button>
-      </va-navbar-item>
-    </template>
-    <template #center>
-      <va-navbar-item><va-button>SQL Game</va-button></va-navbar-item>
-    </template>
-    <template #right>
-      <va-dropdown
-        class="mr-3"
-        trigger="none"
-        v-model="activateBlock.avatar"
-        :close-on-click-outside="true"
-        :offset="[-50, -155]"
-      >
-        <template #anchor>
-          <va-button round size="small" @click="onClickAvatar">
-            <va-avatar color="danger">?</va-avatar>
-          </va-button>
-        </template>
-        <va-dropdown-content class="flex flex-row">
-          <va-button class="mr-2" @click="onClickLogIn">Войти</va-button>
-          <va-button @click="onClickRegister">Зарегистрироваться</va-button>
-        </va-dropdown-content>
-      </va-dropdown>
-    </template>
-  </va-navbar> -->
   <n-navbar>
     <n-space justify="end">
       <n-avatar
@@ -55,14 +22,20 @@
       :key="history"
       @click="onClickHistory"
     >
-      <va-card-title class="card-title-history"
-        >history {{ history }}</va-card-title
-      >
+      <div class="card-title-history">history {{ history }}</div>
     </div>
   </div>
   <div class="history-content__wrapper mt-5">
     <!-- // TODO: Добавить в отдельный компонент -->
-    <CodeBlock></CodeBlock>
+    <n-space class="codemirror-container">
+      <CodeBlock :onClickRunCodeFunc="onClickRunCode">
+        <n-button @click="fakeData()">Случайные данные</n-button>
+      </CodeBlock>
+      <n-data-table
+        :columns="codemirror.columns"
+        :data="codemirror.data"
+      ></n-data-table>
+    </n-space>
   </div>
   <n-modal
     v-model:show="forms.logIn.active"
@@ -96,29 +69,30 @@
 
 <script lang="js">
 import { defineComponent} from "vue";
-import { NButton, NModal, NAvatar, NSpace, } from 'naive-ui'
+import { NModal, NAvatar, NDataTable} from 'naive-ui'
 
 import {logR} from '@/services/utils';
 import NavbarVertical from "@/components/NavbarVertical.vue"
-// import Form from '@/components/Form.vue';
+
 import CodeBlock from '@/UI/CodeBlock.vue';
 import DatabaseManager from "@/database/DatabaseManager"
-
+import FakeData from '@/services/service.fakedata';
 import User from "@/models/model.user"
 
 export default defineComponent( {
-  components: {"n-button": NButton,"n-space": NSpace, "n-avatar": NAvatar, "n-modal": NModal, "n-navbar": NavbarVertical, CodeBlock, },
+  components: { "n-data-table": NDataTable,"n-avatar": NAvatar, "n-modal": NModal, "n-navbar": NavbarVertical, CodeBlock, },
   async created() {
     this.render.main = true;
     this.render.main = false;
-    const query = "SELECT * FROM person";
-    await DatabaseManager.createDatabaseFromFile("sql-murder-mystery.db");
-    const res = await DatabaseManager.executeQuery(query);
-    console.log(res)
+    await DatabaseManager.createDatabase();
+
+
+
   },
   data(){
     return{
       menubar: {},
+      codemirror:{columns: [], data: [],},
       render: {
         main: false
       },
@@ -145,6 +119,27 @@ export default defineComponent( {
     }
   },
     methods: {
+      async fakeData(){
+        await DatabaseManager.createTableUsers();
+        const resp = await FakeData.getUsers();
+        const users = resp.data
+
+
+        console.log(users);
+        for(let i = 0; i<users.length; i++){
+          let queryVal = "INSERT INTO users VALUES\n"
+          const value = users[i];
+          const name = value.name.split(' ')[0];
+          const username = value.username;
+          const email = value.email;
+          const values = `("${name}", "${username}", "${email}")`;
+          queryVal +=  values;
+          console.log(queryVal);
+          await DatabaseManager.runQuery(queryVal);
+        }
+
+
+      },
       onClickAvatar() {
       logR('warn', 'NAVBAR: onClickAvatar');
       this.activateBlock.avatar = true;
@@ -176,7 +171,27 @@ export default defineComponent( {
     },
     onClickHistory() {
       logR('warn', 'NAVBAR: onClickHistory');
-    }
+    },
+    async onClickRunCode(code){
+      logR('warn', 'NAVBAR: onClickRunCode');
+
+      const data = await DatabaseManager.executeQuery(code);
+      console.log(data);
+      // this.codemirror.columns = data.columns;
+      const columns  = data[0].columns;
+      const values = data[0].values;
+      console.log(columns);
+      for(let i = 0; i<columns.length; i++) {
+
+        const column = {title: columns[i], key: columns[i]};
+        this.codemirror.columns.push(column);
+        // TODO: prepare data for column;
+
+      }
+
+
+
+    },
 
 
   },

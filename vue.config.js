@@ -1,15 +1,13 @@
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 
-const fs = require('fs');
-const filebuffer = fs.readFileSync('src/database/sql-murder-mystery.db');
-const {defineConfig, definePlugin} = require('@vue/cli-service');
+const {defineConfig} = require('@vue/cli-service');
 module.exports = defineConfig({
   transpileDependencies: true,
 
   configureWebpack: {
-    plugins: [new NodePolyfillPlugin(), definePlugin({filebuffer: filebuffer})],
+    plugins: [new NodePolyfillPlugin()],
 
-    // resolve: { fallback: { fs: false, os: false, path: false } },
+    resolve: {fallback: {fs: false, os: false, path: false}},
     experiments: {
       topLevelAwait: true,
     },

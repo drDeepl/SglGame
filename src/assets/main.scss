@@ -6,3 +6,7 @@
 @import 'common/wrapper';
 @import 'common/codemirror';
 @import 'common/navbar';
+
+body {
+  color: $color-text;
+}
