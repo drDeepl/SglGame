@@ -4,5 +4,11 @@
 }
 
 .codemirror-container {
-  max-width: 28em;
+  display: flex;
+  flex-direction: column;
+  width: 30em;
+}
+
+.codemirror-container > * {
+  margin-top: 1em;
 }

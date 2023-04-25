@@ -24,7 +24,7 @@ class DatabaseManager {
 
   async createTableUsers() {
     this.db.run(
-      'CREATE TABLE IF NOT EXISTS users (name VARCHAR, usernaem VARCHAR, email VARCHAR)'
+      'CREATE TABLE IF NOT EXISTS users (name VARCHAR, username VARCHAR, email VARCHAR)'
     );
   }
 }

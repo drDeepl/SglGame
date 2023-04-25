@@ -25,17 +25,25 @@
       <div class="card-title-history">history {{ history }}</div>
     </div>
   </div>
-  <div class="history-content__wrapper mt-5">
+  <div class="history-content__wrapper">
     <!-- // TODO: Добавить в отдельный компонент -->
-    <n-space class="codemirror-container">
+    <div class="codemirror-container">
       <CodeBlock :onClickRunCodeFunc="onClickRunCode">
         <n-button @click="fakeData()">Случайные данные</n-button>
       </CodeBlock>
+      <n-space justify="space-between">
+        <n-input
+          v-model:value="codemirror.answer"
+          placeholder="Введи ответ.."
+        ></n-input>
+        <n-button>Отправить</n-button>
+      </n-space>
       <n-data-table
         :columns="codemirror.columns"
         :data="codemirror.data"
+        :pagination="codemirror.pagination"
       ></n-data-table>
-    </n-space>
+    </div>
   </div>
   <n-modal
     v-model:show="forms.logIn.active"
@@ -69,7 +77,7 @@
 
 <script lang="js">
 import { defineComponent} from "vue";
-import { NModal, NAvatar, NDataTable} from 'naive-ui'
+import { NModal, NAvatar, NDataTable, NInput} from 'naive-ui'
 
 import {logR} from '@/services/utils';
 import NavbarVertical from "@/components/NavbarVertical.vue"
@@ -80,7 +88,7 @@ import FakeData from '@/services/service.fakedata';
 import User from "@/models/model.user"
 
 export default defineComponent( {
-  components: { "n-data-table": NDataTable,"n-avatar": NAvatar, "n-modal": NModal, "n-navbar": NavbarVertical, CodeBlock, },
+  components: { "n-input": NInput,"n-data-table": NDataTable,"n-avatar": NAvatar, "n-modal": NModal, "n-navbar": NavbarVertical, CodeBlock, },
   async created() {
     this.render.main = true;
     this.render.main = false;
@@ -92,7 +100,7 @@ export default defineComponent( {
   data(){
     return{
       menubar: {},
-      codemirror:{columns: [], data: [],},
+      codemirror:{columns: [], data: [], pagination: {pageSize: 2}, answer: ''},
       render: {
         main: false
       },
@@ -178,6 +186,7 @@ export default defineComponent( {
       const data = await DatabaseManager.executeQuery(code);
       console.log(data);
       // this.codemirror.columns = data.columns;
+      // TODO: parse response ============================================
       const columns  = data[0].columns;
       const values = data[0].values;
       console.log(columns);
@@ -188,7 +197,16 @@ export default defineComponent( {
         // TODO: prepare data for column;
 
       }
-
+      // TODO: parse response =============================================
+      let array_vals = [];
+      values.forEach(row => {
+        const value = {};
+        for(let column = 0; column < columns.length; column++){
+          value[columns[column]] = row[column];
+        }
+        array_vals.push(value);
+      });
+      this.codemirror.data = array_vals;
 
 
     },

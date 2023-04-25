@@ -1,17 +1,18 @@
 <template>
-  <n-space>
+  <n-space vertical>
     <Codemirror
       v-model:value="code"
       :options="cmOptions"
       border
       placeholder="Введи свой запрос здесь..."
       height="13vh"
-      width="35vw"
     />
-    <n-button @click="onClickRunCode">Выполнить</n-button>
-    <n-button @click="onClickClearCode">Очистить</n-button>
-    <slot></slot>
+    <n-space class="codeblock-action">
+      <n-button @click="onClickRunCode">Выполнить</n-button>
+      <n-button @click="onClickClearCode">Очистить</n-button>
+    </n-space>
   </n-space>
+  <slot></slot>
 </template>
 
 <script lang="js">
