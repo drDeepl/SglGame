@@ -27,7 +27,8 @@ import 'codemirror/theme/idea.css';
 export default defineComponent({
   components: {Codemirror},
   props: {
-    onClickRunCodeFunc: {type: Function, required: false}
+    onClickRunCodeFunc: {type: Function, required: false},
+    onClickClearCodeFunc: {type: Function, required: false}
   },
   setup() {
     const code = ref(``);
@@ -48,6 +49,7 @@ export default defineComponent({
     onClickClearCode(){
       logR('warn', 'CodeMirror: onClickClearCode');
       this.code = "";
+      this.onClickClearCodeFunc()
     }
   }
 });

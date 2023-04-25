@@ -31,25 +31,6 @@
   </div>
   <div class="history-content__wrapper">
     <!-- // TODO: Добавить в отдельный компонент -->
-    <div class="codemirror-container">
-      <CodeBlock :onClickRunCodeFunc="onClickRunCode">
-        <n-button @click="fakeData()">Случайные данные</n-button>
-      </CodeBlock>
-      <n-space justify="space-between">
-        <n-input
-          v-model:value="codemirror.answer"
-          placeholder="Введи ответ.."
-        ></n-input>
-        <n-button>Отправить</n-button>
-      </n-space>
-      <n-data-table
-        ref="table"
-        v-if="codemirror.isWork"
-        :columns="codemirror.columns"
-        :data="codemirror.data"
-        :pagination="codemirror.pagination"
-      ></n-data-table>
-    </div>
   </div>
   <n-modal
     v-model:show="forms.logIn.active"
@@ -74,11 +55,45 @@
       role="dialog"
       size="huge"
     >
+      <template #header-extra>
+        <n-button
+          quaternary
+          circle
+          type="error"
+          @click="history.active = false"
+        >
+          <icon-close style="width: 1.7em" />
+        </n-button>
+      </template>
+
       {{ history.description }}
-      <template #footer>
-        <n-button @click="history.active = false">Закрыть</n-button>
-      </template></n-card
-    >
+      <CodeBlock
+        :onClickRunCodeFunc="onClickRunCode"
+        :onClickClearCodeFunc="onClickClearCode"
+      >
+        <n-button @click="fakeData()">Случайные данные</n-button>
+      </CodeBlock>
+      <!-- <n-space justify="space-around"> -->
+      <n-space justify="space-between">
+        <n-input
+          v-model:value="codemirror.answer"
+          placeholder="Ответ:"
+        ></n-input>
+        <n-button>Отправить</n-button>
+      </n-space>
+      <div style="margin-top: 1em">
+        <n-data-table
+          ref="table"
+          v-if="codemirror.isWork"
+          :columns="codemirror.columns"
+          :data="codemirror.data"
+          :pagination="codemirror.pagination"
+        ></n-data-table>
+      </div>
+      <!-- </n-space> -->
+
+      <template #footer> </template>
+    </n-card>
   </n-modal>
   <!-- <Form
     v-if="forms.logIn.active"
@@ -134,7 +149,7 @@ export default defineComponent( {
         description: "",
 
       },
-      codemirror:{columns: [], data: [], pagination: {pageSize: 2}, answer: '', isWork: false},
+      codemirror:{columns: [], data: [], pagination: {pageSize: 5}, answer: '', isWork: false},
       render: {
         main: false
       },
@@ -216,6 +231,11 @@ export default defineComponent( {
       this.history.description = history.description;
       this.history.active = true;
     },
+  onClickClearCode(){
+    this.codemirror.data = [];
+    this.codemirror.columns = [];
+    this.codemirror.isWork = false;
+  },
     async onClickRunCode(code){
       logR('warn', 'NAVBAR: onClickRunCode');
 
@@ -226,13 +246,15 @@ export default defineComponent( {
       const columns  = data[0].columns;
       const values = data[0].values;
       console.log(columns);
+      let tableHeader = []
       for(let i = 0; i<columns.length; i++) {
 
         const column = {title: columns[i], key: columns[i]};
-        this.codemirror.columns.push(column);
-        // TODO: prepare data for column;
 
+        tableHeader.push(column);
+        // TODO: prepare data for column;
       }
+      this.codemirror.columns = tableHeader;
       // TODO: parse response =============================================
       let array_vals = [];
       values.forEach(row => {
@@ -245,13 +267,9 @@ export default defineComponent( {
       this.codemirror.data = array_vals;
       this.codemirror.isWork = true;
       // code.value.scrollIntoView({ behavior: 'smooth' });
-
-
-
     },
-
-
   },
+
 
 });
 </script>
