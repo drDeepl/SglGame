@@ -20,9 +20,13 @@
       class="card-history-main-layer"
       v-for="history in arrays.history"
       :key="history"
-      @click="onClickHistory"
+      @click="onClickHistory(history)"
     >
-      <div class="card-title-history">history {{ history }}</div>
+      <div class="card-title-history">history {{ history.title }}</div>
+      <img
+        class="card-history-img"
+        :src="require('@/img/history_' + history.title + '.jpg')"
+      />
     </div>
   </div>
   <div class="history-content__wrapper">
@@ -39,6 +43,8 @@
         <n-button>Отправить</n-button>
       </n-space>
       <n-data-table
+        ref="table"
+        v-if="codemirror.isWork"
         :columns="codemirror.columns"
         :data="codemirror.data"
         :pagination="codemirror.pagination"
@@ -56,6 +62,23 @@
       :toValidate="true"
       :hideProps="{role: true}"
     ></c-form>
+  </n-modal>
+  <n-modal
+    v-if="history.active"
+    v-model:show="history.active"
+    :mask-closable="false"
+  >
+    <n-card
+      class="card-main-layer border-top-yellow"
+      :title="history.title"
+      role="dialog"
+      size="huge"
+    >
+      {{ history.description }}
+      <template #footer>
+        <n-button @click="history.active = false">Закрыть</n-button>
+      </template></n-card
+    >
   </n-modal>
   <!-- <Form
     v-if="forms.logIn.active"
@@ -77,7 +100,7 @@
 
 <script lang="js">
 import { defineComponent} from "vue";
-import { NModal, NAvatar, NDataTable, NInput} from 'naive-ui'
+import {NCard, NModal, NAvatar, NDataTable, NInput} from 'naive-ui'
 
 import {logR} from '@/services/utils';
 import NavbarVertical from "@/components/NavbarVertical.vue"
@@ -88,7 +111,7 @@ import FakeData from '@/services/service.fakedata';
 import User from "@/models/model.user"
 
 export default defineComponent( {
-  components: { "n-input": NInput,"n-data-table": NDataTable,"n-avatar": NAvatar, "n-modal": NModal, "n-navbar": NavbarVertical, CodeBlock, },
+  components: { "n-card": NCard, "n-input": NInput,"n-data-table": NDataTable,"n-avatar": NAvatar, "n-modal": NModal, "n-navbar": NavbarVertical, CodeBlock, },
   async created() {
     this.render.main = true;
     this.render.main = false;
@@ -100,13 +123,24 @@ export default defineComponent( {
   data(){
     return{
       menubar: {},
-      codemirror:{columns: [], data: [], pagination: {pageSize: 2}, answer: ''},
+      alert: {
+        success:{ active: false, message: ""},
+        info:{ active: false, message: ""},
+        error:{ active: false, message: ""},
+      },
+      history: {
+        active: false,
+        title: "",
+        description: "",
+
+      },
+      codemirror:{columns: [], data: [], pagination: {pageSize: 2}, answer: '', isWork: false},
       render: {
         main: false
       },
       tab: 0,
       arrays: {
-        history: [1, 2, 3]
+        history: [{title: "1", description: "Description history 1"}, {title: "2", description: "Description history 2"}, {title: "3", description: "Description history 3"}]
       },
       game: {
         step: ''
@@ -131,8 +165,6 @@ export default defineComponent( {
         await DatabaseManager.createTableUsers();
         const resp = await FakeData.getUsers();
         const users = resp.data
-
-
         console.log(users);
         for(let i = 0; i<users.length; i++){
           let queryVal = "INSERT INTO users VALUES\n"
@@ -177,8 +209,12 @@ export default defineComponent( {
       logR('warn', 'NAVBAR: onClickCancelRegister');
       this.forms.register.active = false;
     },
-    onClickHistory() {
+    onClickHistory(history) {
       logR('warn', 'NAVBAR: onClickHistory');
+      console.log(history);
+      this.history.title = history.title;
+      this.history.description = history.description;
+      this.history.active = true;
     },
     async onClickRunCode(code){
       logR('warn', 'NAVBAR: onClickRunCode');
@@ -207,6 +243,9 @@ export default defineComponent( {
         array_vals.push(value);
       });
       this.codemirror.data = array_vals;
+      this.codemirror.isWork = true;
+      // code.value.scrollIntoView({ behavior: 'smooth' });
+
 
 
     },

@@ -4,7 +4,7 @@
       v-model:value="code"
       :options="cmOptions"
       border
-      placeholder="Введи свой запрос здесь..."
+      placeholder="Введи запрос..."
       height="13vh"
     />
     <n-space class="codeblock-action">

@@ -14,6 +14,9 @@
   background-color: $beige-color;
   cursor: pointer;
   transform: rotate(5deg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
   // transition: width 0.5s, height 0.5s;
 }
 
@@ -25,4 +28,16 @@
   // width: 20vw;
   // height: 20vw;
   box-shadow: 5px 5px 5px 5px $color-grey-shadow;
+}
+
+.card-title-history {
+  font-weight: 500;
+  position: absolute;
+  color: $color-white;
+}
+.card-history-img {
+  z-index: -1;
+  height: 18vw;
+  width: 18vw;
+  filter: blur(1.5px);
 }

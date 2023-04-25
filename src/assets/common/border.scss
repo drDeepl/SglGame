@@ -4,7 +4,12 @@
 
 .border-top-green {
   border-radius: $border-radius !important;
-  border-top: 6px solid $color-green !important;
+  border-top: $border-top-width solid $color-green !important;
+}
+
+.border-top-yellow {
+  border-radius: $border-radius !important;
+  border-top: $border-top-width solid $color-yellow !important;
 }
 .va-navbar {
   border-radius: $border-radius;
