@@ -3,6 +3,11 @@
   max-width: 35em;
 }
 
+.card-main-layer-history {
+  min-width: 100vw !important;
+  min-height: 100vh !important;
+}
+
 .card-main-layout-success {
   border-top: 7.5px solid $color-green;
 }
@@ -41,3 +46,10 @@
   width: 18vw;
   filter: blur(1.5px);
 }
+
+.history-card-content {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center;
+}
+

@@ -1,15 +1,20 @@
 <template>
-  <n-space vertical>
+  <n-space vertical class="code-mirror-wrapper">
     <Codemirror
       v-model:value="code"
       :options="cmOptions"
       border
       placeholder="Введи запрос..."
       height="13vh"
+      min-width="20em"
     />
     <n-space class="codeblock-action">
-      <n-button @click="onClickRunCode">Выполнить</n-button>
-      <n-button @click="onClickClearCode">Очистить</n-button>
+      <n-button :loading="loadApply" @click="onClickRunCode"
+        >Выполнить</n-button
+      >
+      <n-button :disabled="loadApply" @click="onClickClearCode"
+        >Очистить</n-button
+      >
     </n-space>
   </n-space>
   <slot></slot>
@@ -28,7 +33,8 @@ export default defineComponent({
   components: {Codemirror},
   props: {
     onClickRunCodeFunc: {type: Function, required: false},
-    onClickClearCodeFunc: {type: Function, required: false}
+    onClickClearCodeFunc: {type: Function, required: false},
+    loadApply: {type: Boolean, required: false},
   },
   setup() {
     const code = ref(``);

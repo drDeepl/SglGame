@@ -6,9 +6,12 @@
 .codemirror-container {
   display: flex;
   flex-direction: column;
-  width: 30em;
 }
 
 .codemirror-container > * {
   margin-top: 1em;
+}
+
+.code-mirror-wrapper {
+  min-width: 30em;
 }

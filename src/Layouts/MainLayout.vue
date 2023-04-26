@@ -6,11 +6,13 @@
       >
       <n-modal v-model:show="todos">
         <p style="background-color: whitesmoke">
-          <n-space vertical
-            ><span>file: onClickHistory</span>
+          <n-space vertical>
+            <span>
+              1.Найти способ автоматизировать подгрузку схемы базы данных
+            </span>
             <span
-              >1.Пока загружается базаданных пользователю показывает прогресс
-              загрузки</span
+              >2.Статус открытой\закрытой истории и соответствующая иконка к
+              нему</span
             >
           </n-space>
         </p>
@@ -68,23 +70,34 @@
     :mask-closable="false"
   >
     <n-card
-      class="card-main-layer border-top-yellow"
+      class="card-main-layer-history border-top-yellow"
       :title="history.title"
       role="dialog"
       size="huge"
     >
       <template #header-extra>
         <n-button
+          :disabled="render.history.runCode"
           quaternary
           circle
           type="error"
-          @click="history.active = false"
+          @click="onClickCloseHistory"
         >
           <icon-close style="width: 1.7em" />
         </n-button>
       </template>
       <n-space v-if="history.loadData" justify="center">
-        <n-spin></n-spin>
+        <n-progress
+          v-if="history.loadProgress != 100"
+          style="margin: 0 8px 12px 0"
+          type="circle"
+          :percentage="history.loadProgress"
+          :color="themeVars.successColor"
+          :rail-color="changeColor(themeVars.successColor, {alpha: 0.2})"
+          :indicator-text-color="themeVars.successColor"
+        >
+        </n-progress>
+        <n-spin v-if="history.loadProgress == 100 && history.loadData"></n-spin>
       </n-space>
       <div v-else class="history-card-content">
         <p>
@@ -94,8 +107,9 @@
         <CodeBlock
           :onClickRunCodeFunc="onClickRunCode"
           :onClickClearCodeFunc="onClickClearCode"
+          :loadApply="render.history.runCode"
         >
-          <n-button @click="fakeData()">Случайные данные</n-button>
+          <!-- <n-button @click="fakeData()">Случайные данные</n-button>  -->
         </CodeBlock>
         <!-- <n-space justify="space-around"> -->
         <n-space justify="space-between">
@@ -141,13 +155,15 @@
 
 <script lang="js">
 import { defineComponent} from "vue";
-import { NCard, NModal, NAvatar, NDataTable, NInput} from 'naive-ui'
+import { NProgress, NCard, NModal, NAvatar, NDataTable, NInput} from 'naive-ui'
 import NavbarVertical from "@/components/NavbarVertical.vue"
 import CodeBlock from '@/UI/CodeBlock.vue';
+import { changeColor } from "seemly";
+import { useThemeVars } from "naive-ui";
 
 
 import {logR} from '@/services/utils';
-import FakeData from '@/services/service.fakedata';
+// import FakeData from '@/services/service.fakedata';
 import DatabaseManager from "@/database/DatabaseManager";
 import ServiceDatabase from "@/services/service.database";
 
@@ -158,7 +174,7 @@ import User from "@/models/model.user"
 
 
 export default defineComponent( {
-  components: {"n-card": NCard, "n-input": NInput,"n-data-table": NDataTable,"n-avatar": NAvatar, "n-modal": NModal, "n-navbar": NavbarVertical, CodeBlock, },
+  components: {"n-progress": NProgress, "n-card": NCard, "n-input": NInput,"n-data-table": NDataTable,"n-avatar": NAvatar, "n-modal": NModal, "n-navbar": NavbarVertical, CodeBlock, },
   async created() {
     this.render.main = true;
     this.render.main = false;
@@ -172,6 +188,8 @@ export default defineComponent( {
       // NOTE: На время теста ===================
       todos: false,
       // NOTE: На время теста ===================
+      changeColor: changeColor,
+      themeVars: useThemeVars(),
       menubar: {},
       alert: {
         success:{ active: false, message: ""},
@@ -182,16 +200,21 @@ export default defineComponent( {
         active: false,
         title: "",
         description: "",
-        loadData: true,
+        loadData: false,
+        loadProgress: 0,
+        db: null,
 
       },
       codemirror:{columns: [], data: [], pagination: {pageSize: 5}, answer: '', isWork: false},
       render: {
-        main: false
+        main: false,
+        history: {runCode: false}
       },
       tab: 0,
       arrays: {
-        history: [{title: "murder_mystery", description: "Description history 1"}, {title: "2", description: "Description history 2"}, {title: "3", description: "Description history 3"}]
+        history: [{title: "murder_mystery", description: "Произошло преступление, и детективу нужна ваша помощь. Детектив дал вам отчет о месте преступления, но вы каким-то образом потеряли его. Вы смутно помните, что преступление было убийством, которое произошло где-то 15 января 2018 года, и что оно произошло в SQL City. Начните с поиска соответствующего отчета о месте преступления в базе данных полицейского управления."},
+         {title: "2", description: "Description history 2"},
+         {title: "3", description: "Description history 3"}]
       },
       game: {
         step: ''
@@ -212,25 +235,6 @@ export default defineComponent( {
     }
   },
     methods: {
-      async fakeData(){
-        await DatabaseManager.createTableUsers();
-        const resp = await FakeData.getUsers();
-        const users = resp.data
-        console.log(users);
-        for(let i = 0; i<users.length; i++){
-          let queryVal = "INSERT INTO users VALUES\n"
-          const value = users[i];
-          const name = value.name.split(' ')[0];
-          const username = value.username;
-          const email = value.email;
-          const values = `("${name}", "${username}", "${email}")`;
-          queryVal +=  values;
-          console.log(queryVal);
-          await DatabaseManager.runQuery(queryVal);
-        }
-
-
-      },
       onClickAvatar() {
       logR('warn', 'NAVBAR: onClickAvatar');
       this.activateBlock.avatar = true;
@@ -260,19 +264,52 @@ export default defineComponent( {
       logR('warn', 'NAVBAR: onClickCancelRegister');
       this.forms.register.active = false;
     },
+    async changeProgressDownloadFile(response){
+      const reader = response.body.getReader();
+    // INFO: Получаю длину ответа
+    // TODO: Вынести в отдельную функцию =================================================================
+    const contentLength = +response.headers.get('Content-Length');
+    let receivedLength = 0; // INFO: количество байт, полученных на данный момент
+    console.log(reader);
+    let chunks = [];
+    let work = true;
+    while (work) {
+      const {done, value} = await reader.read();
+      if (done) {
+        work = false;
+        return {chunks:chunks, length: receivedLength};
+      }
+      chunks.push(value);
+      receivedLength += value.length;
+      const percentage = (receivedLength*100)/contentLength;
+      this.history.loadProgress = Math.round(percentage);
+      console.log(`Получено ${receivedLength} из ${contentLength} = ${percentage}%`);
+    }
+    },
     async onClickHistory(history) {
       // FIX: =========================================
       logR('warn', 'NAVBAR: onClickHistory');
+      this.history.loadData = true;
       this.history.active = true;
       console.log(history);
       const urlToDb = await ServiceDatabase.getLinkToDatabase(history.title);
       const response2DownloadDb = await ServiceDatabase.downloadFile(urlToDb);
       // const body = response2DownloadDb.body.getReader();
       console.log("Downloaded BD\n", response2DownloadDb);
+      const chunkDb = await this.changeProgressDownloadFile(response2DownloadDb);
 
-
+    // TODO: Вынести в отдельную функцию =================================================================
+      const chunksAll = new Uint8Array(chunkDb.length);
+      let position = 0;
+      for(let chunk of chunkDb.chunks){
+        chunksAll.set(chunk, position);
+        position += chunk.length;
+      }
+      // TODO: Create db from chunksAll
+      this.history.db = await DatabaseManager.createDatabase(chunksAll);
       this.history.title = history.title;
       this.history.description = history.description;
+      this.history.loadData = false;
       // FIX: =========================================
 
 
@@ -284,8 +321,8 @@ export default defineComponent( {
   },
     async onClickRunCode(code){
       logR('warn', 'NAVBAR: onClickRunCode');
-
-      const data = await DatabaseManager.executeQuery(code);
+      this.render.history.runCode = true;
+      const data = this.history.db.exec(code);
       console.log(data);
       // this.codemirror.columns = data.columns;
       // TODO: parse response ============================================
@@ -312,8 +349,15 @@ export default defineComponent( {
       });
       this.codemirror.data = array_vals;
       this.codemirror.isWork = true;
-      // code.value.scrollIntoView({ behavior: 'smooth' });
+      this.render.history.runCode = false;
+
     },
+    onClickCloseHistory(){
+      logR("warn", "MainLayout: onClickCloseHistory")
+      this.history.active = false;
+      this.onClickClearCode();
+
+    }
   },
 
 
