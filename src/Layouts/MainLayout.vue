@@ -1,5 +1,21 @@
 <template>
   <n-navbar>
+    <n-space hustify="start">
+      <n-button @click="todos = true" style="background-color: whitesmoke"
+        >todos</n-button
+      >
+      <n-modal v-model:show="todos">
+        <p style="background-color: whitesmoke">
+          <n-space vertical
+            ><span>file: onClickHistory</span>
+            <span
+              >1.Пока загружается базаданных пользователю показывает прогресс
+              загрузки</span
+            >
+          </n-space>
+        </p>
+      </n-modal>
+    </n-space>
     <n-space justify="end">
       <n-avatar
         @click="onClickAvatar"
@@ -22,7 +38,9 @@
       :key="history"
       @click="onClickHistory(history)"
     >
-      <div class="card-title-history">history {{ history.title }}</div>
+      <div class="card-title-history">
+        history {{ history.title.replace('_', ' ') }}
+      </div>
       <img
         class="card-history-img"
         :src="require('@/img/history_' + history.title + '.jpg')"
@@ -65,22 +83,30 @@
           <icon-close style="width: 1.7em" />
         </n-button>
       </template>
-
-      {{ history.description }}
-      <CodeBlock
-        :onClickRunCodeFunc="onClickRunCode"
-        :onClickClearCodeFunc="onClickClearCode"
-      >
-        <n-button @click="fakeData()">Случайные данные</n-button>
-      </CodeBlock>
-      <!-- <n-space justify="space-around"> -->
-      <n-space justify="space-between">
-        <n-input
-          v-model:value="codemirror.answer"
-          placeholder="Ответ:"
-        ></n-input>
-        <n-button>Отправить</n-button>
+      <n-space v-if="history.loadData" justify="center">
+        <n-spin></n-spin>
       </n-space>
+      <div v-else class="history-card-content">
+        <p>
+          {{ history.description }}
+        </p>
+
+        <CodeBlock
+          :onClickRunCodeFunc="onClickRunCode"
+          :onClickClearCodeFunc="onClickClearCode"
+        >
+          <n-button @click="fakeData()">Случайные данные</n-button>
+        </CodeBlock>
+        <!-- <n-space justify="space-around"> -->
+        <n-space justify="space-between">
+          <n-input
+            v-model:value="codemirror.answer"
+            placeholder="Ответ:"
+          ></n-input>
+
+          <n-button>Отправить</n-button>
+        </n-space>
+      </div>
       <div style="margin-top: 1em">
         <n-data-table
           ref="table"
@@ -115,18 +141,24 @@
 
 <script lang="js">
 import { defineComponent} from "vue";
-import {NCard, NModal, NAvatar, NDataTable, NInput} from 'naive-ui'
+import { NCard, NModal, NAvatar, NDataTable, NInput} from 'naive-ui'
+import NavbarVertical from "@/components/NavbarVertical.vue"
+import CodeBlock from '@/UI/CodeBlock.vue';
+
 
 import {logR} from '@/services/utils';
-import NavbarVertical from "@/components/NavbarVertical.vue"
-
-import CodeBlock from '@/UI/CodeBlock.vue';
-import DatabaseManager from "@/database/DatabaseManager"
 import FakeData from '@/services/service.fakedata';
+import DatabaseManager from "@/database/DatabaseManager";
+import ServiceDatabase from "@/services/service.database";
+
 import User from "@/models/model.user"
 
+
+
+
+
 export default defineComponent( {
-  components: { "n-card": NCard, "n-input": NInput,"n-data-table": NDataTable,"n-avatar": NAvatar, "n-modal": NModal, "n-navbar": NavbarVertical, CodeBlock, },
+  components: {"n-card": NCard, "n-input": NInput,"n-data-table": NDataTable,"n-avatar": NAvatar, "n-modal": NModal, "n-navbar": NavbarVertical, CodeBlock, },
   async created() {
     this.render.main = true;
     this.render.main = false;
@@ -137,6 +169,9 @@ export default defineComponent( {
   },
   data(){
     return{
+      // NOTE: На время теста ===================
+      todos: false,
+      // NOTE: На время теста ===================
       menubar: {},
       alert: {
         success:{ active: false, message: ""},
@@ -147,6 +182,7 @@ export default defineComponent( {
         active: false,
         title: "",
         description: "",
+        loadData: true,
 
       },
       codemirror:{columns: [], data: [], pagination: {pageSize: 5}, answer: '', isWork: false},
@@ -155,7 +191,7 @@ export default defineComponent( {
       },
       tab: 0,
       arrays: {
-        history: [{title: "1", description: "Description history 1"}, {title: "2", description: "Description history 2"}, {title: "3", description: "Description history 3"}]
+        history: [{title: "murder_mystery", description: "Description history 1"}, {title: "2", description: "Description history 2"}, {title: "3", description: "Description history 3"}]
       },
       game: {
         step: ''
@@ -224,12 +260,22 @@ export default defineComponent( {
       logR('warn', 'NAVBAR: onClickCancelRegister');
       this.forms.register.active = false;
     },
-    onClickHistory(history) {
+    async onClickHistory(history) {
+      // FIX: =========================================
       logR('warn', 'NAVBAR: onClickHistory');
+      this.history.active = true;
       console.log(history);
+      const urlToDb = await ServiceDatabase.getLinkToDatabase(history.title);
+      const response2DownloadDb = await ServiceDatabase.downloadFile(urlToDb);
+      // const body = response2DownloadDb.body.getReader();
+      console.log("Downloaded BD\n", response2DownloadDb);
+
+
       this.history.title = history.title;
       this.history.description = history.description;
-      this.history.active = true;
+      // FIX: =========================================
+
+
     },
   onClickClearCode(){
     this.codemirror.data = [];
