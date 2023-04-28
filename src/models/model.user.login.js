@@ -1,15 +1,13 @@
-class User {
+class UserLogin {
   constructor() {
     this.data = {
       username: '',
       password: '',
-      role: ''
     };
 
     this.labels = {
       username: 'Имя пользователя',
       password: 'Пароль',
-      role: 'Роль'
     };
 
     this.rules = {
@@ -23,11 +21,10 @@ class User {
             return new Error('Пароль должен содержать больше 6-ти символов');
           }
           return true;
-        }
+        },
       },
-      role: {required: true, message: 'Необходимое поле', trigger: 'blur'}
     };
   }
 }
 
-export default new User();
+export default new UserLogin();

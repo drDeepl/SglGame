@@ -1,6 +1,7 @@
 <template>
   <n-navbar>
-    <n-space hustify="start">
+    <n-space hustify="start"> </n-space>
+    <n-space justify="end">
       <n-button @click="todos = true" style="background-color: whitesmoke"
         >todos</n-button
       >
@@ -17,18 +18,24 @@
           </n-space>
         </p>
       </n-modal>
-    </n-space>
-    <n-space justify="end">
+
       <n-avatar
         @click="onClickAvatar"
         class="user__avatar"
+        size="large"
         round
         :style="{backgroundColor: '#ee4540'}"
-        >?</n-avatar
       >
+        <span>?</span>
+      </n-avatar>
+
       <div v-if="activateBlock.avatar" class="user-menu">
-        <n-button>Вход</n-button>
-        <n-button>Регистрация</n-button>
+        <n-button style="background-color: whitesmoke" @click="onClickLogIn">
+          Вход
+        </n-button>
+        <n-button style="background-color: whitesmoke" @click="onclickRegister">
+          Регистрация
+        </n-button>
       </div>
     </n-space>
   </n-navbar>
@@ -52,18 +59,7 @@
   <div class="history-content__wrapper">
     <!-- // TODO: Добавить в отдельный компонент -->
   </div>
-  <n-modal
-    v-model:show="forms.logIn.active"
-    :mask-closable="false"
-    title="Диалог"
-  >
-    <c-form
-      title="Вход"
-      :itemModel="forms.logIn.model"
-      :toValidate="true"
-      :hideProps="{role: true}"
-    ></c-form>
-  </n-modal>
+
   <n-modal
     v-if="history.active"
     v-model:show="history.active"
@@ -135,27 +131,27 @@
       <template #footer> </template>
     </n-card>
   </n-modal>
-  <!-- <Form
+  <!-- // NOTE: блок с всплывающими оповещениями -->
+
+  <!-- // NOTE: блок с формами -->
+  <c-form
     v-if="forms.logIn.active"
+    :isActive="forms.logIn.active"
     title="Вход"
     :itemModel="forms.logIn.model"
-    :isActive="forms.logIn.active"
-    :onClickCancelForm="onClickCancelLogin"
-    :onClickApplyForm="onClickApplyLogIn"
-  />
-  <Form
-    v-if="forms.register.active"
-    title="Регистрация"
-    :itemModel="forms.register.model"
-    :isActive="forms.register.active"
-    :onClickCancelForm="onClickCancelRegister"
-    :onClickApplyForm="onClickApplyRegister"
-  /> -->
+    :toValidate="true"
+    :hideProps="{role: true}"
+    labelApplyButton="Войти"
+    labelCancelButton="Закрыть"
+    :applyFunction="onClickApplyLogIn"
+    :cancelFunction="oncClickCancelLogIn"
+  >
+  </c-form>
 </template>
 
 <script lang="js">
 import { defineComponent} from "vue";
-import { NProgress, NCard, NModal, NAvatar, NDataTable, NInput} from 'naive-ui'
+import {NProgress, NCard, NModal, NAvatar, NDataTable, NInput} from 'naive-ui'
 import NavbarVertical from "@/components/NavbarVertical.vue"
 import CodeBlock from '@/UI/CodeBlock.vue';
 import { changeColor } from "seemly";
@@ -167,10 +163,8 @@ import {logR} from '@/services/utils';
 import DatabaseManager from "@/database/DatabaseManager";
 import ServiceDatabase from "@/services/service.database";
 
-import User from "@/models/model.user"
-
-
-
+import UserLogin from "@/models/model.user.login";
+import UserRegister from "@/models/model.user.register"
 
 
 export default defineComponent( {
@@ -224,11 +218,11 @@ export default defineComponent( {
       },
       forms: {
         logIn: {
-          model: User,
+          model: UserLogin,
           active: false
         },
         register: {
-          model: User,
+          model: UserRegister,
           active: false
         }
       },
@@ -248,8 +242,10 @@ export default defineComponent( {
       logR('warn', 'NAVBAR: onClickCancelLogin');
       this.forms.logIn.active = false;
     },
-    onClickApplyLogIn() {
-      logR('warn', 'NAVBAR: onClickApplyLogIn');
+    async onClickApplyLogIn(dataForm) {
+      logR('warn', 'NAVBAR: onClickApplyLogIn\n');
+      console.log(dataForm)
+
     },
     onClickRegister() {
       logR('warn', 'onClickRegister');
@@ -293,19 +289,21 @@ export default defineComponent( {
       this.history.active = true;
       console.log(history);
       const urlToDb = await ServiceDatabase.getLinkToDatabase(history.title);
-      const response2DownloadDb = await ServiceDatabase.downloadFile(urlToDb);
+      const response2DownloadDb = await ServiceDatabase.downloadFile(urlToDb).catch(error =>
+      {
+        console.log(error + "\n");
+        console.log(Object.keys(error));
+        });
       // const body = response2DownloadDb.body.getReader();
       console.log("Downloaded BD\n", response2DownloadDb);
       const chunkDb = await this.changeProgressDownloadFile(response2DownloadDb);
-
-    // TODO: Вынести в отдельную функцию =================================================================
       const chunksAll = new Uint8Array(chunkDb.length);
       let position = 0;
       for(let chunk of chunkDb.chunks){
         chunksAll.set(chunk, position);
         position += chunk.length;
       }
-      // TODO: Create db from chunksAll
+      // INFO: Create db from chunksAll
       this.history.db = await DatabaseManager.createDatabase(chunksAll);
       this.history.title = history.title;
       this.history.description = history.description;
