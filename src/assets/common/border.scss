@@ -2,6 +2,10 @@
   border: 2px solid $color-white;
 }
 
+.main-border-radius {
+  border-radius: $border-radius !important;
+}
+
 .border-top-green {
   border-radius: $border-radius !important;
   border-top: $border-top-width solid $color-green !important;

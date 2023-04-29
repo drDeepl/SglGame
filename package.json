@@ -12,12 +12,14 @@
     "codemirror-editor-vue3": "^2.3.0",
     "core-js": "^3.8.3",
     "fs": "^0.0.1-security",
+    "jwtextract": "^1.0.2",
     "naive-ui": "^2.34.3",
     "node-polyfill-webpack-plugin": "^2.0.1",
     "sass": "^1.62.0",
     "sass-loader": "^13.2.2",
     "sql.js": "^1.8.0",
     "vue": "^3.2.13",
+    "vue-router": "^4.1.6",
     "vuex": "^4.1.0"
   },
   "devDependencies": {

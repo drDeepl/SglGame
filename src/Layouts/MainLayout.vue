@@ -1,13 +1,12 @@
 <template>
   <n-navbar>
-    <n-space hustify="start"> </n-space>
     <n-space justify="end">
       <n-button @click="todos = true" style="background-color: whitesmoke"
         >todos</n-button
       >
       <n-modal v-model:show="todos">
         <p style="background-color: whitesmoke">
-          <n-space vertical>
+          <n-space class="user-menu" vertical>
             <span>
               1.Найти способ автоматизировать подгрузку схемы базы данных
             </span>
@@ -18,119 +17,32 @@
           </n-space>
         </p>
       </n-modal>
-
-      <n-avatar
-        @click="onClickAvatar"
-        class="user__avatar"
-        size="large"
-        round
-        :style="{backgroundColor: '#ee4540'}"
+      <n-popconfirm
+        class="navbar-popconfirm"
+        :show-icon="false"
+        positive-text="Вход"
+        :on-positive-click="onClickLogIn"
+        negative-text="Регистрация"
+        :on-negative-click="onClickRegister"
       >
-        <span>?</span>
-      </n-avatar>
-
-      <div v-if="activateBlock.avatar" class="user-menu">
-        <n-button style="background-color: whitesmoke" @click="onClickLogIn">
-          Вход
-        </n-button>
-        <n-button style="background-color: whitesmoke" @click="onclickRegister">
-          Регистрация
-        </n-button>
-      </div>
+        <template #trigger>
+          <n-avatar
+            @click="onClickAvatar"
+            class="user__avatar"
+            size="large"
+            round
+            :style="{backgroundColor: '#ee4540'}"
+          >
+            <span>?</span>
+          </n-avatar>
+        </template>
+      </n-popconfirm>
     </n-space>
   </n-navbar>
-
-  <div class="choice-history mb-5">
-    <div
-      class="card-history-main-layer"
-      v-for="history in arrays.history"
-      :key="history"
-      @click="onClickHistory(history)"
-    >
-      <div class="card-title-history">
-        history {{ history.title.replace('_', ' ') }}
-      </div>
-      <img
-        class="card-history-img"
-        :src="require('@/img/history_' + history.title + '.jpg')"
-      />
-    </div>
-  </div>
-  <div class="history-content__wrapper">
-    <!-- // TODO: Добавить в отдельный компонент -->
+  <div class="main-content">
+    <router-view />
   </div>
 
-  <n-modal
-    v-if="history.active"
-    v-model:show="history.active"
-    :mask-closable="false"
-  >
-    <n-card
-      class="card-main-layer-history border-top-yellow"
-      :title="history.title"
-      role="dialog"
-      size="huge"
-    >
-      <template #header-extra>
-        <n-button
-          :disabled="render.history.runCode"
-          quaternary
-          circle
-          type="error"
-          @click="onClickCloseHistory"
-        >
-          <icon-close style="width: 1.7em" />
-        </n-button>
-      </template>
-      <n-space v-if="history.loadData" justify="center">
-        <n-progress
-          v-if="history.loadProgress != 100"
-          style="margin: 0 8px 12px 0"
-          type="circle"
-          :percentage="history.loadProgress"
-          :color="themeVars.successColor"
-          :rail-color="changeColor(themeVars.successColor, {alpha: 0.2})"
-          :indicator-text-color="themeVars.successColor"
-        >
-        </n-progress>
-        <n-spin v-if="history.loadProgress == 100 && history.loadData"></n-spin>
-      </n-space>
-      <div v-else class="history-card-content">
-        <p>
-          {{ history.description }}
-        </p>
-
-        <CodeBlock
-          :onClickRunCodeFunc="onClickRunCode"
-          :onClickClearCodeFunc="onClickClearCode"
-          :loadApply="render.history.runCode"
-        >
-          <!-- <n-button @click="fakeData()">Случайные данные</n-button>  -->
-        </CodeBlock>
-        <!-- <n-space justify="space-around"> -->
-        <n-space justify="space-between">
-          <n-input
-            v-model:value="codemirror.answer"
-            placeholder="Ответ:"
-          ></n-input>
-
-          <n-button>Отправить</n-button>
-        </n-space>
-      </div>
-      <div style="margin-top: 1em">
-        <n-data-table
-          ref="table"
-          v-if="codemirror.isWork"
-          :columns="codemirror.columns"
-          :data="codemirror.data"
-          :pagination="codemirror.pagination"
-        ></n-data-table>
-      </div>
-      <!-- </n-space> -->
-
-      <template #footer> </template>
-    </n-card>
-  </n-modal>
   <!-- // NOTE: блок с всплывающими оповещениями -->
 
   <!-- // NOTE: блок с формами -->
@@ -140,41 +52,51 @@
     title="Вход"
     :itemModel="forms.logIn.model"
     :toValidate="true"
-    :hideProps="{role: true}"
     labelApplyButton="Войти"
-    labelCancelButton="Закрыть"
     :applyFunction="onClickApplyLogIn"
-    :cancelFunction="oncClickCancelLogIn"
+    :cancelFunction="onClickCancelLogIn"
+    :isRunSuccess="forms.runSuccess"
+    :loading="forms.running"
+  >
+  </c-form>
+
+  <c-form
+    v-if="forms.register.active"
+    :isActive="forms.register.active"
+    title="Регистрация"
+    :itemModel="forms.register.model"
+    :toValidate="true"
+    :hideProps="{role: true}"
+    labelApplyButton="Зарегистрироваться"
+    :applyFunction="onClickApplyRegister"
+    :cancelFunction="onClickCancelRegister"
+    :loading="forms.running"
   >
   </c-form>
 </template>
 
 <script lang="js">
 import { defineComponent} from "vue";
-import {NProgress, NCard, NModal, NAvatar, NDataTable, NInput} from 'naive-ui'
+import {NAvatar} from 'naive-ui'
 import NavbarVertical from "@/components/NavbarVertical.vue"
-import CodeBlock from '@/UI/CodeBlock.vue';
-import { changeColor } from "seemly";
-import { useThemeVars } from "naive-ui";
-
 
 import {logR} from '@/services/utils';
 // import FakeData from '@/services/service.fakedata';
-import DatabaseManager from "@/database/DatabaseManager";
-import ServiceDatabase from "@/services/service.database";
+
+import UserService from "@/services/user.service";
+import {extractJWT} from "@/services/utils";
+
+
 
 import UserLogin from "@/models/model.user.login";
 import UserRegister from "@/models/model.user.register"
 
 
 export default defineComponent( {
-  components: {"n-progress": NProgress, "n-card": NCard, "n-input": NInput,"n-data-table": NDataTable,"n-avatar": NAvatar, "n-modal": NModal, "n-navbar": NavbarVertical, CodeBlock, },
+  components: {"n-avatar": NAvatar, "n-navbar": NavbarVertical},
   async created() {
     this.render.main = true;
     this.render.main = false;
-    await DatabaseManager.createDatabase();
-
-
 
   },
   data(){
@@ -182,48 +104,24 @@ export default defineComponent( {
       // NOTE: На время теста ===================
       todos: false,
       // NOTE: На время теста ===================
-      changeColor: changeColor,
-      themeVars: useThemeVars(),
+      render: {main: false},
       menubar: {},
-      alert: {
-        success:{ active: false, message: ""},
-        info:{ active: false, message: ""},
-        error:{ active: false, message: ""},
-      },
-      history: {
-        active: false,
-        title: "",
-        description: "",
-        loadData: false,
-        loadProgress: 0,
-        db: null,
 
-      },
-      codemirror:{columns: [], data: [], pagination: {pageSize: 5}, answer: '', isWork: false},
-      render: {
-        main: false,
-        history: {runCode: false}
-      },
-      tab: 0,
-      arrays: {
-        history: [{title: "murder_mystery", description: "Произошло преступление, и детективу нужна ваша помощь. Детектив дал вам отчет о месте преступления, но вы каким-то образом потеряли его. Вы смутно помните, что преступление было убийством, которое произошло где-то 15 января 2018 года, и что оно произошло в SQL City. Начните с поиска соответствующего отчета о месте преступления в базе данных полицейского управления."},
-         {title: "2", description: "Description history 2"},
-         {title: "3", description: "Description history 3"}]
-      },
-      game: {
-        step: ''
-      },
       activateBlock: {
         avatar: false,
       },
       forms: {
+        runSuccess: false,
+        running: false,
         logIn: {
+          active: false,
           model: UserLogin,
-          active: false
+
         },
         register: {
+          active: false,
           model: UserRegister,
-          active: false
+
         }
       },
     }
@@ -238,124 +136,66 @@ export default defineComponent( {
       logR('warn', 'NAVBAR: onClickLogIn');
       this.forms.logIn.active = true;
     },
-    onClickCancelLogin() {
+    onClickCancelLogIn() {
       logR('warn', 'NAVBAR: onClickCancelLogin');
       this.forms.logIn.active = false;
     },
     async onClickApplyLogIn(dataForm) {
       logR('warn', 'NAVBAR: onClickApplyLogIn\n');
       console.log(dataForm)
+      // const response = await this.$store.dispatch("auth/login", dataForm)
+      const response = {status: 200,
+      data: {type: "Bearer",
+      accessToken: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiZXhwIjoxNjgyNjg0MTQ3LCJ1c2VySWQiOjIsInJvbGUiOiJST0xFX1VTRVIifQ.kiXWT2vKMUSmhFbhRMBFVZPMWyrfWTO90xrW5KsUFhqBJHi1VvDuno9QrCq6Mb_w7CGGp14KD6CNrDYCjS-Ufw",
+      refreshToken: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyIiwiZXhwIjoxNjg1Mjc1ODQ3fQ.zRlDaEuUz_CDp--ZpNKz93oeEzZXfBz28mlKGrMBk8D3AUUhWop3vuIej8KHSVzEquQBrMErmeGtEQ4Ira-S4Q"
+      },
+      message: ''};
+      console.log(response);
+      if(response.status==200){
+        const token = response.data.accessToken;
+
+        const userData = extractJWT(token);
+        console.log(userData);
+
+        this.$store.commit("auth/SET_TOKEN_USER", token);
+        this.$store.commit("auth/SET_DATA_LOGIN", userData);
+        this.$router.push({name:"profile"})
+      }
+      this.forms.logIn = false;
 
     },
     onClickRegister() {
       logR('warn', 'onClickRegister');
       this.forms.register.active = true;
     },
-    onClickApplyRegister(dataForm) {
+    async onClickApplyRegister(dataForm) {
       logR('warn', 'NAVBAR: onCLickApplyRegister');
       console.log(dataForm);
+      // TODO: исправить после внесения правок на бэке ========================================================
+      // const response = await UserService.createUser({username:dataForm.username, password:dataForm.password})
+      console.error("todo: userService.createUser", UserService)
+      // TODO: ================================================================================================
+      const response = {status: 200, data: {
+  type: "Bearer",
+  accessToken: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiZXhwIjoxNjgyNjg0MTQ3LCJ1c2VySWQiOjIsInJvbGUiOiJST0xFX1VTRVIifQ.kiXWT2vKMUSmhFbhRMBFVZPMWyrfWTO90xrW5KsUFhqBJHi1VvDuno9QrCq6Mb_w7CGGp14KD6CNrDYCjS-Ufw",
+  refreshToken: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyIiwiZXhwIjoxNjg1Mjc1ODQ3fQ.zRlDaEuUz_CDp--ZpNKz93oeEzZXfBz28mlKGrMBk8D3AUUhWop3vuIej8KHSVzEquQBrMErmeGtEQ4Ira-S4Q"
+}, message: ''}
+      if(response.status == 200){
+        this.$store.commit('auth/SET_TOKEN_USER', response.data.accessToken)
+        this.forms.runSucess = true;
+        this.$router.push({name: "profile"})
+      }
+      else{
+        this.alert.error.active - true;
+        this.alert.message = this.$store.state.message.error;
+      }
       this.forms.register.active = false;
     },
     onClickCancelRegister() {
       logR('warn', 'NAVBAR: onClickCancelRegister');
       this.forms.register.active = false;
     },
-    async changeProgressDownloadFile(response){
-      const reader = response.body.getReader();
-    // INFO: Получаю длину ответа
-    // TODO: Вынести в отдельную функцию =================================================================
-    const contentLength = +response.headers.get('Content-Length');
-    let receivedLength = 0; // INFO: количество байт, полученных на данный момент
-    console.log(reader);
-    let chunks = [];
-    let work = true;
-    while (work) {
-      const {done, value} = await reader.read();
-      if (done) {
-        work = false;
-        return {chunks:chunks, length: receivedLength};
-      }
-      chunks.push(value);
-      receivedLength += value.length;
-      const percentage = (receivedLength*100)/contentLength;
-      this.history.loadProgress = Math.round(percentage);
-      console.log(`Получено ${receivedLength} из ${contentLength} = ${percentage}%`);
-    }
-    },
-    async onClickHistory(history) {
-      // FIX: =========================================
-      logR('warn', 'NAVBAR: onClickHistory');
-      this.history.loadData = true;
-      this.history.active = true;
-      console.log(history);
-      const urlToDb = await ServiceDatabase.getLinkToDatabase(history.title);
-      const response2DownloadDb = await ServiceDatabase.downloadFile(urlToDb).catch(error =>
-      {
-        console.log(error + "\n");
-        console.log(Object.keys(error));
-        });
-      // const body = response2DownloadDb.body.getReader();
-      console.log("Downloaded BD\n", response2DownloadDb);
-      const chunkDb = await this.changeProgressDownloadFile(response2DownloadDb);
-      const chunksAll = new Uint8Array(chunkDb.length);
-      let position = 0;
-      for(let chunk of chunkDb.chunks){
-        chunksAll.set(chunk, position);
-        position += chunk.length;
-      }
-      // INFO: Create db from chunksAll
-      this.history.db = await DatabaseManager.createDatabase(chunksAll);
-      this.history.title = history.title;
-      this.history.description = history.description;
-      this.history.loadData = false;
-      // FIX: =========================================
 
-
-    },
-  onClickClearCode(){
-    this.codemirror.data = [];
-    this.codemirror.columns = [];
-    this.codemirror.isWork = false;
-  },
-    async onClickRunCode(code){
-      logR('warn', 'NAVBAR: onClickRunCode');
-      this.render.history.runCode = true;
-      const data = this.history.db.exec(code);
-      console.log(data);
-      // this.codemirror.columns = data.columns;
-      // TODO: parse response ============================================
-      const columns  = data[0].columns;
-      const values = data[0].values;
-      console.log(columns);
-      let tableHeader = []
-      for(let i = 0; i<columns.length; i++) {
-
-        const column = {title: columns[i], key: columns[i]};
-
-        tableHeader.push(column);
-        // TODO: prepare data for column;
-      }
-      this.codemirror.columns = tableHeader;
-      // TODO: parse response =============================================
-      let array_vals = [];
-      values.forEach(row => {
-        const value = {};
-        for(let column = 0; column < columns.length; column++){
-          value[columns[column]] = row[column];
-        }
-        array_vals.push(value);
-      });
-      this.codemirror.data = array_vals;
-      this.codemirror.isWork = true;
-      this.render.history.runCode = false;
-
-    },
-    onClickCloseHistory(){
-      logR("warn", "MainLayout: onClickCloseHistory")
-      this.history.active = false;
-      this.onClickClearCode();
-
-    }
   },
 
 

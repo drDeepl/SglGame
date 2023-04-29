@@ -1,5 +1,4 @@
 import {isDevelop} from '@/_config';
-
 export function logR(type, msg) {
   // INFO: зато забавно
   if (isDevelop) {
@@ -14,8 +13,9 @@ export function logR(type, msg) {
 }
 
 export const decorateResponseApi = async function (func, context) {
+  logR('warn', func);
+  logR('warn', context);
   let response = {status: 200, data: null, message: ''};
-
   const responseWrap = await func(context).catch((resp) => {
     response.status = resp.status;
   });
@@ -27,4 +27,8 @@ export const decorateResponseApi = async function (func, context) {
   }
   response.data = responseWrap.data;
   return response;
+};
+
+export const extractJWT = function (token) {
+  return JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
 };

@@ -1,5 +1,5 @@
 import {createStore} from 'vuex';
-const message = createStore({
+export const message = createStore({
   namespace: true,
   state() {
     return {
@@ -10,5 +10,3 @@ const message = createStore({
   getters: {},
   mutations: {},
 });
-
-export default message;
