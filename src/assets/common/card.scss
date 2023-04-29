@@ -36,15 +36,25 @@
 }
 
 .card-title-history {
+  width: 17.5em;
   font-weight: 500;
   position: absolute;
+  z-index: 100;
+  bottom: -2em;
   color: $color-white;
 }
+
+.card-title-history > span {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  color: $color-text;
+}
 .card-history-img {
-  z-index: -1;
+  z-index: -3;
   height: 18vw;
   width: 18vw;
-  filter: blur(1.5px);
+  filter: blur(1px);
 }
 
 .history-card-content {
@@ -53,3 +63,7 @@
   align-items: center;
 }
 
+.history-card-content > p {
+  font-weight: bold;
+  font-size: 1.2em;
+}

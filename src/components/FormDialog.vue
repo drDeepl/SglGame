@@ -58,8 +58,7 @@ export default defineComponent({
   },
   props: {
     isActive: {type: Boolean, default: false},
-    isRunSuccess: {type: Boolean, default: false},
-    isRunning: {type: Boolean, default: false},
+
     title: {
       type: String,
       required: false,
@@ -102,7 +101,13 @@ export default defineComponent({
       // NOTE: applyFUnction возвращает объект {ok:true}
       logR('warn', 'FormDialog: onclickApplyButton');
       status.running = true;
-      await props.applyFunction(props.itemModel.data);
+      const isValid = await formRef.value
+        ?.validate()
+        .catch((resp) => resp.length > 0);
+      if (!isValid) {
+        await props.applyFunction(props.itemModel.data);
+      }
+
       status.running = false;
     };
 

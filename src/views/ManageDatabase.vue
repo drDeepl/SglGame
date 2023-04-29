@@ -39,28 +39,28 @@
         </n-card>
       </n-layout-sider>
       <n-layout>
-        <n-layout-header class="img-header-profile">
+        <n-layout-header
+          class="img-header-profile"
+          v-if="
+            $router.currentRoute._value.name == 'profile' ||
+            $router.currentRoute._value.name == 'admin'
+          "
+        >
+          {{ $router.currentRoute._value.name }}
           <n-space justify="center" align="center">
             <n-popover trigger="hover">
               <template #trigger>
-                <div
-                  class="profile-story"
-                  @click="onClickStory"
-                  v-for="story in arrays.stories"
-                  :key="story.id"
-                >
-                  <span>{{ story.title }}</span>
-                  <img
-                    class="profile-story-img"
-                    :src="
-                      require('@/assets/img/history_' +
-                        story.title.toLowerCase() +
-                        '.jpg')
-                    "
-                  />
+                <div class="profile-story" @click="onClickStory">
+                  <n-space justify="center" align="center">
+                    <n-icon size="50" color="white" class="profile-icon-story">
+                      <icon-add />
+                    </n-icon>
+                  </n-space>
                 </div>
               </template>
-              <span></span>
+              <span>{{
+                userData.role == 'ROLE_ADMIN' ? 'Создать историю' : 'Подробнее'
+              }}</span>
             </n-popover>
           </n-space>
         </n-layout-header>
@@ -85,7 +85,7 @@
 import {defineComponent} from 'vue';
 import {mapGetters} from 'vuex';
 import {NAvatar} from 'naive-ui';
-import {extractJWT, logR} from '@/services/utils';
+import {logR} from '@/services/utils';
 import CreateStory from '@/models/model.create.story';
 
 export default defineComponent({
@@ -120,51 +120,21 @@ export default defineComponent({
   async created() {
     // TODO: Подгрузка историй с бека
     this.render.main = true;
-    console.log(this.userData);
     if (!this.userData) {
       this.$router.push({name: 'home'});
     } else {
       // const dataUser = this.$store.state.auth.dataLogin;
-      const dataUser = extractJWT(
-        'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiZXhwIjoxNjgyNjg0MTQ3LCJ1c2VySWQiOjIsInJvbGUiOiJST0xFX1VTRVIifQ.kiXWT2vKMUSmhFbhRMBFVZPMWyrfWTO90xrW5KsUFhqBJHi1VvDuno9QrCq6Mb_w7CGGp14KD6CNrDYCjS-Ufw'
-      );
-      dataUser.role = 'ROLE_ADMIN';
-      // FIXME:  удалить после подключения запросов
-      this.userData.role = 'ROLE_ADMIN';
-      // FIXME:  удалить после подключения запросов
-      this.sidebar.rows = this.$store.state.user.userSidebar.user;
+
+      this.sidebar.rows = this.sidebar.rows =
+        this.$store.state.user.userSidebar.admin;
     }
     this.render.main = false;
   },
 
   methods: {
-    onClickCreateStory() {
-      logR('PROFILE:onCLickCreateStory');
-    },
-    onClickInfoStory() {
-      logR('PROFILE:onClickInfoStory');
-    },
-    onClickStory() {
-      logR('warn', 'PROFILE:onClickStory');
-
-      if (this.userData.role == 'ROLE_ADMIN') {
-        this.forms.createStory.active = true;
-      } else {
-        console.error('TODO:onClickStory by User');
-      }
-    },
     onClickToLink(url) {
+      logR('warn', 'onClickToLink');
       url.length > 0 ? this.$router.push(url) : '';
-    },
-    async onClickApplyCreateStory(dataForm) {
-      logR('warn', 'PROFILE:onClickApplyCreateStory');
-      console.log(dataForm);
-      await this.$store.dispatch('story/createStory', dataForm);
-    },
-
-    onClickCancelCreateStory() {
-      logR('warn', 'PROFILE:onCLickCancelCreateStory');
-      this.forms.createStory.active = false;
     },
   },
 });

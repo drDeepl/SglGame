@@ -1,46 +1,83 @@
 <template>
   <n-navbar>
-    <n-space justify="end">
-      <n-button @click="todos = true" style="background-color: whitesmoke"
-        >todos</n-button
-      >
-      <n-modal v-model:show="todos">
-        <p style="background-color: whitesmoke">
-          <n-space class="user-menu" vertical>
-            <span>
-              1.Найти способ автоматизировать подгрузку схемы базы данных
-            </span>
-            <span
-              >2.Статус открытой\закрытой истории и соответствующая иконка к
-              нему</span
+    <n-space justify="space-between" align="center">
+      <n-space justify="start">
+        <router-link to="/">
+          <n-button text>
+            <span style="color: whitesmoke">На главную</span>
+          </n-button>
+        </router-link>
+      </n-space>
+      <n-space justify="end">
+        <n-popconfirm
+          v-if="!userData"
+          class="navbar-popconfirm"
+          :show-icon="false"
+          positive-text="Вход"
+          :on-positive-click="onClickLogIn"
+          negative-text="Регистрация"
+          :on-negative-click="onClickRegister"
+        >
+          <template #trigger>
+            <n-avatar
+              @click="onClickAvatar"
+              class="user__avatar"
+              size="large"
+              round
+              :style="{backgroundColor: '#ee4540'}"
             >
-          </n-space>
-        </p>
-      </n-modal>
-      <n-popconfirm
-        class="navbar-popconfirm"
-        :show-icon="false"
-        positive-text="Вход"
-        :on-positive-click="onClickLogIn"
-        negative-text="Регистрация"
-        :on-negative-click="onClickRegister"
-      >
-        <template #trigger>
-          <n-avatar
-            @click="onClickAvatar"
-            class="user__avatar"
-            size="large"
-            round
-            :style="{backgroundColor: '#ee4540'}"
-          >
-            <span>?</span>
-          </n-avatar>
-        </template>
-      </n-popconfirm>
+              <span>?</span>
+            </n-avatar>
+          </template>
+        </n-popconfirm>
+        <n-popconfirm
+          v-else
+          class="navbar-popconfirm"
+          :show-icon="false"
+          positive-text="Личный кабинет"
+          :negative-text="null"
+          :on-positive-click="onClickToProfile"
+        >
+          <template #trigger>
+            <n-avatar
+              @click="onClickAvatar"
+              class="user__avatar"
+              size="large"
+              round
+              :style="{backgroundColor: '#ee4540'}"
+            >
+              <span>?</span>
+            </n-avatar>
+          </template>
+        </n-popconfirm>
+      </n-space>
     </n-space>
   </n-navbar>
   <div class="main-content">
-    <router-view />
+    <div
+      v-if="$router.currentRoute._value.name == 'home'"
+      class="main-preview-layout"
+    >
+      <div class="preview-description">
+        <p>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
+          minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+          aliquip ex ea commodo consequat. Duis aute irure dolor in
+          reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+          pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
+          culpa qui officia deserunt mollit anim id est laborum.
+        </p>
+        <n-button
+          color="#ee4540"
+          class="preview-btn"
+          @click="$router.push('/stories')"
+          >Играть</n-button
+        >
+      </div>
+      <div class="main-preview"></div>
+    </div>
+    <router-view> </router-view>
   </div>
 
   <!-- // NOTE: блок с всплывающими оповещениями -->
@@ -51,7 +88,7 @@
     :isActive="forms.logIn.active"
     title="Вход"
     :itemModel="forms.logIn.model"
-    :toValidate="true"
+    :toValidate="false"
     labelApplyButton="Войти"
     :applyFunction="onClickApplyLogIn"
     :cancelFunction="onClickCancelLogIn"
@@ -77,6 +114,8 @@
 
 <script lang="js">
 import { defineComponent} from "vue";
+import {mapGetters} from "vuex";
+
 import {NAvatar} from 'naive-ui'
 import NavbarVertical from "@/components/NavbarVertical.vue"
 
@@ -103,6 +142,7 @@ export default defineComponent( {
     return{
       // NOTE: На время теста ===================
       todos: false,
+      role: {"ROLE_ADMIN": 'admin', "ROLE_USER": 'user'},
       // NOTE: На время теста ===================
       render: {main: false},
       menubar: {},
@@ -126,7 +166,17 @@ export default defineComponent( {
       },
     }
   },
+  computed: {
+    ...mapGetters({
+      getUserToken: 'auth/GET_TOKEN_USER',
+      userData: 'auth/GET_DATA_LOGIN',
+    }),
+  },
     methods: {
+      onClickToProfile(){
+        const role = this.userData.role
+        this.$router.push({name: this.role[role]})
+      },
       onClickAvatar() {
       logR('warn', 'NAVBAR: onClickAvatar');
       this.activateBlock.avatar = true;
@@ -153,15 +203,20 @@ export default defineComponent( {
       console.log(response);
       if(response.status==200){
         const token = response.data.accessToken;
-
-        const userData = extractJWT(token);
+        let userData = extractJWT(token);
         console.log(userData);
 
         this.$store.commit("auth/SET_TOKEN_USER", token);
+        // userData.role = "ROLE_ADMIN"
         this.$store.commit("auth/SET_DATA_LOGIN", userData);
-        this.$router.push({name:"profile"})
+        if(userData.role == "ROLE_USER"){
+          this.$router.push({name:"user"})
+          }
+        else if(userData.role== "ROLE_ADMIN"){
+            this.$router.push({name:"admin"})
+        }
       }
-      this.forms.logIn = false;
+      this.forms.logIn.active = false;
 
     },
     onClickRegister() {
@@ -172,14 +227,14 @@ export default defineComponent( {
       logR('warn', 'NAVBAR: onCLickApplyRegister');
       console.log(dataForm);
       // TODO: исправить после внесения правок на бэке ========================================================
-      // const response = await UserService.createUser({username:dataForm.username, password:dataForm.password})
+      const response = await UserService.createUser({username:dataForm.username, password:dataForm.password})
       console.error("todo: userService.createUser", UserService)
       // TODO: ================================================================================================
-      const response = {status: 200, data: {
-  type: "Bearer",
-  accessToken: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiZXhwIjoxNjgyNjg0MTQ3LCJ1c2VySWQiOjIsInJvbGUiOiJST0xFX1VTRVIifQ.kiXWT2vKMUSmhFbhRMBFVZPMWyrfWTO90xrW5KsUFhqBJHi1VvDuno9QrCq6Mb_w7CGGp14KD6CNrDYCjS-Ufw",
-  refreshToken: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyIiwiZXhwIjoxNjg1Mjc1ODQ3fQ.zRlDaEuUz_CDp--ZpNKz93oeEzZXfBz28mlKGrMBk8D3AUUhWop3vuIej8KHSVzEquQBrMErmeGtEQ4Ira-S4Q"
-}, message: ''}
+//       const response = {status: 200, data: {
+//   type: "Bearer",
+//   accessToken: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiZXhwIjoxNjgyNjg0MTQ3LCJ1c2VySWQiOjIsInJvbGUiOiJST0xFX1VTRVIifQ.kiXWT2vKMUSmhFbhRMBFVZPMWyrfWTO90xrW5KsUFhqBJHi1VvDuno9QrCq6Mb_w7CGGp14KD6CNrDYCjS-Ufw",
+//   refreshToken: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyIiwiZXhwIjoxNjg1Mjc1ODQ3fQ.zRlDaEuUz_CDp--ZpNKz93oeEzZXfBz28mlKGrMBk8D3AUUhWop3vuIej8KHSVzEquQBrMErmeGtEQ4Ira-S4Q"
+// }, message: ''}
       if(response.status == 200){
         this.$store.commit('auth/SET_TOKEN_USER', response.data.accessToken)
         this.forms.runSucess = true;

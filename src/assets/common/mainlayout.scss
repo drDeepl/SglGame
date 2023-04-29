@@ -1,0 +1,41 @@
+.main-preview {
+  min-width: 10em;
+  min-height: 35em;
+  background-image: url('img/main_preview.png');
+  background-repeat: no-repeat;
+}
+
+.main-preview-layout {
+  //   background-color: rgba(229, 209, 184, 0.25);
+  background-color: $color-crema;
+  padding-left: 5em;
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+
+  align-items: center;
+  border-radius: $border-radius;
+}
+
+.preview-description {
+  display: flex;
+  flex-direction: column;
+  justify-items: end;
+
+  //   grid-template-columns: 3fr 2fr;
+}
+
+.preview-description > p {
+  font-weight: bold;
+  font-size: 1.3em;
+}
+
+.preview-btn {
+  max-width: 8em;
+  background-color: $color-red;
+  border-radius: $border-radius;
+}
+
+.preview-btn > span {
+  color: $color-white;
+  font-size: 1.1em;
+}

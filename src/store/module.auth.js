@@ -1,4 +1,5 @@
 import AuthService from '@/services/auth.service';
+import TokenService from '@/services/token.service';
 import {extractJWT} from '@/services/utils';
 export const auth = {
   namespaced: true,
@@ -25,12 +26,19 @@ export const auth = {
       return state.currentUser;
     },
     GET_DATA_LOGIN: (state) => {
-      return state.dataLogin;
+      return state.dataLogin ? state.dataLogin : TokenService.getUser();
+    },
+
+    GET_LOCAL_ACCESS_TOKEN: (state) => {
+      return state.tokenUser
+        ? state.tokenUser
+        : TokenService.getLocalAccessToken();
     },
   },
   mutations: {
     SET_DATA_LOGIN: function (state, dataLogin) {
       state.dataLogin = dataLogin;
+      TokenService.setUser(dataLogin);
     },
     SET_TOKEN_USER: function (state, tokenUser) {
       state.tokenUser = tokenUser;

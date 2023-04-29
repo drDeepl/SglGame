@@ -5,6 +5,26 @@ export const user = {
   state() {
     return {
       userData: null,
+      userSidebar: {
+        admin: [
+          {
+            id: 0,
+            title: 'Панель администратора',
+            lock: false,
+            url: '/admin',
+          },
+          {
+            id: 1,
+            title: 'Управление базой данных',
+            lock: false,
+            url: '/database',
+          },
+        ],
+        user: [
+          {id: 0, title: 'К историям', lock: false, url: '/stories'},
+          {id: 1, title: 'Личный кабинет', lock: false, url: '/user'},
+        ],
+      },
     };
   },
   actions: {
