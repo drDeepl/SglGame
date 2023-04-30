@@ -1,6 +1,35 @@
 import ApiStory from '@/api/api.story';
 import {decorateResponseApi, logR} from './utils';
 class StoryService {
+  async getStories() {
+    logR('warn', 'STORY.SERVICE.getStories');
+    let response = await decorateResponseApi(ApiStory.getStories).catch(
+      (resp) => {
+        console.log(resp);
+      }
+    );
+    response.status == 200
+      ? (response.message = 'Успешно')
+      : (response.message = 'Произошла ошибка при получения списка историй');
+    console.log(response);
+    return response;
+  }
+
+  async getStoryById(storyId) {
+    logR('warn', 'STORY.SERVICE.createStory');
+    let response = await decorateResponseApi(
+      ApiStory.getStoryById,
+      storyId
+    ).catch((resp) => {
+      console.log(resp);
+    });
+    response.status == 200
+      ? (response.message = 'Успешно')
+      : (response.message = 'Произошла ошибка при получении истории');
+    console.log(response);
+    return response;
+  }
+
   async storyCreate(formData) {
     logR('warn', 'STORY.SERVICE.createStory');
     let response = await decorateResponseApi(
@@ -9,10 +38,37 @@ class StoryService {
     ).catch((resp) => {
       console.log(resp);
     });
-
     response.status == 200
       ? (response.message = 'Успешно')
       : (response.message = 'Произошла ошибка при создании истории');
+    console.log(response);
+    return response;
+  }
+
+  async storyUpdate(formData) {
+    logR('warn', 'STORY.SERVICE.Update');
+    let response = await decorateResponseApi(ApiStory.update, formData).catch(
+      (resp) => {
+        console.log(resp);
+      }
+    );
+    response.status == 200
+      ? (response.message = 'Успешно')
+      : (response.message = 'Произошла ошибка во время обновления истории');
+    console.log(response);
+    return response;
+  }
+
+  async storyDelete(storyId) {
+    logR('warn', 'STORY.SERVICE.Delete');
+    let response = await decorateResponseApi(ApiStory.delete, storyId).catch(
+      (resp) => {
+        console.log(resp);
+      }
+    );
+    response.status == 200
+      ? (response.message = 'Успешно')
+      : (response.message = 'Произошла ошибка во время удаления истории');
     console.log(response);
     return response;
   }

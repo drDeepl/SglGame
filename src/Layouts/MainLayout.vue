@@ -152,7 +152,7 @@ export default defineComponent( {
   data(){
     return{
       // NOTE: На время теста ===================
-      isDevelop: true,
+      isDevelop: false,
       todos: false,
       role: {"ROLE_ADMIN": 'admin', "ROLE_USER": 'user'},
       // NOTE: На время теста ===================

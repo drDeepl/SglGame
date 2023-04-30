@@ -32,13 +32,13 @@ const setup = (store) => {
           originalConfig._retry = true;
 
           try {
-            const rs = await instance.post('/token/refresh', {
+            const rs = await instance.post('/auth/refresh', {
               refresh: TokenService.getLocalRefreshToken(),
             });
 
             const access = rs.data.access;
 
-            store.dispatch('auth/refresh', access);
+            store.commit('auth/refresh', access);
             TokenService.updateLocalAccessToken(access);
             return instance(originalConfig);
           } catch (_error) {

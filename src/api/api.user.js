@@ -6,6 +6,8 @@ const path = '/userDB/user';
 class ApiUser {
   async createUser(dataRegistration) {
     logR('warn', 'ApiUser: createUser');
+    console.log(instance.apply()
+    );
     const response = await instance.post(
       `${path}/registration`,
       dataRegistration

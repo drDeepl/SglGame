@@ -1,4 +1,4 @@
-const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
+// const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 
 const {defineConfig} = require('@vue/cli-service');
 module.exports = defineConfig({
@@ -6,16 +6,14 @@ module.exports = defineConfig({
   devServer: {
     proxy: {
       '^/api': {
-        target: 'http://localhost:8080/',
+        target: 'http://localhost:8080',
+        ws: true,
         changeOrigin: true,
-        pathRewrite: {
-          '^/api': '',
-        },
       },
     },
   },
   configureWebpack: {
-    plugins: [new NodePolyfillPlugin()],
+    // plugins: [new NodePolyfillPlugin()],
 
     resolve: {fallback: {fs: false, os: false, path: false}},
     experiments: {

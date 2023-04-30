@@ -1,6 +1,7 @@
 import ApiAuth from '@/api/api.auth';
 import {decorateResponseApi, logR} from './utils';
 import TokenService from './token.service';
+
 class AuthService {
   async login(dataForm) {
     logR('AuthService: Login');

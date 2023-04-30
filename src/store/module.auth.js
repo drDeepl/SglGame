@@ -1,10 +1,16 @@
 import AuthService from '@/services/auth.service';
 import TokenService from '@/services/token.service';
 import {extractJWT} from '@/services/utils';
+const user = JSON.parse(localStorage.getItem('user'));
+const initialState = user
+  ? {status: {loggedIn: true}, user}
+  : {status: {loggedIn: false}, user: null};
+
 export const auth = {
   namespaced: true,
   state() {
     return {
+      initState: initialState,
       tokenUser: null,
       dataLogin: null,
     };
@@ -20,12 +26,18 @@ export const auth = {
         const token = extractJWT(responseData.accessToken);
         context.commit('SET_TOKEN_USER', token);
         response.data = token;
+        context.commit('LOGIN_SECCESS');
+      } else {
+        context.commit('LOGIN_FAILED');
       }
 
       return response;
     },
   },
   getters: {
+    GET_INIT_STATE: (state) => {
+      return state.initState;
+    },
     GET_TOKEN_USER: (state) => {
       return state.currentUser;
     },
@@ -42,6 +54,7 @@ export const auth = {
   mutations: {
     SET_DATA_LOGIN: function (state, dataLogin) {
       state.dataLogin = dataLogin;
+      state.user;
       TokenService.setUser(dataLogin);
     },
     SET_TOKEN_USER: function (state, tokenUser) {
@@ -51,6 +64,19 @@ export const auth = {
       TokenService.removeUser();
       state.tokenUser = null;
       state.dataLogin = null;
+    },
+    LOGIN_SUCCESS: function (state, user) {
+      state.initState.status.loggedIn = true;
+      state.initState.user = user;
+    },
+
+    LOGIN_FAILED: function (state) {
+      state.initState.status.loggedIn = false;
+      state.initState.user = null;
+    },
+    refresh(state, access) {
+      state.initState.status.loggedIn = true;
+      state.initState.user.accessToken = access;
     },
   },
 };

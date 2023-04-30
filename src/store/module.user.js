@@ -19,6 +19,7 @@ export const user = {
             lock: false,
             url: '/database',
           },
+          {id: 2, title: 'К историям', lock: false, url: '/stories'},
         ],
         user: [{id: 0, title: 'К историям', lock: false, url: '/stories'}],
       },

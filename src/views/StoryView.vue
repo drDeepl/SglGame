@@ -13,11 +13,15 @@
               <span> history {{ history.title.replace('_', ' ') }} </span>
             </div>
             <img
+              :id="history.title"
               class="card-history-img"
               :src="require('@/assets/img/history_' + history.title + '.jpg')"
             />
           </div>
         </template>
+        <n-button @click="onClickChangeImgStory(history.title)"
+          >Заменить картинку</n-button
+        >
         <n-rate readonly :default-value="history.difficulty"></n-rate
       ></n-popover>
     </div>
@@ -110,6 +114,7 @@
 <script>
 import DatabaseManager from '@/database/DatabaseManager';
 import ServiceDatabase from '@/services/service.database';
+import ServiceDownloadFile from '@/services/download.service';
 
 import {logR, prepareDataTable} from '@/services/utils';
 import {defineComponent} from 'vue';
@@ -221,8 +226,7 @@ export default defineComponent({
         const response2DownloadDb = await ServiceDatabase.downloadFile(
           urlToDb
         ).catch((error) => {
-          console.log(error + '\n');
-          console.log(Object.keys(error));
+          console.log('response2DownloadDb\n' + error + '\n');
         });
         // const body = response2DownloadDb.body.getReader();
         console.log('Downloaded BD\n', response2DownloadDb);
@@ -278,6 +282,19 @@ export default defineComponent({
       logR('warn', 'MainLayout: onClickCloseHistory');
       this.history.active = false;
       this.onClickClearCode();
+    },
+    async onClickChangeImgStory(imgDOMId, urlImg) {
+      logR('warn', 'MainLayout: onClickChangeImgStory');
+      // NOTE: Function get the url of image
+      logR('warn', 'MainLayout: onClickChangeImgStory');
+      const fileUint8Array = await ServiceDownloadFile.downloadFileInUint8Array(
+        urlImg
+      );
+      // NOTE: Download it
+      document.getElementById(imgDOMId).src = URL.createObjectURL(
+        new Blob([fileUint8Array.buffer], {type: 'image/png'})
+      );
+      // NOTE: and replace in DOM through imgDOMId
     },
   },
 });
