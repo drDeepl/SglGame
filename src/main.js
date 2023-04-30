@@ -64,7 +64,6 @@ app.component('n-space', NSpace);
 app.component('n-button', NButton);
 
 app.use(router);
-
 app.use(store);
 app.mount('#app');
 

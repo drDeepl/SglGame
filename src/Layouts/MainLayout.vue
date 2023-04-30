@@ -215,6 +215,7 @@ export default defineComponent( {
     async onClickApplyLogIn(dataForm) {
       logR('warn', 'NAVBAR: onClickApplyLogIn\n');
       console.log(dataForm)
+
       const response = await this.$store.dispatch("auth/login", dataForm);
       console.log(response)
       if(response.status==200){

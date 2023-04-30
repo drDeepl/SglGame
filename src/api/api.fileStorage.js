@@ -3,10 +3,10 @@ import axios from 'axios';
 const storageBaseUrl = 'https://cloud-api.yandex.net/v1/disk/resources';
 const path2Database = 'disk:/sqlgame/database';
 
+axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
 const apiFileStore = axios.create({
   baseURL: `${storageBaseUrl}`,
   headers: {
-    'Content-type': 'application/json',
     Authorization: process.env.VUE_APP_TOKEN_STORAGE,
   },
 });
