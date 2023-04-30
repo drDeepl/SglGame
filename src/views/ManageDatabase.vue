@@ -39,29 +39,23 @@
         </n-card>
       </n-layout-sider>
       <n-layout>
-        <n-layout-header
-          class="img-header-profile"
-          v-if="
-            $router.currentRoute._value.name == 'profile' ||
-            $router.currentRoute._value.name == 'admin'
-          "
-        >
+        <n-layout-header>
           {{ $router.currentRoute._value.name }}
-          <n-space justify="center" align="center">
-            <n-popover trigger="hover">
-              <template #trigger>
-                <div class="profile-story" @click="onClickStory">
-                  <n-space justify="center" align="center">
-                    <n-icon size="50" color="white" class="profile-icon-story">
-                      <icon-add />
-                    </n-icon>
-                  </n-space>
-                </div>
-              </template>
-              <span>{{
-                userData.role == 'ROLE_ADMIN' ? 'Создать историю' : 'Подробнее'
-              }}</span>
-            </n-popover>
+          <n-space justify="start">
+            <n-card
+              class="database-add-table"
+              hoverable
+              @click="onClickCreateTable"
+            >
+              <!-- <template #footer> -->
+              <n-space justify="center" align="center" vertical>
+                <span class="database-add-table-header">Добавить таблицу</span>
+                <n-icon size="35" color="black" class="database-icon-table">
+                  <icon-add-plus />
+                </n-icon>
+              </n-space>
+              <!-- </template> -->
+            </n-card>
           </n-space>
         </n-layout-header>
         <n-layout-content></n-layout-content>
@@ -69,13 +63,13 @@
     </n-layout>
 
     <c-form
-      v-if="forms.createStory.active"
-      :isActive="forms.createStory.active"
-      title="Создание истории"
-      :itemModel="forms.createStory.model"
+      v-if="forms.createTable.active"
+      :isActive="forms.createTable.active"
+      title="Создание таблицы"
+      :itemModel="forms.createTable.model"
       labelApplyButton="Создать"
-      :applyFunction="onClickApplyCreateStory"
-      :cancelFunction="onClickCancelCreateStory"
+      :applyFunction="onClickApplyCreateTable"
+      :cancelFunction="onClickCancelCreateTable"
     >
     </c-form>
   </div>
@@ -94,7 +88,7 @@ export default defineComponent({
     return {
       sidebar: {active: false, rows: []},
       render: {main: false},
-      forms: {createStory: {active: false, model: CreateStory}},
+      forms: {createTable: {active: false, model: CreateStory}},
       arrays: {
         stories: [
           {
@@ -135,6 +129,17 @@ export default defineComponent({
     onClickToLink(url) {
       logR('warn', 'onClickToLink');
       url.length > 0 ? this.$router.push(url) : '';
+    },
+
+    onClickApplyCreateTable() {
+      logR('warn', 'ManageDatabase:onClickApplyCreateTable');
+    },
+
+    onClickCancelCreateTable() {
+      logR('warn', 'ManageDatabase:onClickCancelCreate');
+    },
+    onClickCreateTable() {
+      logR('warn', 'ManageDatabase:onClickCreateTable');
     },
   },
 });

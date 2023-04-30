@@ -20,10 +20,7 @@ export const user = {
             url: '/database',
           },
         ],
-        user: [
-          {id: 0, title: 'К историям', lock: false, url: '/stories'},
-          {id: 1, title: 'Личный кабинет', lock: false, url: '/user'},
-        ],
+        user: [{id: 0, title: 'К историям', lock: false, url: '/stories'}],
       },
     };
   },

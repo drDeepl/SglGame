@@ -3,6 +3,7 @@ import {createStore} from 'vuex';
 import {auth} from './module.auth';
 import {user} from './module.user';
 import {story} from './module.story';
+import {notification} from './module.notification';
 import instance from '@/api/main';
 
 const userInfo = localStorage.getItem('user');
@@ -12,5 +13,5 @@ if (userInfo) {
 }
 
 export default createStore({
-  modules: {auth, user, story},
+  modules: {auth, user, story, notification},
 });

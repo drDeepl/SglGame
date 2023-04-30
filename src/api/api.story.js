@@ -5,7 +5,7 @@ const path = '/userDB/stories';
 class ApiStory {
   async createStory(dataForm) {
     logR('warn', 'API.STORY: creating story');
-    return instance.post(`/${path}/create`, dataForm);
+    return instance.post(path + '/create', dataForm);
   }
 }
 

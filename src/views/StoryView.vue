@@ -209,6 +209,15 @@ export default defineComponent({
       console.log(history);
       try {
         const urlToDb = await ServiceDatabase.getLinkToDatabase(history.title);
+        if (urlToDb.length <= 0) {
+          this.$store.commit(
+            'notification/SET_ACTIVE_ERROR',
+            'Ошибка при загрузке базы данных'
+          );
+          this.history.active = false;
+          this.history.loadData = false;
+          return;
+        }
         const response2DownloadDb = await ServiceDatabase.downloadFile(
           urlToDb
         ).catch((error) => {

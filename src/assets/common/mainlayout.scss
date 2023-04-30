@@ -10,8 +10,9 @@
   background-color: $color-crema;
   padding-left: 5em;
   display: grid;
-  grid-template-columns: 3fr 2fr;
-
+  // grid-template-columns: 3fr 2fr;
+  grid-template-columns: 50em 40em;
+  justify-content: center;
   align-items: center;
   border-radius: $border-radius;
 }

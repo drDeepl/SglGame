@@ -11,7 +11,13 @@
       :title="title"
     >
       <template #header-extra>
-        <n-button quaternary circle type="error" @click="onClickCancelButton">
+        <n-button
+          quaternary
+          circle
+          type="error"
+          :focusable="false"
+          @click="onClickCancelButton"
+        >
           <icon-close style="width: 1.7em" />
         </n-button>
       </template>

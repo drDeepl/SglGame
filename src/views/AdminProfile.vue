@@ -39,18 +39,12 @@
         </n-card>
       </n-layout-sider>
       <n-layout>
-        <n-layout-header
-          class="img-header-profile"
-          v-if="
-            $router.currentRoute._value.name == 'profile' ||
-            $router.currentRoute._value.name == 'admin'
-          "
-        >
-          {{ $router.currentRoute._value.name }}
+        <!--  $router.currentRoute._value.name -->
+        <n-layout-header class="img-header-profile">
           <n-space justify="center" align="center">
             <n-popover trigger="hover">
               <template #trigger>
-                <div class="profile-story" @click="onClickStory">
+                <div class="profile-story" @click="onClickCreateStory">
                   <n-space justify="center" align="center">
                     <n-icon size="50" color="white" class="profile-icon-story">
                       <icon-add />
@@ -58,26 +52,23 @@
                   </n-space>
                 </div>
               </template>
-              <span>{{
-                userData.role == 'ROLE_ADMIN' ? 'Создать историю' : 'Подробнее'
-              }}</span>
+              <span> Создать историю </span>
             </n-popover>
           </n-space>
         </n-layout-header>
         <n-layout-content></n-layout-content>
       </n-layout>
+      <c-form
+        v-if="forms.createStory.active"
+        :isActive="forms.createStory.active"
+        title="Создание истории"
+        :itemModel="forms.createStory.model"
+        labelApplyButton="Создать"
+        :applyFunction="onClickApplyCreateStory"
+        :cancelFunction="onClickCancelCreateStory"
+      >
+      </c-form>
     </n-layout>
-
-    <c-form
-      v-if="forms.createStory.active"
-      :isActive="forms.createStory.active"
-      title="Создание истории"
-      :itemModel="forms.createStory.model"
-      labelApplyButton="Создать"
-      :applyFunction="onClickApplyCreateStory"
-      :cancelFunction="onClickCancelCreateStory"
-    >
-    </c-form>
   </div>
 </template>
 
@@ -132,31 +123,35 @@ export default defineComponent({
 
   methods: {
     onClickCreateStory() {
-      logR('PROFILE:onCLickCreateStory');
+      logR('ADMIN PROFILE:onCLickCreateStory');
+      this.forms.createStory.active = true;
+      console.log(this.createStory);
     },
     onClickInfoStory() {
-      logR('PROFILE:onClickInfoStory');
+      logR('ADMIN PROFILE:onClickInfoStory');
     },
     onClickStory() {
-      logR('warn', 'PROFILE:onClickStory');
-
-      if (this.userData.role == 'ROLE_ADMIN') {
-        this.forms.createStory.active = true;
-      } else {
-        console.error('TODO:onClickStory by User');
-      }
+      logR('warn', 'ADMIN PROFILE:onClickStory');
     },
     onClickToLink(url) {
       url.length > 0 ? this.$router.push(url) : '';
     },
     async onClickApplyCreateStory(dataForm) {
-      logR('warn', 'PROFILE:onClickApplyCreateStory');
+      logR('warn', 'ADMIN PROFILE:onClickApplyCreateStory');
       console.log(dataForm);
-      await this.$store.dispatch('story/createStory', dataForm);
+      const response = await this.$store.dispatch(
+        'story/createStory',
+        dataForm
+      );
+      if (response.status == 200) {
+        console.log(response);
+      } else {
+        this.$store.commit('notification/SET_ACTIVE_ERROR', response.message);
+      }
     },
 
     onClickCancelCreateStory() {
-      logR('warn', 'PROFILE:onCLickCancelCreateStory');
+      logR('warn', 'PROFILE:onClickCancelCreateStory');
       this.forms.createStory.active = false;
     },
   },

@@ -1,0 +1,22 @@
+.database-icon-table {
+  background-color: $color-light-green-transparent;
+  border-radius: 100%;
+  padding: 0.19em;
+}
+
+.database-add-table {
+  cursor: pointer;
+  margin-left: 1em;
+  min-width: 20em;
+  min-height: 12em;
+  display: flex !important;
+  justify-content: center !important;
+  align-content: center !important;
+  border-left: 10px solid $color-light-green !important;
+  border-radius: $border-radius;
+}
+
+.database-add-table-header {
+  font-weight: bold;
+  font-size: 1.35em;
+}

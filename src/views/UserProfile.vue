@@ -85,7 +85,7 @@
 import {defineComponent} from 'vue';
 import {mapGetters} from 'vuex';
 import {NAvatar} from 'naive-ui';
-import {extractJWT, logR} from '@/services/utils';
+import {logR} from '@/services/utils';
 import CreateStory from '@/models/model.create.story';
 
 export default defineComponent({
@@ -124,14 +124,6 @@ export default defineComponent({
     if (!this.userData) {
       this.$router.push({name: 'home'});
     } else {
-      // const dataUser = this.$store.state.auth.dataLogin;
-      const dataUser = extractJWT(
-        'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiZXhwIjoxNjgyNjg0MTQ3LCJ1c2VySWQiOjIsInJvbGUiOiJST0xFX1VTRVIifQ.kiXWT2vKMUSmhFbhRMBFVZPMWyrfWTO90xrW5KsUFhqBJHi1VvDuno9QrCq6Mb_w7CGGp14KD6CNrDYCjS-Ufw'
-      );
-      dataUser.role = 'ROLE_ADMIN';
-      // FIXME:  удалить после подключения запросов
-      this.userData.role = 'ROLE_ADMIN';
-      // FIXME:  удалить после подключения запросов
       this.sidebar.rows = this.$store.state.user.userSidebar.user;
     }
     this.render.main = false;
@@ -155,16 +147,6 @@ export default defineComponent({
     },
     onClickToLink(url) {
       url.length > 0 ? this.$router.push(url) : '';
-    },
-    async onClickApplyCreateStory(dataForm) {
-      logR('warn', 'PROFILE:onClickApplyCreateStory');
-      console.log(dataForm);
-      await this.$store.dispatch('story/createStory', dataForm);
-    },
-
-    onClickCancelCreateStory() {
-      logR('warn', 'PROFILE:onCLickCancelCreateStory');
-      this.forms.createStory.active = false;
     },
   },
 });

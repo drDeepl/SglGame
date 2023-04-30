@@ -4,7 +4,11 @@ import store from '@/store';
 import router from '@/router/index';
 import setupInterceptors from '@/services/setupInterceptors';
 
-import {Dismiss28Regular, AddCircle20Regular} from '@vicons/fluent';
+import {
+  Dismiss28Regular,
+  AddCircle20Regular,
+  Add16Filled,
+} from '@vicons/fluent';
 import './assets/main.scss';
 
 import FormDialog from '@/components/FormDialog.vue';
@@ -55,6 +59,7 @@ app.component('c-form', FormDialog);
 app.component('n-spin', NSpin);
 app.component('icon-close', Dismiss28Regular);
 app.component('icon-add', AddCircle20Regular);
+app.component('icon-add-plus', Add16Filled);
 app.component('n-space', NSpace);
 app.component('n-button', NButton);
 

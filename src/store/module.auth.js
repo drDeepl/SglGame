@@ -13,12 +13,16 @@ export const auth = {
   actions: {
     async login(context, dataForm) {
       const response = await AuthService.login(dataForm);
-      const responseData = response.data;
-      context.commit('SET_DATA_LOGIN', responseData);
-      console.log(responseData);
-      const token = extractJWT(responseData.accessToken);
-      context.commit('SET_TOKEN_USER', token);
-      return token;
+      if (response.status == 200) {
+        const responseData = response.data;
+        context.commit('SET_DATA_LOGIN', responseData);
+        console.log(responseData);
+        const token = extractJWT(responseData.accessToken);
+        context.commit('SET_TOKEN_USER', token);
+        response.data = token;
+      }
+
+      return response;
     },
   },
   getters: {
@@ -42,6 +46,11 @@ export const auth = {
     },
     SET_TOKEN_USER: function (state, tokenUser) {
       state.tokenUser = tokenUser;
+    },
+    REMOVE_USER: function (state) {
+      TokenService.removeUser();
+      state.tokenUser = null;
+      state.dataLogin = null;
     },
   },
 };

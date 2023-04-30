@@ -13,19 +13,16 @@ export function logR(type, msg) {
 }
 
 export const decorateResponseApi = async function (func, context) {
-  logR('warn', func);
-  logR('warn', context);
-  let response = {status: 200, data: null, message: ''};
+  let response = {status: 404, data: null, message: ''};
   const responseWrap = await func(context).catch((resp) => {
-    response.status = resp.status;
+    console.error('DECORATE RESPONSE API\n', resp);
+    return {status: 404};
   });
-
-  console.log('RESPONSE WRAP\n', responseWrap);
-  if (responseWrap.status != 200) {
-    response.message = 'Что-то пошло не так';
+  if (responseWrap.status == 200) {
+    response.status = responseWrap.status;
+    response.data = responseWrap.data;
     return response;
   }
-  response.data = responseWrap.data;
   return response;
 };
 

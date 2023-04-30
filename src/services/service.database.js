@@ -16,7 +16,6 @@ class ServiceDatabase {
   async downloadFile(url) {
     logR('warn', 'ServiceDatabse: downloadFile');
     logR('log', 'URL\n' + url);
-
     const response = await fetch(url).catch((error) => console.log(error));
     return response;
   }

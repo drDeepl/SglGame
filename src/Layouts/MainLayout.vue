@@ -35,8 +35,9 @@
           class="navbar-popconfirm"
           :show-icon="false"
           positive-text="Личный кабинет"
-          :negative-text="null"
           :on-positive-click="onClickToProfile"
+          negative-text="Выйти"
+          :on-negative-click="onClickToExitProfile"
         >
           <template #trigger>
             <n-avatar
@@ -46,7 +47,7 @@
               round
               :style="{backgroundColor: '#ee4540'}"
             >
-              <span>?</span>
+              <span>{{ userData.sub.slice(0, 2) }}</span>
             </n-avatar>
           </template>
         </n-popconfirm>
@@ -78,6 +79,16 @@
       <div class="main-preview"></div>
     </div>
     <router-view> </router-view>
+    <n-modal
+      v-if="errorAlertActive.active"
+      v-model:show="errorAlertActive.active"
+      :title="errorAlertActive.message"
+      :mask-closable="false"
+      preset="dialog"
+      @positive-click="onClickCancelErrorAlert"
+      type="error"
+    >
+    </n-modal>
   </div>
 
   <!-- // NOTE: блок с всплывающими оповещениями -->
@@ -141,12 +152,17 @@ export default defineComponent( {
   data(){
     return{
       // NOTE: На время теста ===================
+      isDevelop: true,
       todos: false,
       role: {"ROLE_ADMIN": 'admin', "ROLE_USER": 'user'},
       // NOTE: На время теста ===================
       render: {main: false},
       menubar: {},
-
+      alert: {
+        success: {active: false, message: ''},
+        info: {active: false, message: ''},
+        error: {active: false, message: ''},
+      },
       activateBlock: {
         avatar: false,
       },
@@ -170,9 +186,15 @@ export default defineComponent( {
     ...mapGetters({
       getUserToken: 'auth/GET_TOKEN_USER',
       userData: 'auth/GET_DATA_LOGIN',
+      errorAlertActive: 'notification/GET_STATE_ERROR'
     }),
   },
     methods: {
+      onClickCancelErrorAlert() {
+      this.alert.error.active = false;
+      this.alert.error.message = '';
+      this.$store.commit('notification/REMOVE_STATE_ERROR');
+    },
       onClickToProfile(){
         const role = this.userData.role
         this.$router.push({name: this.role[role]})
@@ -193,14 +215,8 @@ export default defineComponent( {
     async onClickApplyLogIn(dataForm) {
       logR('warn', 'NAVBAR: onClickApplyLogIn\n');
       console.log(dataForm)
-      // const response = await this.$store.dispatch("auth/login", dataForm)
-      const response = {status: 200,
-      data: {type: "Bearer",
-      accessToken: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiZXhwIjoxNjgyNjg0MTQ3LCJ1c2VySWQiOjIsInJvbGUiOiJST0xFX1VTRVIifQ.kiXWT2vKMUSmhFbhRMBFVZPMWyrfWTO90xrW5KsUFhqBJHi1VvDuno9QrCq6Mb_w7CGGp14KD6CNrDYCjS-Ufw",
-      refreshToken: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyIiwiZXhwIjoxNjg1Mjc1ODQ3fQ.zRlDaEuUz_CDp--ZpNKz93oeEzZXfBz28mlKGrMBk8D3AUUhWop3vuIej8KHSVzEquQBrMErmeGtEQ4Ira-S4Q"
-      },
-      message: ''};
-      console.log(response);
+      const response = await this.$store.dispatch("auth/login", dataForm);
+      console.log(response)
       if(response.status==200){
         const token = response.data.accessToken;
         let userData = extractJWT(token);
@@ -215,6 +231,21 @@ export default defineComponent( {
         else if(userData.role== "ROLE_ADMIN"){
             this.$router.push({name:"admin"})
         }
+      }
+      else if(this.isDevelop){
+        const response = {status: 200, data: {
+          type: "Bearer",
+          accessToken: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiZXhwIjoxNjgyNjg0MTQ3LCJ1c2VySWQiOjIsInJvbGUiOiJST0xFX1VTRVIifQ.kiXWT2vKMUSmhFbhRMBFVZPMWyrfWTO90xrW5KsUFhqBJHi1VvDuno9QrCq6Mb_w7CGGp14KD6CNrDYCjS-Ufw",
+          refreshToken: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyIiwiZXhwIjoxNjg1Mjc1ODQ3fQ.zRlDaEuUz_CDp--ZpNKz93oeEzZXfBz28mlKGrMBk8D3AUUhWop3vuIej8KHSVzEquQBrMErmeGtEQ4Ira-S4Q"
+          }, message: ''};
+          let dataUser = extractJWT(response.data.accessToken);
+          dataUser.role = "ROLE_ADMIN";
+          this.$store.commit("auth/SET_DATA_LOGIN", dataUser);
+          this.$store.commit('auth/SET_TOKEN_USER', response.data.accessToken);
+          this.forms.runSucess = true;
+          this.$router.push({name: this.role[dataUser.role]});
+      }else{
+        this.$store.commit("notification/SET_ACTIVE_ERROR", response.message);
       }
       this.forms.logIn.active = false;
 
@@ -238,18 +269,44 @@ export default defineComponent( {
       if(response.status == 200){
         this.$store.commit('auth/SET_TOKEN_USER', response.data.accessToken)
         this.forms.runSucess = true;
-        this.$router.push({name: "profile"})
+        this.$router.push({name: "profile"});
+        this.forms.register.active = false;
+      }
+      else if(this.isDevelop){
+        const response = {status: 200, data: {
+          type: "Bearer",
+          accessToken: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiZXhwIjoxNjgyNjg0MTQ3LCJ1c2VySWQiOjIsInJvbGUiOiJST0xFX1VTRVIifQ.kiXWT2vKMUSmhFbhRMBFVZPMWyrfWTO90xrW5KsUFhqBJHi1VvDuno9QrCq6Mb_w7CGGp14KD6CNrDYCjS-Ufw",
+          refreshToken: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyIiwiZXhwIjoxNjg1Mjc1ODQ3fQ.zRlDaEuUz_CDp--ZpNKz93oeEzZXfBz28mlKGrMBk8D3AUUhWop3vuIej8KHSVzEquQBrMErmeGtEQ4Ira-S4Q"
+          }, message: ''};
+          let dataUser = extractJWT(response.data.accessToken);
+          dataUser.role = "ROLE_ADMIN";
+          this.$store.commit("auth/SET_DATA_LOGIN", dataUser);
+          this.$store.commit('auth/SET_TOKEN_USER', response.data.accessToken);
+          this.forms.runSucess = true;
+          this.$router.push({name: this.role[dataUser.role]});
+          this.forms.register.active = false;
       }
       else{
-        this.alert.error.active - true;
-        this.alert.message = this.$store.state.message.error;
+        // this.alert.error.active = true;
+        // this.alert.error.message = response.message;
+        this.$store.commit("notification/SET_ACTIVE_ERROR", response.message);
+        console.log(this.alert.error)
       }
-      this.forms.register.active = false;
+
     },
     onClickCancelRegister() {
       logR('warn', 'NAVBAR: onClickCancelRegister');
       this.forms.register.active = false;
     },
+
+    onClickToExitProfile(){
+      logR('warn', 'MainLayout: onClickToExitProfile');
+      this.render.main = true;
+      this.$store.commit("auth/REMOVE_USER");
+      this.$router.push({name: "home"});
+      this.$router.removeRoute();
+      this.render.main = false;
+    }
 
   },
 

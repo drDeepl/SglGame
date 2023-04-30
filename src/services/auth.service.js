@@ -4,9 +4,12 @@ import TokenService from './token.service';
 class AuthService {
   async login(dataForm) {
     logR('AuthService: Login');
-    const response = await decorateResponseApi(ApiAuth.login, dataForm);
-    if (response.data) {
+
+    let response = await decorateResponseApi(ApiAuth.login, dataForm);
+    if (response.status == 200) {
       TokenService.updateLocalAccessToken(response.data.accessToken);
+    } else {
+      response = {status: 404, data: null, message: 'Ошибка при входе'};
     }
     return response;
   }
