@@ -152,7 +152,7 @@ export default defineComponent( {
   data(){
     return{
       // NOTE: На время теста ===================
-      isDevelop: true,
+      isDevelop: false,
       todos: false,
       role: {"ROLE_ADMIN": 'admin', "ROLE_USER": 'user'},
       // NOTE: На время теста ===================
@@ -222,30 +222,30 @@ export default defineComponent( {
         const token = response.data.accessToken;
         let userData = extractJWT(token);
         console.log(userData);
-
-        this.$store.commit("auth/SET_TOKEN_USER", token);
-        // userData.role = "ROLE_ADMIN"
-        this.$store.commit("auth/SET_DATA_LOGIN", userData);
-        if(userData.role == "ROLE_USER"){
-          this.$router.push({name:"user"})
-          }
-        else if(userData.role== "ROLE_ADMIN"){
-            this.$router.push({name:"admin"})
-        }
-      }
-      else if(this.isDevelop){
-        const response = {status: 200, data: {
-          type: "Bearer",
-          accessToken: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiZXhwIjoxNjgyNjg0MTQ3LCJ1c2VySWQiOjIsInJvbGUiOiJST0xFX1VTRVIifQ.kiXWT2vKMUSmhFbhRMBFVZPMWyrfWTO90xrW5KsUFhqBJHi1VvDuno9QrCq6Mb_w7CGGp14KD6CNrDYCjS-Ufw",
-          refreshToken: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyIiwiZXhwIjoxNjg1Mjc1ODQ3fQ.zRlDaEuUz_CDp--ZpNKz93oeEzZXfBz28mlKGrMBk8D3AUUhWop3vuIej8KHSVzEquQBrMErmeGtEQ4Ira-S4Q"
-          }, message: ''};
-          let dataUser = extractJWT(response.data.accessToken);
+        let dataUser = extractJWT(response.data.accessToken);
           dataUser.role = "ROLE_ADMIN";
           this.$store.commit("auth/SET_DATA_LOGIN", dataUser);
           this.$store.commit('auth/SET_TOKEN_USER', response.data.accessToken);
           this.forms.runSucess = true;
           this.$router.push({name: this.role[dataUser.role]});
-      }else{
+        this.$store.commit("auth/SET_TOKEN_USER", token);
+        // userData.role = "ROLE_ADMIN"
+        this.$store.commit("auth/SET_DATA_LOGIN", userData);
+      }
+      // else if(this.isDevelop){
+      //   const response = {status: 200, data: {
+      //     type: "Bearer",
+      //     accessToken: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiZXhwIjoxNjgyNjg0MTQ3LCJ1c2VySWQiOjIsInJvbGUiOiJST0xFX1VTRVIifQ.kiXWT2vKMUSmhFbhRMBFVZPMWyrfWTO90xrW5KsUFhqBJHi1VvDuno9QrCq6Mb_w7CGGp14KD6CNrDYCjS-Ufw",
+      //     refreshToken: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyIiwiZXhwIjoxNjg1Mjc1ODQ3fQ.zRlDaEuUz_CDp--ZpNKz93oeEzZXfBz28mlKGrMBk8D3AUUhWop3vuIej8KHSVzEquQBrMErmeGtEQ4Ira-S4Q"
+      //     }, message: ''};
+      //     let dataUser = extractJWT(response.data.accessToken);
+      //     dataUser.role = "ROLE_ADMIN";
+      //     this.$store.commit("auth/SET_DATA_LOGIN", dataUser);
+      //     this.$store.commit('auth/SET_TOKEN_USER', response.data.accessToken);
+      //     this.forms.runSucess = true;
+      //     this.$router.push({name: this.role[dataUser.role]});
+      // }
+      else{
         this.$store.commit("notification/SET_ACTIVE_ERROR", response.message);
       }
       this.forms.logIn.active = false;
@@ -258,35 +258,34 @@ export default defineComponent( {
     async onClickApplyRegister(dataForm) {
       logR('warn', 'NAVBAR: onCLickApplyRegister');
       console.log(dataForm);
-      // TODO: исправить после внесения правок на бэке ========================================================
+      console.error("HERE TO FIX in MainLAyout: row 261")
+      // FIX: обновление токена ========================================================
       const response = await UserService.createUser({username:dataForm.username, password:dataForm.password})
       console.error("todo: userService.createUser", UserService)
-      // TODO: ================================================================================================
-//       const response = {status: 200, data: {
-//   type: "Bearer",
-//   accessToken: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiZXhwIjoxNjgyNjg0MTQ3LCJ1c2VySWQiOjIsInJvbGUiOiJST0xFX1VTRVIifQ.kiXWT2vKMUSmhFbhRMBFVZPMWyrfWTO90xrW5KsUFhqBJHi1VvDuno9QrCq6Mb_w7CGGp14KD6CNrDYCjS-Ufw",
-//   refreshToken: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyIiwiZXhwIjoxNjg1Mjc1ODQ3fQ.zRlDaEuUz_CDp--ZpNKz93oeEzZXfBz28mlKGrMBk8D3AUUhWop3vuIej8KHSVzEquQBrMErmeGtEQ4Ira-S4Q"
-// }, message: ''}
+      // FIX: ================================================================================================
+
       if(response.status == 200){
-        this.$store.commit('auth/SET_TOKEN_USER', response.data.accessToken)
-        this.forms.runSucess = true;
-        this.$router.push({name: "profile"});
-        this.forms.register.active = false;
-      }
-      else if(this.isDevelop){
-        const response = {status: 200, data: {
-          type: "Bearer",
-          accessToken: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiZXhwIjoxNjgyNjg0MTQ3LCJ1c2VySWQiOjIsInJvbGUiOiJST0xFX1VTRVIifQ.kiXWT2vKMUSmhFbhRMBFVZPMWyrfWTO90xrW5KsUFhqBJHi1VvDuno9QrCq6Mb_w7CGGp14KD6CNrDYCjS-Ufw",
-          refreshToken: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyIiwiZXhwIjoxNjg1Mjc1ODQ3fQ.zRlDaEuUz_CDp--ZpNKz93oeEzZXfBz28mlKGrMBk8D3AUUhWop3vuIej8KHSVzEquQBrMErmeGtEQ4Ira-S4Q"
-          }, message: ''};
-          let dataUser = extractJWT(response.data.accessToken);
-          dataUser.role = "ROLE_ADMIN";
-          this.$store.commit("auth/SET_DATA_LOGIN", dataUser);
-          this.$store.commit('auth/SET_TOKEN_USER', response.data.accessToken);
+        console.log("STATUS: 200\n",dataForm);
+        const loginResponse = await this.onClickApplyLogIn(dataForm);
+
+        let dataUser = extractJWT(loginResponse.data.accessToken);
           this.forms.runSucess = true;
           this.$router.push({name: this.role[dataUser.role]});
-          this.forms.register.active = false;
       }
+      // else if(this.isDevelop){
+      //   const response = {status: 200, data: {
+      //     type: "Bearer",
+      //     accessToken: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiZXhwIjoxNjgyNjg0MTQ3LCJ1c2VySWQiOjIsInJvbGUiOiJST0xFX1VTRVIifQ.kiXWT2vKMUSmhFbhRMBFVZPMWyrfWTO90xrW5KsUFhqBJHi1VvDuno9QrCq6Mb_w7CGGp14KD6CNrDYCjS-Ufw",
+      //     refreshToken: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyIiwiZXhwIjoxNjg1Mjc1ODQ3fQ.zRlDaEuUz_CDp--ZpNKz93oeEzZXfBz28mlKGrMBk8D3AUUhWop3vuIej8KHSVzEquQBrMErmeGtEQ4Ira-S4Q"
+      //     }, message: ''};
+      //     let dataUser = extractJWT(response.data.accessToken);
+      //     dataUser.role = "ROLE_ADMIN";
+      //     this.$store.commit("auth/SET_DATA_LOGIN", dataUser);
+      //     this.$store.commit('auth/SET_TOKEN_USER', response.data.accessToken);
+      //     this.forms.runSucess = true;
+      //     this.$router.push({name: this.role[dataUser.role]});
+      //     this.forms.register.active = false;
+      // }
       else{
         // this.alert.error.active = true;
         // this.alert.error.message = response.message;

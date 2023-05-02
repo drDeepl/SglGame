@@ -2,7 +2,7 @@ import {createApp} from 'vue';
 import App from './App.vue';
 import store from '@/store';
 import router from '@/router/index';
-import setupInterceptors from '@/services/setupInterceptors';
+// import setupInterceptors from '@/services/setupInterceptors';
 
 import {
   Dismiss28Regular,
@@ -36,7 +36,7 @@ import {
 import CodeBlock from '@/UI/CodeBlock.vue';
 const app = createApp(App);
 
-setupInterceptors(store);
+// setupInterceptors(store);
 
 app.component('n-dialog', NDialog);
 app.component('n-rate', NRate);
