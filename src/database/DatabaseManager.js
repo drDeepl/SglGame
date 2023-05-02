@@ -12,6 +12,8 @@ class DatabaseManager {
     const SQL = await initSqlJs({locateFile: () => sqlWasm});
     return new SQL.Database(dbChunks);
   }
+
+  
 }
 
 export default new DatabaseManager();

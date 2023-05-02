@@ -65,7 +65,20 @@
         <p>
           {{ history.description }}
         </p>
-
+        <n-alert
+          width="100%"
+          v-if="codemirror.error.active"
+          :title="codemirror.error.message"
+          closable
+          type="warning"
+          :on-close="
+            () => {
+              (codemirror.error.active = false),
+                (codemirror.error.message = '');
+            }
+          "
+        >
+        </n-alert>
         <n-code-block
           :onClickRunCodeFunc="onClickRunCode"
           :onClickClearCodeFunc="onClickClearCode"
@@ -73,6 +86,7 @@
         >
           <!-- <n-button @click="fakeData()">Случайные данные</n-button>  -->
         </n-code-block>
+
         <!-- <n-space justify="space-around"> -->
         <n-space justify="space-between">
           <n-input
@@ -92,7 +106,6 @@
           :pagination="codemirror.pagination"
         ></n-data-table>
       </div>
-      <!-- </n-space> -->
     </n-card>
   </n-modal>
   <n-modal
@@ -111,8 +124,9 @@
 import {mapGetters} from 'vuex';
 import DatabaseManager from '@/database/DatabaseManager';
 import ServiceDatabase from '@/services/service.database';
+// import ServiceDownloadFile from '@/services/download.service';
 
-import {logR, prepareDataTable} from '@/services/utils';
+import {logR, prepareDataTable, sqlQueryIsValidate} from '@/services/utils';
 import {defineComponent} from 'vue';
 
 // import CodeBlock from '@/UI/CodeBlock.vue';
@@ -148,6 +162,7 @@ export default defineComponent({
         pagination: {pageSize: 5},
         answer: '',
         isWork: false,
+        error: {active: false, message: ''},
       },
 
       tab: 0,
@@ -173,6 +188,7 @@ export default defineComponent({
   async created() {
     logR('warn', 'STORY VIEW: created');
     this.render.main = true;
+
     const user = this.userData;
     if (!user) {
       this.$router.push({name: 'home'});
@@ -227,23 +243,24 @@ export default defineComponent({
       this.history.active = true;
       console.log(history);
       try {
-        const urlToDb = await ServiceDatabase.getLinkToDatabase(history.title);
-        if (urlToDb.length <= 0) {
-          this.$store.commit(
-            'notification/SET_ACTIVE_ERROR',
-            'Ошибка при загрузке базы данных'
-          );
-          this.history.active = false;
-          this.history.loadData = false;
-          return;
-        }
+        // const urlToDb = await ServiceDatabase.getLinkToDatabase(history.title);
+        // if (urlToDb.length <= 0) {
+        //   this.$store.commit(
+        //     'notification/SET_ACTIVE_ERROR',
+        //     'Ошибка при загрузке базы данных'
+        //   );
+        //   this.history.active = false;
+        //   this.history.loadData = false;
+        //   return;
+        // }
+
+        const urlToDb = 'http://localhost:8080/api/fileDB/get';
         const response2DownloadDb = await ServiceDatabase.downloadFile(
           urlToDb
         ).catch((error) => {
           console.log(error + '\n');
           console.log(Object.keys(error));
         });
-        // const body = response2DownloadDb.body.getReader();
         console.log('Downloaded BD\n', response2DownloadDb);
         const chunkDb = await this.changeProgressDownloadFile(
           response2DownloadDb
@@ -272,23 +289,32 @@ export default defineComponent({
       this.codemirror.columns = [];
       this.codemirror.isWork = false;
     },
-    async onClickRunCode(code) {
+    async onClickRunCode(query) {
       logR('warn', 'NAVBAR: onClickRunCode');
       this.render.history.runCode = true;
       try {
-        const data = this.history.db.exec(code);
-        console.log(data);
-        // TODO: parse response ============================================
-        const columns = data[0].columns;
-        const values = data[0].values;
-        const result = prepareDataTable(columns, values);
-        this.codemirror.columns = result.tableHeader;
-        this.codemirror.data = result.array_vals;
-        this.codemirror.isWork = true;
-        this.render.history.runCode = false;
+        const responseQueryValidate = sqlQueryIsValidate(query);
+        console.log('RESPONSE VALIDATE QUERY\n', responseQueryValidate);
+        if (responseQueryValidate.isValid) {
+          const data = this.history.db.exec(query);
+
+          console.log(data);
+          // TODO: parse response ============================================
+          const columns = data[0].columns;
+          const values = data[0].values;
+          const result = prepareDataTable(columns, values);
+          this.codemirror.columns = result.tableHeader;
+          this.codemirror.data = result.array_vals;
+          this.codemirror.isWork = true;
+          this.render.history.runCode = false;
+        } else {
+          this.codemirror.error.active = true;
+          this.codemirror.error.message = responseQueryValidate.message;
+        }
       } catch (e) {
-        this.alert.error.active = true;
-        this.alert.error.message = 'Что-то пошло не так...';
+        console.log(e);
+        // this.alert.error.active = true;
+        // this.alert.error.message = 'Что-то пошло не так...';
       } finally {
         this.render.history.runCode = false;
       }

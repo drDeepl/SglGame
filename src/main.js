@@ -32,12 +32,13 @@ import {
   NPopover,
   NRate,
   NDialog,
+  NAlert,
 } from 'naive-ui';
 import CodeBlock from '@/UI/CodeBlock.vue';
 const app = createApp(App);
 
 // setupInterceptors(store);
-
+app.component('n-alert', NAlert);
 app.component('n-dialog', NDialog);
 app.component('n-rate', NRate);
 app.component('n-popover', NPopover);

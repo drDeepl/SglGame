@@ -1,6 +1,7 @@
 // import apiClient from '@/api/main';
 import ApiFileStorage from '@/api/api.fileStorage';
 import {decorateResponseApi, logR} from './utils';
+import TokenService from './token.service';
 
 class ServiceDatabase {
   async getLinkToDatabase(databaseName) {
@@ -16,7 +17,12 @@ class ServiceDatabase {
   async downloadFile(url) {
     logR('warn', 'ServiceDatabse: downloadFile');
     logR('log', 'URL\n' + url);
-    const response = await fetch(url).catch((error) => console.log(error));
+    const token = TokenService.getToken();
+    console.log(token);
+    const config = {headers: {Authorization: 'Bearer ' + token.accessToken}};
+    const response = await fetch(url, config).catch((error) =>
+      console.error(error)
+    );
     return response;
   }
 }

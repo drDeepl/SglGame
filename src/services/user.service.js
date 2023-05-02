@@ -13,13 +13,6 @@ class UserService {
     if (responseCreateUser.status == 200) {
       response = responseCreateUser;
     }
-    // try {
-    //   response = await decorateResponseApi(ApiUser.createUser, dataForm);
-    // } catch (e) {
-    //   console.log(e);
-    // } finally {
-    //   console.log(response);
-    // }
     return response;
   }
 

@@ -17,14 +17,12 @@ export const auth = {
       if (response.status == 200) {
         const responseData = response.data;
         logR('log', 'MODULE.AUTH: responseData\n', responseData);
+        context.commit('SET_TOKEN_USER', responseData);
         context.commit('SET_DATA_LOGIN', responseData);
         console.log(responseData);
         const userData = extractJWT(responseData.accessToken);
-        // FIX: на время разработки
-        console.error('MODULE.AUTH: row 24 remove change ROLE');
-        userData.role = 'ROLE_ADMIN';
-        // FIX: ========================
-        logR('log', 'MODULE.AUTH: toke\n', userData);
+
+        logR('log', 'MODULE.AUTH: token\n', userData);
         context.commit('SET_DATA_LOGIN', userData);
       }
 
@@ -55,6 +53,7 @@ export const auth = {
     },
     SET_TOKEN_USER: function (state, tokenUser) {
       state.tokenUser = tokenUser;
+      TokenService.setToken(tokenUser);
     },
     REMOVE_USER: function (state) {
       TokenService.removeUser();

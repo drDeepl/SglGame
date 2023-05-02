@@ -1,3 +1,4 @@
+import TokenService from './token.service';
 import {isDevelop} from '@/_config';
 export function logR(type, msg) {
   // INFO: зато забавно
@@ -14,7 +15,10 @@ export function logR(type, msg) {
 
 export const decorateResponseApi = async function (func, context) {
   let response = {status: 404, data: null, message: ''};
-  const responseWrap = await func(context).catch((resp) => {
+  const token = TokenService.getLocalAccessToken();
+  console.log('token\n', token);
+  const config = {headers: {Authorization: token}};
+  const responseWrap = await func(context, config).catch((resp) => {
     console.error('DECORATE RESPONSE API\n', resp);
     return {status: 404};
   });
@@ -31,18 +35,23 @@ export const extractJWT = function (token) {
 };
 
 export const sqlQueryIsValidate = function (query) {
-  const lowerCaseQuery = query.toLowerCase();
+  let response = {isValid: false, message: []};
+  const lowerCaseQuery = query.toLowerCase().trim();
   const arrayQuerys = lowerCaseQuery.split(';');
-  if (arrayQuerys.length > 1) {
-    return false;
-  } else if (!/^(select)/.test(lowerCaseQuery)) {
-    return false;
-  } else if (/\s\b[join]\b\s/.test(lowerCaseQuery)) {
-    return false;
-  } else if (/\bfrom\s+(\w+\.)?\w+\s+(,\s*(\w+\.)?\w+)*/.test(lowerCaseQuery)) {
-    return false;
+  const splitedQueryByFrom = lowerCaseQuery.split('from');
+  console.log(splitedQueryByFrom);
+  if (arrayQuerys.length != 1 && arrayQuerys[1].length > 0) {
+    console.log(arrayQuerys);
+    response.message = 'выполнено два запроса одновременно';
+  } else if (splitedQueryByFrom.at(0).startsWith('select')) {
+    response.message = 'Нет ключевого слова SELECT';
+  } else if (/(,)/.test(splitedQueryByFrom).at(1)) {
+    response.message = 'выполено объединеие таблиц';
+  } else {
+    response.isValid = true;
   }
-  return true;
+
+  return response;
 };
 
 export const prepareDataTable = function (columns, values) {
