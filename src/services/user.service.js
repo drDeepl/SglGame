@@ -5,18 +5,21 @@ import {logR} from './utils';
 class UserService {
   async createUser(dataForm) {
     logR('warn', 'service.user: creating user');
-    let response = {
-      status: 400,
-      data: null,
-      message: 'Произошла ошибка во время регистрации',
-    };
-    try {
-      response = await decorateResponseApi(ApiUser.createUser, dataForm);
-    } catch (e) {
-      console.log(e);
-    } finally {
-      console.log(response);
+    let response = {status: 404, message: 'Такой пользователь уже существует'};
+    const responseCreateUser = await decorateResponseApi(
+      ApiUser.createUser,
+      dataForm
+    );
+    if (responseCreateUser.status == 200) {
+      response = responseCreateUser;
     }
+    // try {
+    //   response = await decorateResponseApi(ApiUser.createUser, dataForm);
+    // } catch (e) {
+    //   console.log(e);
+    // } finally {
+    //   console.log(response);
+    // }
     return response;
   }
 

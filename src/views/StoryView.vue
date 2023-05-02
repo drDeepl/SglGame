@@ -108,6 +108,7 @@
 </template>
 
 <script>
+import {mapGetters} from 'vuex';
 import DatabaseManager from '@/database/DatabaseManager';
 import ServiceDatabase from '@/services/service.database';
 
@@ -122,6 +123,10 @@ export default defineComponent({
   coponents: {},
   data() {
     return {
+      render: {
+        main: false,
+        history: {runCode: false},
+      },
       changeColor: changeColor,
       themeVars: useThemeVars(),
       alert: {
@@ -144,10 +149,7 @@ export default defineComponent({
         answer: '',
         isWork: false,
       },
-      render: {
-        main: false,
-        history: {runCode: false},
-      },
+
       tab: 0,
       arrays: {
         history: [
@@ -168,6 +170,23 @@ export default defineComponent({
       },
     };
   },
+  async created() {
+    logR('warn', 'STORY VIEW: created');
+    this.render.main = true;
+    const user = this.userData;
+    if (!user) {
+      this.$router.push({name: 'home'});
+    }
+    this.render.main = false;
+  },
+  computed: {
+    ...mapGetters({
+      getUserToken: 'auth/GET_TOKEN_USER',
+      userData: 'auth/GET_DATA_LOGIN',
+      errorAlertActive: 'notification/GET_STATE_ERROR',
+    }),
+  },
+
   methods: {
     createErrorAlert(message) {
       this.alert.error.active = true;

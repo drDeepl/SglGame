@@ -11,6 +11,10 @@
   border-top: $border-top-width solid $color-green !important;
 }
 
+.border-left-red {
+  border-left: $border-top-width solid $color-red !important;
+}
+
 .border-top-yellow {
   border-radius: $border-radius !important;
   border-top: $border-top-width solid $color-yellow !important;

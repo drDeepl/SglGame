@@ -33,7 +33,14 @@
             :label="itemModel.labels[field]"
             :path="field"
           >
-            <n-input v-model:value="formValue[field]" placeholder="" />
+            <n-input
+              v-if="field == 'password'"
+              type="password"
+              show-password-on="click"
+              v-model:value="formValue[field]"
+              placeholder=""
+            />
+            <n-input v-else v-model:value="formValue[field]" placeholder="" />
           </n-form-item>
         </div>
         <n-space vertical>
@@ -52,15 +59,13 @@
 
 <script>
 import {defineComponent, ref, reactive} from 'vue'; // ref
-import {NModal, NForm, NFormItem, NInput, NCard} from 'naive-ui';
+import {NForm, NFormItem, NInput} from 'naive-ui';
 import {logR} from '@/services/utils';
 export default defineComponent({
   components: {
-    'n-modal': NModal,
     'n-input': NInput,
     'n-form-item': NFormItem,
     'n-form': NForm,
-    'n-card': NCard,
   },
   props: {
     isActive: {type: Boolean, default: false},
@@ -96,7 +101,8 @@ export default defineComponent({
   setup(props) {
     const modalActive = ref(props.isActive);
     const formRef = ref(null);
-    const formValue = ref(props.itemModel.data);
+    const values = ref(props.itemModel.data);
+    let formValue = reactive({values});
     const running = ref(false);
     const status = reactive({running});
     const onClickSubmit = function () {
@@ -110,8 +116,9 @@ export default defineComponent({
       const isValid = await formRef.value
         ?.validate()
         .catch((resp) => resp.length > 0);
+
       if (!isValid) {
-        await props.applyFunction(props.itemModel.data);
+        await props.applyFunction(formValue);
       }
 
       status.running = false;

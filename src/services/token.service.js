@@ -1,3 +1,4 @@
+import {logR} from './utils';
 class TokenService {
   getLocalRefreshToken() {
     const user = JSON.parse(localStorage.getItem('user'));
@@ -11,6 +12,7 @@ class TokenService {
   }
 
   updateLocalAccessToken(token) {
+    logR('warn', 'TokenService: updateLocalAccessToken');
     let user = JSON.parse(localStorage.getItem('user'));
     user.access = token;
     localStorage.setItem('user', JSON.stringify(user));
@@ -21,7 +23,8 @@ class TokenService {
   }
 
   setUser(user) {
-    console.log('TOKEN.SERVICE: setUser');
+    logR('warn', 'TokenService: setUser');
+
     console.log(JSON.stringify(user));
     localStorage.setItem('user', JSON.stringify(user));
   }

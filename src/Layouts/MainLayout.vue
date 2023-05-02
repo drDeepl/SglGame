@@ -47,7 +47,7 @@
               round
               :style="{backgroundColor: '#ee4540'}"
             >
-              <span>{{ userData.sub.slice(0, 2) }}</span>
+              <span>{{ userData }}</span>
             </n-avatar>
           </template>
         </n-popconfirm>
@@ -61,20 +61,29 @@
     >
       <div class="preview-description">
         <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-          minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-          aliquip ex ea commodo consequat. Duis aute irure dolor in
-          reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-          pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-          culpa qui officia deserunt mollit anim id est laborum.
+          Хотите проверить свой уровень знаний SQL? Тогда Вы точно по адресу!
+          Вам будут предложены различные сценарии, которые задуманы, как
+          самостоятельный урок по изучению концепций и команд SQL. Такая
+          увлекательная игра подойдёт как для опытных пользователей SQL, так и
+          для новичков.
         </p>
-        <n-button
-          color="#ee4540"
-          class="preview-btn"
-          @click="$router.push('/stories')"
-          >Играть</n-button
-        >
+        <n-popover trigger="hover" class="border-left-red">
+          <template #trigger>
+            <n-button
+              color="#ee4540"
+              class="preview-btn"
+              @click="$router.push('/stories')"
+              >Играть</n-button
+            >
+          </template>
+          <span class="primary-font-color">
+            {{
+              userData
+                ? 'Вперёд!'
+                : 'Только авторизованные пользователи могут играть'
+            }}</span
+          >
+        </n-popover>
       </div>
       <div class="main-preview"></div>
     </div>
@@ -134,8 +143,6 @@ import {logR} from '@/services/utils';
 // import FakeData from '@/services/service.fakedata';
 
 import UserService from "@/services/user.service";
-import {extractJWT} from "@/services/utils";
-
 
 
 import UserLogin from "@/models/model.user.login";
@@ -219,37 +226,25 @@ export default defineComponent( {
       const response = await this.$store.dispatch("auth/login", dataForm);
       console.log(response)
       if(response.status==200){
-        const token = response.data.accessToken;
-        let userData = extractJWT(token);
-        console.log(userData);
-        let dataUser = extractJWT(response.data.accessToken);
-          dataUser.role = "ROLE_ADMIN";
-          this.$store.commit("auth/SET_DATA_LOGIN", dataUser);
-          this.$store.commit('auth/SET_TOKEN_USER', response.data.accessToken);
-          this.forms.runSucess = true;
-          this.$router.push({name: this.role[dataUser.role]});
-        this.$store.commit("auth/SET_TOKEN_USER", token);
-        // userData.role = "ROLE_ADMIN"
-        this.$store.commit("auth/SET_DATA_LOGIN", userData);
+        const exp =this.userData.exp
+        console.log("USER EXP\n", exp)
+        console.log("MAINLAYOUT life time token", Date.now())
+        // TODO: таймер на обновление токена
+        // setInterval(() => {
+
+        // }, this.userData.exp);
+        // TODO: таймер на обновление токена
+
+        this.forms.runSucess = true;
+
+
       }
-      // else if(this.isDevelop){
-      //   const response = {status: 200, data: {
-      //     type: "Bearer",
-      //     accessToken: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiZXhwIjoxNjgyNjg0MTQ3LCJ1c2VySWQiOjIsInJvbGUiOiJST0xFX1VTRVIifQ.kiXWT2vKMUSmhFbhRMBFVZPMWyrfWTO90xrW5KsUFhqBJHi1VvDuno9QrCq6Mb_w7CGGp14KD6CNrDYCjS-Ufw",
-      //     refreshToken: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyIiwiZXhwIjoxNjg1Mjc1ODQ3fQ.zRlDaEuUz_CDp--ZpNKz93oeEzZXfBz28mlKGrMBk8D3AUUhWop3vuIej8KHSVzEquQBrMErmeGtEQ4Ira-S4Q"
-      //     }, message: ''};
-      //     let dataUser = extractJWT(response.data.accessToken);
-      //     dataUser.role = "ROLE_ADMIN";
-      //     this.$store.commit("auth/SET_DATA_LOGIN", dataUser);
-      //     this.$store.commit('auth/SET_TOKEN_USER', response.data.accessToken);
-      //     this.forms.runSucess = true;
-      //     this.$router.push({name: this.role[dataUser.role]});
-      // }
+
       else{
         this.$store.commit("notification/SET_ACTIVE_ERROR", response.message);
       }
       this.forms.logIn.active = false;
-
+      return response;
     },
     onClickRegister() {
       logR('warn', 'onClickRegister');
@@ -261,37 +256,24 @@ export default defineComponent( {
       console.error("HERE TO FIX in MainLAyout: row 261")
       // FIX: обновление токена ========================================================
       const response = await UserService.createUser({username:dataForm.username, password:dataForm.password})
-      console.error("todo: userService.createUser", UserService)
       // FIX: ================================================================================================
 
       if(response.status == 200){
         console.log("STATUS: 200\n",dataForm);
-        const loginResponse = await this.onClickApplyLogIn(dataForm);
+        const responseLogIn = await this.$store.dispatch('auth/login',dataForm);
+        logR('log', "MAINLAYOUT response login\n", responseLogIn)
 
-        let dataUser = extractJWT(loginResponse.data.accessToken);
-          this.forms.runSucess = true;
-          this.$router.push({name: this.role[dataUser.role]});
+        if(responseLogIn.status == 200){
+          this.forms.runSuccess = true;
+        this.$router.push({name: this.role[this.userData.role]});
+
+        }
       }
-      // else if(this.isDevelop){
-      //   const response = {status: 200, data: {
-      //     type: "Bearer",
-      //     accessToken: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ1c2VyIiwiZXhwIjoxNjgyNjg0MTQ3LCJ1c2VySWQiOjIsInJvbGUiOiJST0xFX1VTRVIifQ.kiXWT2vKMUSmhFbhRMBFVZPMWyrfWTO90xrW5KsUFhqBJHi1VvDuno9QrCq6Mb_w7CGGp14KD6CNrDYCjS-Ufw",
-      //     refreshToken: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyIiwiZXhwIjoxNjg1Mjc1ODQ3fQ.zRlDaEuUz_CDp--ZpNKz93oeEzZXfBz28mlKGrMBk8D3AUUhWop3vuIej8KHSVzEquQBrMErmeGtEQ4Ira-S4Q"
-      //     }, message: ''};
-      //     let dataUser = extractJWT(response.data.accessToken);
-      //     dataUser.role = "ROLE_ADMIN";
-      //     this.$store.commit("auth/SET_DATA_LOGIN", dataUser);
-      //     this.$store.commit('auth/SET_TOKEN_USER', response.data.accessToken);
-      //     this.forms.runSucess = true;
-      //     this.$router.push({name: this.role[dataUser.role]});
-      //     this.forms.register.active = false;
-      // }
       else{
-        // this.alert.error.active = true;
-        // this.alert.error.message = response.message;
         this.$store.commit("notification/SET_ACTIVE_ERROR", response.message);
         console.log(this.alert.error)
       }
+      this.forms.register.active = false;
 
     },
     onClickCancelRegister() {
@@ -304,7 +286,7 @@ export default defineComponent( {
       this.render.main = true;
       this.$store.commit("auth/REMOVE_USER");
       this.$router.push({name: "home"});
-      this.$router.removeRoute();
+
       this.render.main = false;
     }
 

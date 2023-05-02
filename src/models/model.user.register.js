@@ -19,8 +19,8 @@ class UserRegister {
         validator(rule, value) {
           if (!value) {
             return new Error('Необходимое поле');
-          } else if (value.length < 6) {
-            return new Error('Пароль должен содержать больше 6-ти символов');
+          } else if (value.length <= 2) {
+            return new Error('Пароль должен содержать больше 2-ти символов');
           }
           return true;
         },

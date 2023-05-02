@@ -3,6 +3,7 @@ export const notification = {
   state() {
     return {
       error: {active: false, message: ''},
+      info: {active: false, message: ''},
     };
   },
 

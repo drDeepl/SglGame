@@ -1,6 +1,6 @@
 import AuthService from '@/services/auth.service';
 import TokenService from '@/services/token.service';
-import {extractJWT} from '@/services/utils';
+import {logR, extractJWT} from '@/services/utils';
 export const auth = {
   namespaced: true,
   state() {
@@ -12,16 +12,25 @@ export const auth = {
 
   actions: {
     async login(context, dataForm) {
+      logR('warn', 'MODULE.AUTH: login');
       const response = await AuthService.login(dataForm);
       if (response.status == 200) {
         const responseData = response.data;
+        logR('log', 'MODULE.AUTH: responseData\n', responseData);
         context.commit('SET_DATA_LOGIN', responseData);
         console.log(responseData);
-        const token = extractJWT(responseData.accessToken);
-        context.commit('SET_TOKEN_USER', token);
-        response.data = token;
+        const userData = extractJWT(responseData.accessToken);
+        // FIX: на время разработки
+        console.error('MODULE.AUTH: row 24 remove change ROLE');
+        userData.role = 'ROLE_ADMIN';
+        // FIX: ========================
+        logR('log', 'MODULE.AUTH: toke\n', userData);
+        context.commit('SET_DATA_LOGIN', userData);
       }
 
+      if (response.status == 404) {
+        response.message = 'Такого пользователя не существует';
+      }
       return response;
     },
   },

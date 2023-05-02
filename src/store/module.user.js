@@ -15,7 +15,7 @@ export const user = {
           },
           {
             id: 1,
-            title: 'Управление базой данных',
+            title: 'Редактирование таблиц',
             lock: false,
             url: '/database',
           },

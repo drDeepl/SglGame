@@ -3,11 +3,11 @@ import {decorateResponseApi, logR} from './utils';
 import TokenService from './token.service';
 class AuthService {
   async login(dataForm) {
-    logR('AuthService: Login');
-
+    logR('warn', 'AuthService: Login');
     let response = await decorateResponseApi(ApiAuth.login, dataForm);
     if (response.status == 200) {
-      TokenService.updateLocalAccessToken(response.data.accessToken);
+      console.log('AUTH.SERVICE.login: response', response);
+      TokenService.setUser(response.data);
     } else {
       response = {status: 404, data: null, message: 'Ошибка при входе'};
     }
