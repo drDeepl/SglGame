@@ -72,3 +72,14 @@ export const prepareDataTable = function (columns, values) {
   const result = {tableHeader: tableHeader, array_vals: array_vals};
   return result;
 };
+
+export const getBinaryFromFile = function (file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.addEventListener('load', () => resolve(reader.result));
+    reader.addEventListener('error', (err) => reject(err));
+
+    reader.readAsBinaryString(file);
+  });
+};

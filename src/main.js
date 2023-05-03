@@ -33,11 +33,23 @@ import {
   NRate,
   NDialog,
   NAlert,
+  NDescriptions,
+  NDescriptionsItem,
+  NCarousel,
+  NCarouselItem,
+  NImage,
+  NUpload,
 } from 'naive-ui';
 import CodeBlock from '@/UI/CodeBlock.vue';
 const app = createApp(App);
 
 // setupInterceptors(store);
+app.component('n-upload', NUpload);
+app.component('n-image', NImage);
+app.component('n-carousel', NCarousel);
+app.component('n-carousel-item', NCarouselItem);
+app.component('n-descriptions-item', NDescriptionsItem);
+app.component('n-descriptions', NDescriptions);
 app.component('n-alert', NAlert);
 app.component('n-dialog', NDialog);
 app.component('n-rate', NRate);
@@ -67,5 +79,3 @@ app.component('n-button', NButton);
 app.use(router);
 app.use(store);
 app.mount('#app');
-
-// app.use(createVuestic({config: config}));

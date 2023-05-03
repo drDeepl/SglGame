@@ -6,7 +6,7 @@ export const auth = {
   state() {
     return {
       tokenUser: null,
-      dataLogin: null,
+      tokenData: null,
     };
   },
 
@@ -31,10 +31,20 @@ export const auth = {
       }
       return response;
     },
+
+    async updateAccessToken(context, refreshToken) {
+      logR('warn', 'Module.Auth: updating access token');
+      const response = await AuthService.updateAccessToken(refreshToken);
+      if (response.status == 200) {
+        context.commit('SET_ACCESS_TOKEN');
+      }
+    },
   },
   getters: {
-    GET_TOKEN_USER: (state) => {
-      return state.currentUser;
+    GET_ACCESS_TOKEN: (state) => {
+      return state.tokenUser
+        ? state.tokenUser.access
+        : TokenService.getLocalAccessToken();
     },
     GET_DATA_LOGIN: (state) => {
       return state.dataLogin ? state.dataLogin : TokenService.getUser();
@@ -48,17 +58,20 @@ export const auth = {
   },
   mutations: {
     SET_DATA_LOGIN: function (state, dataLogin) {
-      state.dataLogin = dataLogin;
+      state.tokenData = dataLogin;
       TokenService.setUser(dataLogin);
     },
     SET_TOKEN_USER: function (state, tokenUser) {
       state.tokenUser = tokenUser;
       TokenService.setToken(tokenUser);
     },
+    SET_ACCESS_TOKEN: function (state, accessToken) {
+      state.tokenUser.accessToken = accessToken;
+    },
     REMOVE_USER: function (state) {
-      TokenService.removeUser();
       state.tokenUser = null;
-      state.dataLogin = null;
+      state.tokenData = null;
+      TokenService.removeUser();
     },
   },
 };

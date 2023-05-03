@@ -7,15 +7,16 @@ class TokenService {
 
   getLocalAccessToken() {
     console.warn('TOKEN.SERVICE: getLocalAccessToken');
-    const user = JSON.parse(localStorage.getItem('user'));
-    return user ? user.accessToken : null;
+    const token = JSON.parse(localStorage.getItem('token'));
+    return token ? token.accessToken : null;
   }
 
-  updateLocalAccessToken(token) {
+  updateLocalAccessToken(accessTtoken) {
     logR('warn', 'TokenService: updateLocalAccessToken');
-    let user = JSON.parse(localStorage.getItem('user'));
-    user.accessToken = token;
-    localStorage.setItem('user', JSON.stringify(user));
+    let token = JSON.parse(localStorage.getItem('token'));
+    console.log(token);
+    token.accessToken = accessTtoken;
+    localStorage.setItem('token', JSON.stringify(token));
   }
 
   getUser() {

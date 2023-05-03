@@ -47,7 +47,7 @@
               round
               :style="{backgroundColor: '#ee4540'}"
             >
-              <span>{{ userData }}</span>
+              <span>{{ userData ? userData.sub.slice(0, 2) : '' }}</span>
             </n-avatar>
           </template>
         </n-popconfirm>
@@ -72,17 +72,19 @@
             <n-button
               color="#ee4540"
               class="preview-btn"
-              @click="$router.push('/stories')"
+              @click="$router.push({name: 'stories'})"
               >Играть</n-button
             >
           </template>
-          <span class="primary-font-color">
-            {{
-              userData
-                ? 'Вперёд!'
-                : 'Только авторизованные пользователи могут играть'
-            }}</span
-          >
+          <span v-if="userData" class="primary-font-color"> Вперёд! </span>
+          <n-space v-else vertical>
+            <span class="primary-font-color"
+              >Только авторизованные пользователи могут играть</span
+            >
+            <n-button ghost round type="success" @click="onClickLogIn"
+              >Войти</n-button
+            >
+          </n-space>
         </n-popover>
       </div>
       <div class="main-preview"></div>
@@ -140,7 +142,6 @@ import {NAvatar} from 'naive-ui'
 import NavbarVertical from "@/components/NavbarVertical.vue"
 
 import {logR} from '@/services/utils';
-// import FakeData from '@/services/service.fakedata';
 
 import UserService from "@/services/user.service";
 
@@ -159,6 +160,7 @@ export default defineComponent( {
   data(){
     return{
       // NOTE: На время теста ===================
+      timerForUpdateAccessToken: null,
       isDevelop: false,
       todos: false,
       role: {"ROLE_ADMIN": 'admin', "ROLE_USER": 'user'},
@@ -191,12 +193,27 @@ export default defineComponent( {
   },
   computed: {
     ...mapGetters({
-      getUserToken: 'auth/GET_TOKEN_USER',
-      userData: 'auth/GET_DATA_LOGIN',
+
       errorAlertActive: 'notification/GET_STATE_ERROR'
     }),
+    accessToken(){
+      return this.$store.state.auth.tokenUser ? this.$store.state.auth.tokenUser.accessToken : null
+    },
+    userData(){
+      return this.$store.state.auth.tokenData ? this.$store.state.auth.tokenData : null
+    },
+
   },
     methods: {
+      onClickToPlay(userData){
+        logR("warn", "MainLayout: onClickToPlay");
+        if(userData){
+          this.$router.push({name: "stories"})
+        }
+        this.onClickLogIn();
+
+
+      },
       onClickCancelErrorAlert() {
       this.alert.error.active = false;
       this.alert.error.message = '';
@@ -226,13 +243,16 @@ export default defineComponent( {
       const response = await this.$store.dispatch("auth/login", dataForm);
       console.log(response)
       if(response.status==200){
-        const exp =this.userData.exp
+        const exp = this.userData.exp * 1000 // to milliseconds
+        const differenceBetweenTimestamp = exp - Date.now() - 10000;
+        const intervalForUpdateToken =  Math.abs(differenceBetweenTimestamp);
         console.log("USER EXP\n", exp)
-        console.log("MAINLAYOUT life time token", Date.now())
+        console.error(`AccessToken\n${this.accessToken}\n intervalForUpdateToken = ${intervalForUpdateToken}`)
         // TODO: таймер на обновление токена
-        // setInterval(() => {
+        this.timerForUpdateAccessToken = setInterval(() => {
+          this.$store.dispatch('auth/updateAccessToken')
 
-        // }, this.userData.exp);
+        }, intervalForUpdateToken);
         // TODO: таймер на обновление токена
 
         this.forms.runSucess = true;
@@ -286,7 +306,7 @@ export default defineComponent( {
       this.render.main = true;
       this.$store.commit("auth/REMOVE_USER");
       this.$router.push({name: "home"});
-
+      clearInterval(this.timerForUpdateAccessToken)
       this.render.main = false;
     }
 

@@ -3,7 +3,7 @@
     <n-spin size="large"></n-spin
   ></n-modal>
   <div v-else class="page-content">
-    <n-layout has-sider>
+    <n-layout has-sider v-if="userData">
       <n-layout-sider
         :style="sidebar.active ? 'min-width: 25em' : 'min-width: 10em'"
       >
@@ -19,7 +19,9 @@
                 <span>{{ userData.sub.slice(0, 2) }}</span>
               </n-avatar>
               <n-space vertical>
-                <span class="profile_username">{{ userData.sub }}</span>
+                <span class="profile_username">{{
+                  userData ? userData.sub : ''
+                }}</span>
                 <span class="profile_role">{{
                   userData.role.split('_')[1].toLowerCase()
                 }}</span>
@@ -67,6 +69,18 @@
         :applyFunction="onClickApplyCreateStory"
         :cancelFunction="onClickCancelCreateStory"
       >
+        <n-upload
+          v-model:file-list="arrays.fileList"
+          @preview="onUploadFile"
+          :default-upload="true"
+          :file-list="arrays.fileList"
+          list-type="image-card"
+          :max="1"
+          :data="dataImage"
+        >
+          Загрузить картинку
+        </n-upload>
+        {{ arrays.fileList }}
       </c-form>
     </n-layout>
   </div>
@@ -76,7 +90,7 @@
 import {defineComponent} from 'vue';
 import {mapGetters} from 'vuex';
 import {NAvatar} from 'naive-ui';
-import {logR} from '@/services/utils';
+import {logR, getBinaryFromFile} from '@/services/utils';
 import CreateStory from '@/models/model.create.story';
 
 export default defineComponent({
@@ -86,7 +100,9 @@ export default defineComponent({
       sidebar: {active: false, rows: []},
       render: {main: false},
       forms: {createStory: {active: false, model: CreateStory}},
+      dataImage: {},
       arrays: {
+        fileList: [],
         stories: [
           {
             id: 0,
@@ -105,8 +121,12 @@ export default defineComponent({
   computed: {
     ...mapGetters({
       getUserToken: 'auth/GET_TOKEN_USER',
-      userData: 'auth/GET_DATA_LOGIN',
     }),
+    userData() {
+      return this.$store.state.auth.tokenData
+        ? this.$store.state.auth.tokenData
+        : null;
+    },
   },
   async created() {
     // TODO: Подгрузка историй с бека
@@ -122,6 +142,15 @@ export default defineComponent({
   },
 
   methods: {
+    async onUploadFile(data) {
+      logR('warn', 'onUploadFile');
+      console.log(data);
+      console.log(this.dataImage);
+      console.log(this.fileList);
+      const file = data.file;
+      const binary = await getBinaryFromFile(file);
+      console.log(binary);
+    },
     onClickCreateStory() {
       logR('ADMIN PROFILE:onCLickCreateStory');
       this.forms.createStory.active = true;
@@ -138,7 +167,13 @@ export default defineComponent({
     },
     async onClickApplyCreateStory(dataForm) {
       logR('warn', 'ADMIN PROFILE:onClickApplyCreateStory');
-      console.log(dataForm);
+      if (this.arrays.fileList.length > 0) {
+        let file = this.arrays.fileList[0].file;
+        let binary = await getBinaryFromFile(file);
+        console.log(binary);
+        // TODO: создать запрос на загрузку изображения
+      }
+
       const response = await this.$store.dispatch(
         'story/createStory',
         dataForm

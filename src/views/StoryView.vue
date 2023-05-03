@@ -1,29 +1,41 @@
 <template>
-  <div class="choice-history mb-5">
-    <div
-      class="card-history-main-layer"
-      v-for="history in arrays.history"
-      :key="history"
-      @click="onClickHistory(history)"
-    >
-      <n-popover trigger="hover">
-        <template #trigger>
-          <div>
-            <div class="card-title-history">
-              <span> history {{ history.title.replace('_', ' ') }} </span>
+  <div class="container-choice-history">
+    <n-carousel centered-slides show-arrow :loop="false" draggable>
+      <n-carousel-item class="img-carousel-item">
+        <n-image
+          class="carousel-img"
+          preview-disabled
+          lazy
+          v-for="history in arrays.history"
+          :key="history.id"
+          :src="require('@/assets/img/history_' + history.title + '.jpg')"
+        >
+          <n-upload></n-upload>
+        </n-image>
+      </n-carousel-item>
+    </n-carousel>
+    <!-- <n-carousel show-arrow>
+      <div
+        class="card-history-main-layer"
+        v-for="history in arrays.history"
+        :key="history"
+        @click="onClickHistory(history)"
+      >
+        <n-popover trigger="hover">
+          <template #trigger>
+            <div>
+              <div class="card-title-history">
+                <span> history {{ history.title.replace('_', ' ') }} </span>
+              </div>
+              <img
+                class="card-history-img"
+                :src="require('@/assets/img/history_' + history.title + '.jpg')"
+              />
             </div>
-            <img
-              class="card-history-img"
-              :src="require('@/assets/img/history_' + history.title + '.jpg')"
-            />
-          </div>
-        </template>
-        <n-rate readonly :default-value="history.difficulty"></n-rate
-      ></n-popover>
-    </div>
-    <div class="history-content__wrapper">
-      <!-- // TODO: Добавить в отдельный компонент -->
-    </div>
+          </template>
+          <n-rate readonly :default-value="history.difficulty"></n-rate
+        ></n-popover>
+      </div> -->
   </div>
 
   <n-modal
@@ -62,9 +74,12 @@
         <n-spin v-if="history.loadProgress == 100 && history.loadData"></n-spin>
       </n-space>
       <div v-else class="history-card-content">
-        <p>
-          {{ history.description }}
-        </p>
+        <n-descriptions>
+          <n-descriptions-item label-align="center">
+            {{ history.description }}
+          </n-descriptions-item>
+        </n-descriptions>
+        <div class="history-schema-img">Тут будет схема бд</div>
         <n-alert
           width="100%"
           v-if="codemirror.error.active"
@@ -243,17 +258,6 @@ export default defineComponent({
       this.history.active = true;
       console.log(history);
       try {
-        // const urlToDb = await ServiceDatabase.getLinkToDatabase(history.title);
-        // if (urlToDb.length <= 0) {
-        //   this.$store.commit(
-        //     'notification/SET_ACTIVE_ERROR',
-        //     'Ошибка при загрузке базы данных'
-        //   );
-        //   this.history.active = false;
-        //   this.history.loadData = false;
-        //   return;
-        // }
-
         const urlToDb = 'http://localhost:8080/api/fileDB/get';
         const response2DownloadDb = await ServiceDatabase.downloadFile(
           urlToDb

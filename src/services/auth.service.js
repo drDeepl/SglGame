@@ -14,6 +14,20 @@ class AuthService {
     return response;
   }
 
+  async updateAccessTokenThroughtInterval(refreshToken) {
+    logR('warn', 'Auth.Service.updateAccessToken');
+    const response = decorateResponseApi(
+      ApiAuth.updateAccesToken,
+      refreshToken
+    );
+    if (response.status == 200) {
+      TokenService.setToken(response);
+      TokenService.updateLocalAccessToken(response.data.accessToken);
+    }
+
+    return response;
+  }
+
   async refreshToken(accessToken) {
     logR('warn', 'AuthService: Refresh Token');
     const response = await decorateResponseApi(
