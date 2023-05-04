@@ -10,4 +10,10 @@ const instance = axios.create({
   headers: {Authorization: accessToken},
 });
 
+instance.interceptors.request.use(function (config) {
+  console.warn('CONFIG\n', config);
+  config.headers.Authorization = 'Bearer ' + TokenService.getLocalAccessToken();
+  return config;
+});
+
 export default instance;
