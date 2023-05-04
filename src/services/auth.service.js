@@ -14,28 +14,25 @@ class AuthService {
     return response;
   }
 
-  async updateAccessTokenThroughtInterval(refreshToken) {
+  async updateAccessToken() {
     logR('warn', 'Auth.Service.updateAccessToken');
-    const response = decorateResponseApi(
-      ApiAuth.updateAccesToken,
-      refreshToken
-    );
-    if (response.status == 200) {
-      TokenService.setToken(response);
-      TokenService.updateLocalAccessToken(response.data.accessToken);
-    }
-
-    return response;
+    const token = TokenService.getToken();
+    console.log('UpdateAccessToken\n' + token.refreshToken);
+    ApiAuth.getAccessToken(token.refreshToken).then(function (response) {
+      const accessToken = response.data.accessToken;
+      TokenService.updateLocalAccessToken(accessToken);
+      return accessToken;
+    });
   }
 
   async refreshToken(accessToken) {
     logR('warn', 'AuthService: Refresh Token');
     const response = await decorateResponseApi(
-      ApiAuth.refreshToken,
+      ApiAuth.getRefreshToken,
       accessToken
     );
     if (response.data) {
-      TokenService.updateLocalAccessToken(response.data.accessToken);
+      TokenService.setToken(response.data);
     }
   }
 }

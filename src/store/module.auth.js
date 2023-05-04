@@ -1,12 +1,16 @@
 import AuthService from '@/services/auth.service';
 import TokenService from '@/services/token.service';
 import {logR, extractJWT} from '@/services/utils';
+const initialTokenUser = TokenService.getToken();
+const initialTokenData = initialTokenUser
+  ? extractJWT(initialTokenUser.accessToken)
+  : null;
 export const auth = {
   namespaced: true,
   state() {
     return {
-      tokenUser: null,
-      tokenData: null,
+      tokenUser: initialTokenUser,
+      tokenData: initialTokenData,
     };
   },
 
@@ -18,7 +22,6 @@ export const auth = {
         const responseData = response.data;
         logR('log', 'MODULE.AUTH: responseData\n', responseData);
         context.commit('SET_TOKEN_USER', responseData);
-        context.commit('SET_DATA_LOGIN', responseData);
         console.log(responseData);
         const userData = extractJWT(responseData.accessToken);
 
@@ -30,14 +33,6 @@ export const auth = {
         response.message = 'Такого пользователя не существует';
       }
       return response;
-    },
-
-    async updateAccessToken(context, refreshToken) {
-      logR('warn', 'Module.Auth: updating access token');
-      const response = await AuthService.updateAccessToken(refreshToken);
-      if (response.status == 200) {
-        context.commit('SET_ACCESS_TOKEN');
-      }
     },
   },
   getters: {
@@ -68,10 +63,23 @@ export const auth = {
     SET_ACCESS_TOKEN: function (state, accessToken) {
       state.tokenUser.accessToken = accessToken;
     },
+    UPDATE_TOKEN_USER: function (state, token) {
+      state.tokenUser = token;
+    },
+    UPDATE_ACCESS_TOKEN: function (state) {
+      logR('warn', 'MODULE.AUTH: updating access token');
+      const accessToken = TokenService.getLocalAccessToken();
+      console.log(accessToken);
+      state.tokenData.accessToken = accessToken;
+    },
     REMOVE_USER: function (state) {
       state.tokenUser = null;
       state.tokenData = null;
       TokenService.removeUser();
+    },
+    REMOVE_TOKEN: function (state) {
+      state.userToken = null;
+      TokenService.removeToken();
     },
   },
 };

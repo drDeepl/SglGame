@@ -141,10 +141,10 @@ import {mapGetters} from "vuex";
 import {NAvatar} from 'naive-ui'
 import NavbarVertical from "@/components/NavbarVertical.vue"
 
-import {logR} from '@/services/utils';
+import {logR, extractJWT} from '@/services/utils';
 
 import UserService from "@/services/user.service";
-
+import AuthService from "@/services/auth.service";
 
 import UserLogin from "@/models/model.user.login";
 import UserRegister from "@/models/model.user.register"
@@ -153,7 +153,31 @@ import UserRegister from "@/models/model.user.register"
 export default defineComponent( {
   components: {"n-avatar": NAvatar, "n-navbar": NavbarVertical},
   async created() {
+    logR('warn', "MAINLAYOUT: created");
     this.render.main = true;
+    let tokenUser = this.$store.state.auth.tokenUser
+    if(tokenUser){
+
+      const currentDate = Date.now();
+      const userExp = this.userData.exp *1000// INFO: default userData.exp in seconds, aftetr * 1000 will milliseconds
+      const differenceTime = userExp - currentDate
+      console.log(`Difference time${differenceTime}`)
+      if((userExp - currentDate) < 0){
+
+        const refreshToken = extractJWT(tokenUser.refreshToken);
+        const refreshTokenExp = refreshToken.exp * 1000;
+        const differenceTimeRefresh = refreshTokenExp - currentDate;
+        if(differenceTimeRefresh < 0){
+          console.log('REFRESH MORE CURRUENT DATE');
+          this.$store.commit('auth/REMOVE_TOKEN');
+        }
+        else{
+          await AuthService.updateAccessToken();
+          console.log(tokenUser.accessToken);
+          this.$store.commit("auth/UPDATE_ACCESS_TOKEN");
+        }
+      }
+    }
     this.render.main = false;
 
   },
@@ -250,9 +274,11 @@ export default defineComponent( {
         console.error(`AccessToken\n${this.accessToken}\n intervalForUpdateToken = ${intervalForUpdateToken}`)
         // TODO: таймер на обновление токена
         this.timerForUpdateAccessToken = setInterval(() => {
-          this.$store.dispatch('auth/updateAccessToken')
+          AuthService.updateAccessToken();
+          this.$store.commit("auth/UPDATE_ACCESS_TOKEN");
 
         }, intervalForUpdateToken);
+
         // TODO: таймер на обновление токена
 
         this.forms.runSucess = true;
@@ -306,7 +332,7 @@ export default defineComponent( {
       this.render.main = true;
       this.$store.commit("auth/REMOVE_USER");
       this.$router.push({name: "home"});
-      clearInterval(this.timerForUpdateAccessToken)
+      clearInterval(this.timerForUpdateAccessToken);
       this.render.main = false;
     }
 

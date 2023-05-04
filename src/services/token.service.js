@@ -43,6 +43,9 @@ class TokenService {
   removeUser() {
     localStorage.removeItem('user');
   }
+  removeToken() {
+    localStorage.removeItem('token');
+  }
 }
 
 export default new TokenService();

@@ -9,8 +9,16 @@ class ApiAuth {
     return instance.post(`${path}/login`, dataLogin);
   }
 
-  async getAccessToken(refreshToken) {
-    return instance.get(`${path}/token`, refreshToken);
+  getAccessToken(refreshToken) {
+    return instance.post(`${path}/getNewAccessToken`, {
+      refreshToken: refreshToken,
+    });
+  }
+
+  getRefreshToken(accessToken) {
+    return instance.post(`${path}/getNewRefreshToken`, {
+      accessToken: accessToken,
+    });
   }
 
   async refreshToken(token) {
