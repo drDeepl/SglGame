@@ -156,6 +156,7 @@ export default defineComponent( {
     logR('warn', "MAINLAYOUT: created");
     this.render.main = true;
     let tokenUser = this.$store.state.auth.tokenUser
+
     if(tokenUser){
 
       const currentDate = Date.now();
@@ -262,16 +263,16 @@ export default defineComponent( {
     },
     async onClickApplyLogIn(dataForm) {
       logR('warn', 'NAVBAR: onClickApplyLogIn\n');
-      console.log(dataForm)
+
 
       const response = await this.$store.dispatch("auth/login", dataForm);
-      console.log(response)
+
       if(response.status==200){
         const exp = this.userData.exp * 1000 // to milliseconds
         const differenceBetweenTimestamp = exp - Date.now() - 10000;
         const intervalForUpdateToken =  Math.abs(differenceBetweenTimestamp);
-        console.log("USER EXP\n", exp)
-        console.error(`AccessToken\n${this.accessToken}\n intervalForUpdateToken = ${intervalForUpdateToken}`)
+
+
         // TODO: таймер на обновление токена
         this.timerForUpdateAccessToken = setInterval(() => {
           AuthService.updateAccessToken();

@@ -21,37 +21,40 @@
           <icon-close style="width: 1.7em" />
         </n-button>
       </template>
-      <n-form ref="formRef" :model="formValue" :rules="toValidate ? rules : {}">
-        <div
-          class="form-field"
-          v-for="field in Object.keys(itemModel.data)"
-          :key="field"
-        >
-          <n-form-item
-            v-if="!hideProps[field]"
-            :loading="status.running"
-            :label="itemModel.labels[field]"
-            :path="field"
-          >
-            <n-input
-              v-if="field == 'password'"
-              type="password"
-              show-password-on="click"
-              v-model:value="formValue[field]"
-              placeholder=""
-            />
-            <n-input v-else v-model:value="formValue[field]" placeholder="" />
-          </n-form-item>
-        </div>
-        <n-space vertical>
-          <slot></slot>
-        </n-space>
 
-        <n-form-item>
-          <n-button :loading="status.running" @click="onClickApplyButton">
-            {{ labelApplyButton }}
-          </n-button>
-        </n-form-item>
+      <n-form ref="formRef" :model="formValue" :rules="toValidate ? rules : {}">
+        <n-scrollbar style="max-height: 30em">
+          <div
+            class="form-field"
+            v-for="field in Object.keys(itemModel.data)"
+            :key="field"
+          >
+            <n-form-item
+              v-if="!hideProps[field]"
+              :loading="status.running"
+              :label="itemModel.labels[field]"
+              :path="field"
+            >
+              <n-input
+                v-if="field == 'password'"
+                type="password"
+                show-password-on="click"
+                v-model:value="formValue[field]"
+                placeholder=""
+              />
+              <n-input v-else v-model:value="formValue[field]" placeholder="" />
+            </n-form-item>
+          </div>
+          <n-space vertical>
+            <slot></slot>
+          </n-space>
+
+          <n-form-item>
+            <n-button :loading="status.running" @click="onClickApplyButton">
+              {{ labelApplyButton }}
+            </n-button>
+          </n-form-item>
+        </n-scrollbar>
       </n-form>
     </n-card>
   </n-modal>

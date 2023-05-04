@@ -12,7 +12,9 @@ const instance = axios.create({
 
 instance.interceptors.request.use(function (config) {
   console.warn('CONFIG\n', config);
-  config.headers.Authorization = 'Bearer ' + TokenService.getLocalAccessToken();
+  let accessToken = TokenService.getLocalAccessToken();
+  let auth = accessToken ? 'Bearer ' + accessToken : null;
+  config.headers.Authorization = auth;
   return config;
 });
 

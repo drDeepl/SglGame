@@ -1,6 +1,6 @@
 import instance from './main';
 
-const API_PATH = '/userDB/stories_images/';
+const API_PATH = '/userDB/stories_images';
 
 class ApiStoryImage {
   async upload(dataForm) {

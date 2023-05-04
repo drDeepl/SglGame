@@ -47,23 +47,22 @@
   width: 100%;
   border-radius: $border-radius;
   margin-right: 3em;
-  background-image: url('img/profile_story_bg.png');
+
   background-repeat: no-repeat;
   align-items: center;
   padding-right: 2em;
   padding-left: 2em;
 }
 
-.profile-story {
+.profile-story-box {
   cursor: pointer;
-
+  margin: 1em !important;
   border: 10px solid $color-white;
-  min-width: 20em;
-  min-height: 12em;
-  background-color: $beige-color;
-  display: flex !important;
-  justify-content: center;
-  align-content: center !important;
+  transition: border 0.8s 0.02s;
+  border-radius: 10px;
+  box-shadow: 6.7px 6.7px 5.3px rgba(0, 0, 0, 0.028),
+    22.3px 22.3px 17.9px rgba(0, 0, 0, 0.042),
+    100px 100px 80px rgba(0, 0, 0, 0.07);
 }
 
 .profile-story-img {
@@ -72,12 +71,42 @@
   height: 12em;
 }
 
-.profile-story > span {
+.profile-story-box > span {
   display: flex;
   align-items: end;
   z-index: 2;
   color: $color-crema;
   font-weight: bold;
+}
+
+.profile-story-box:hover {
+  border: 10px solid $color-green;
+}
+
+.shiny-hover {
+  -webkit-mask-image: linear-gradient(
+    45deg,
+    #000 25%,
+    rgba(0, 0, 0, 0.2) 50%,
+    #000 75%
+  );
+  mask-image: linear-gradient(
+    45deg,
+    #000 25%,
+    rgba(0, 0, 0, 0.2) 50%,
+    #000 75%
+  );
+  -webkit-mask-size: 800%;
+  mask-size: 800%;
+  -webkit-mask-position: 0;
+  mask-position: 0;
+}
+
+.shiny-hover:hover {
+  transition: mask-position 3s ease, -webkit-mask-position 3s ease;
+  -webkit-mask-position: 120%;
+  mask-position: 120%;
+  opacity: 1;
 }
 
 .profile-bg-add-story {

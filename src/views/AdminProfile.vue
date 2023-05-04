@@ -4,9 +4,7 @@
   ></n-modal>
   <div v-else class="page-content">
     <n-layout has-sider v-if="userData">
-      <n-layout-sider
-        :style="sidebar.active ? 'min-width: 25em' : 'min-width: 10em'"
-      >
+      <n-layout-sider>
         <n-card>
           <template #header>
             <n-space horizontal align="center">
@@ -43,20 +41,53 @@
       <n-layout>
         <!--  $router.currentRoute._value.name -->
         <n-layout-header class="img-header-profile">
-          <n-space justify="center" align="center">
-            <n-popover trigger="hover">
-              <template #trigger>
-                <div class="profile-story" @click="onClickCreateStory">
-                  <n-space justify="center" align="center">
-                    <n-icon size="50" color="white" class="profile-icon-story">
-                      <icon-add />
-                    </n-icon>
-                  </n-space>
-                </div>
-              </template>
-              <span> Создать историю </span>
-            </n-popover>
-          </n-space>
+          <div class="header-image">
+            <div
+              class="profile-story-box story-card"
+              @click="onClickCreateStory"
+            >
+              <n-space justify="center" align="center" vertical>
+                <span class="font-header-card"> Создать историю </span>
+                <n-icon size="50" color="white">
+                  <icon-add />
+                </n-icon>
+              </n-space>
+            </div>
+            <n-scrollbar>
+              <div class="container-card-stories">
+                <card-story
+                  v-for="story in arrays.stories"
+                  :key="story.id"
+                  :title="story.title"
+                  :description="story.description"
+                  :difficulty="story.difficulty"
+                >
+                  <div class="action-story-card">
+                    <n-button
+                      circle
+                      size="tiny"
+                      ghost
+                      @click="onClickUpdateStory"
+                    >
+                      <n-icon size="20" color="orange">
+                        <icon-edit />
+                      </n-icon>
+                    </n-button>
+                    <n-button
+                      circle
+                      size="tiny"
+                      ghost
+                      @click="onClickDeleteStory"
+                    >
+                      <n-icon size="20" color="red">
+                        <icon-delete />
+                      </n-icon>
+                    </n-button>
+                  </div>
+                </card-story>
+              </div>
+            </n-scrollbar>
+          </div>
         </n-layout-header>
         <n-layout-content></n-layout-content>
       </n-layout>
@@ -80,7 +111,6 @@
         >
           Загрузить картинку
         </n-upload>
-        {{ arrays.fileList }}
       </c-form>
     </n-layout>
   </div>
@@ -89,12 +119,17 @@
 <script type="text/javascript">
 import {defineComponent} from 'vue';
 import {mapGetters} from 'vuex';
+
 import {NAvatar} from 'naive-ui';
+import CardStory from '@/UI/CardStory.vue';
+
 import {logR, getBinaryFromFile} from '@/services/utils';
 import CreateStory from '@/models/model.create.story';
+import ServiceStoryImage from '@/services/story.image.service';
+import StoryService from '@/services/story.service';
 
 export default defineComponent({
-  components: {'n-avatar': NAvatar},
+  components: {'n-avatar': NAvatar, 'card-story': CardStory},
   data() {
     return {
       sidebar: {active: false, rows: []},
@@ -134,9 +169,9 @@ export default defineComponent({
     if (!this.userData) {
       this.$router.push({name: 'home'});
     } else {
-      // const dataUser = this.$store.state.auth.dataLogin;
-
       this.sidebar.rows = this.$store.state.user.userSidebar.admin;
+      const responseStories = await StoryService.getStories();
+      this.arrays.stories = responseStories.data;
     }
     this.render.main = false;
   },
@@ -160,19 +195,19 @@ export default defineComponent({
       logR('ADMIN PROFILE:onClickInfoStory');
     },
     onClickStory() {
-      logR('warn', 'ADMIN PROFILE:onClickStory');
+      logR('error', 'todo:ADMIN PROFILE:onClickStory');
+    },
+    onClickUpdateStory() {
+      console.error('todo: onClickUpdateStory');
+    },
+    onClickDeleteStory() {
+      console.error('todo: onClickDeleteStory');
     },
     onClickToLink(url) {
       url.length > 0 ? this.$router.push(url) : '';
     },
     async onClickApplyCreateStory(dataForm) {
       logR('warn', 'ADMIN PROFILE:onClickApplyCreateStory');
-      if (this.arrays.fileList.length > 0) {
-        let file = this.arrays.fileList[0].file;
-        let binary = await getBinaryFromFile(file);
-        console.log(binary);
-        // TODO: создать запрос на загрузку изображения
-      }
 
       const response = await this.$store.dispatch(
         'story/createStory',
@@ -180,6 +215,14 @@ export default defineComponent({
       );
       if (response.status == 200) {
         console.log(response);
+        if (this.arrays.fileList.length > 0) {
+          let file = this.arrays.fileList[0].file;
+          // TODO: создать запрос на загрузку изображения
+          let binaryFile = await getBinaryFromFile(file);
+          console.log(binaryFile);
+          await ServiceStoryImage.uploadImage(binaryFile);
+          // TODO: создать запрос на загрузку изображения
+        }
       } else {
         this.$store.commit('notification/SET_ACTIVE_ERROR', response.message);
       }

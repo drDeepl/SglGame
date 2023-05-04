@@ -8,6 +8,9 @@ import {
   Dismiss28Regular,
   AddCircle20Regular,
   Add16Filled,
+  PlayCircle16Regular,
+  Edit16Regular,
+  Delete16Regular,
 } from '@vicons/fluent';
 import './assets/main.scss';
 
@@ -39,11 +42,14 @@ import {
   NCarouselItem,
   NImage,
   NUpload,
+  NScrollbar,
 } from 'naive-ui';
 import CodeBlock from '@/UI/CodeBlock.vue';
 const app = createApp(App);
 
 // setupInterceptors(store);
+app.component('icon-delete', Delete16Regular);
+app.component('n-scrollbar', NScrollbar);
 app.component('n-upload', NUpload);
 app.component('n-image', NImage);
 app.component('n-carousel', NCarousel);
@@ -70,9 +76,11 @@ app.component('n-card', NCard);
 app.component('n-modal', NModal);
 app.component('c-form', FormDialog);
 app.component('n-spin', NSpin);
+app.component('icon-edit', Edit16Regular);
 app.component('icon-close', Dismiss28Regular);
 app.component('icon-add', AddCircle20Regular);
 app.component('icon-add-plus', Add16Filled);
+app.component('icon-play', PlayCircle16Regular);
 app.component('n-space', NSpace);
 app.component('n-button', NButton);
 

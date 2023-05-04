@@ -33,6 +33,12 @@ class ServiceStoryImage {
     }
   }
 
+  async uploadImage(file) {
+    logR('warn', 'STORY.IMAGE.SERIVCE: uploadImage');
+    const response = await decorateResponseApi(ApiStoryImage.upload, file);
+    return response;
+  }
+
   async deleteStoryImg(storyId) {
     const response = await decorateResponseApi(ApiStoryImage.delete, storyId);
     return response;

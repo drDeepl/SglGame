@@ -67,3 +67,19 @@
   font-weight: bold;
   font-size: 1.2em;
 }
+
+.story-card {
+  background-color: $beige-color;
+  cursor: pointer;
+  margin: 1em !important;
+  width: 20em;
+  height: 12em;
+  display: flex !important;
+  justify-content: center;
+  align-content: center !important;
+  border-radius: 10px;
+}
+
+.story-card:hover {
+  border: 2px solid $color-green;
+}
