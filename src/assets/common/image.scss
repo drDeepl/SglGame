@@ -16,10 +16,13 @@
   align-items: center;
   height: 100%;
   width: 100%;
-  background-image: url('img/profile_story_bg.png');
-  object-fit: cover;
+  background-image: url('img/profile_story_bg.jpg');
+
   background-repeat: no-repeat;
   border-radius: $border-radius;
-  background-position: center bottom;
+  object-fit: cover;
+  // background-position: top bottom;
+  background-position-x: bottom;
+  background-position-y: 80%;
   opacity: 10px;
 }

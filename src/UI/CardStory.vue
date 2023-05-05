@@ -1,7 +1,5 @@
 <template>
   <div>
-    <!-- <n-popover :overlap="true" placemenet="top" trigger="hover"> -->
-    <!-- <template #trigger> -->
     <n-card hoverable class="story-card" :title="title">
       <template #header-extra>
         <slot></slot>
@@ -12,16 +10,11 @@
         vertical
         class="story-card-content"
       >
-        <!-- <span class="font-header-card"> {{ title }}</span> -->
         <n-icon size="50" color="white" class="profile-icon-story">
           <icon-play />
         </n-icon>
       </n-space>
     </n-card>
-    <!-- </template> -->
-
-    <!-- <span>{{ description }}</span> -->
-    <!-- </n-popover> -->
   </div>
 </template>
 

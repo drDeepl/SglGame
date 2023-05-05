@@ -40,10 +40,10 @@
       </n-layout-sider>
       <n-layout>
         <!--  $router.currentRoute._value.name -->
-        <n-layout-header class="img-header-profile">
+        <n-layout-header class="img-header-profile container-header-profile">
           <div class="header-image">
             <div
-              class="profile-story-box story-card"
+              class="profile-story-box story-card story-card-add"
               @click="onClickCreateStory"
             >
               <n-space justify="center" align="center" vertical>
@@ -62,28 +62,35 @@
                   :description="story.description"
                   :difficulty="story.difficulty"
                 >
-                  <div class="action-story-card">
-                    <n-button
-                      circle
-                      size="tiny"
-                      ghost
-                      @click="onClickUpdateStory"
-                    >
-                      <n-icon size="20" color="orange">
-                        <icon-edit />
+                  <n-popconfirm :show-icon="false">
+                    <template #trigger>
+                      <n-icon size="30" color="white" class="card-story-menu">
+                        <icon-menu-story />
                       </n-icon>
-                    </n-button>
-                    <n-button
-                      circle
-                      size="tiny"
-                      ghost
-                      @click="onClickDeleteStory"
-                    >
-                      <n-icon size="20" color="red">
-                        <icon-delete />
-                      </n-icon>
-                    </n-button>
-                  </div>
+                    </template>
+                    <template #action>
+                      <n-button
+                        circle
+                        size="tiny"
+                        ghost
+                        @click="onClickUpdateStory(story)"
+                      >
+                        <n-icon size="20" color="orange">
+                          <icon-edit />
+                        </n-icon>
+                      </n-button>
+                      <n-button
+                        circle
+                        size="tiny"
+                        ghost
+                        @click="onClickDeleteStory"
+                      >
+                        <n-icon size="20" color="red">
+                          <icon-delete />
+                        </n-icon>
+                      </n-button>
+                    </template>
+                  </n-popconfirm>
                 </card-story>
               </div>
             </n-scrollbar>
@@ -99,6 +106,28 @@
         labelApplyButton="Создать"
         :applyFunction="onClickApplyCreateStory"
         :cancelFunction="onClickCancelCreateStory"
+      >
+        <n-upload
+          v-model:file-list="arrays.fileList"
+          @preview="onUploadFile"
+          :default-upload="true"
+          :file-list="arrays.fileList"
+          list-type="image-card"
+          :max="1"
+          :data="dataImage"
+        >
+          Загрузить картинку
+        </n-upload>
+      </c-form>
+
+      <c-form
+        v-if="forms.updateStory.active"
+        :isActive="forms.updateStory.active"
+        title="Редактирование истории"
+        :itemModel="forms.updateStory.model"
+        labelApplyButton="Обновить"
+        :applyFunction="onClickApplyUpdateStory"
+        :cancelFunction="onClickCancelUpdateStory"
       >
         <n-upload
           v-model:file-list="arrays.fileList"
@@ -134,7 +163,10 @@ export default defineComponent({
     return {
       sidebar: {active: false, rows: []},
       render: {main: false},
-      forms: {createStory: {active: false, model: CreateStory}},
+      forms: {
+        createStory: {active: false, model: CreateStory},
+        updateStory: {active: false, model: CreateStory, selectedStoryId: null},
+      },
       dataImage: {},
       arrays: {
         fileList: [],
@@ -191,21 +223,6 @@ export default defineComponent({
       this.forms.createStory.active = true;
       console.log(this.createStory);
     },
-    onClickInfoStory() {
-      logR('ADMIN PROFILE:onClickInfoStory');
-    },
-    onClickStory() {
-      logR('error', 'todo:ADMIN PROFILE:onClickStory');
-    },
-    onClickUpdateStory() {
-      console.error('todo: onClickUpdateStory');
-    },
-    onClickDeleteStory() {
-      console.error('todo: onClickDeleteStory');
-    },
-    onClickToLink(url) {
-      url.length > 0 ? this.$router.push(url) : '';
-    },
     async onClickApplyCreateStory(dataForm) {
       logR('warn', 'ADMIN PROFILE:onClickApplyCreateStory');
 
@@ -227,10 +244,33 @@ export default defineComponent({
         this.$store.commit('notification/SET_ACTIVE_ERROR', response.message);
       }
     },
-
     onClickCancelCreateStory() {
       logR('warn', 'PROFILE:onClickCancelCreateStory');
       this.forms.createStory.active = false;
+    },
+    onClickStory() {
+      logR('error', 'todo:ADMIN PROFILE:onClickStory');
+    },
+    onClickUpdateStory(dataStory) {
+      console.error('todo: onClickUpdateStory');
+      for (let prop in this.forms.updateStory.model.data) {
+        this.forms.updateStory.model.data[prop] = dataStory[prop];
+      }
+      this.forms.updateStory.active = true;
+    },
+    async onClickApplyUpdateStory(dataStory) {
+      logR('warn', 'AdminProfile: onClickApplyUpdateStory');
+      console.log(dataStory);
+    },
+    onClickCancelUpdateStory() {
+      logR('warn', 'AdminProfile: onClickCancelUpdateStory');
+      this.forms.updateStory.active = false;
+    },
+    onClickDeleteStory() {
+      console.error('todo: onClickDeleteStory');
+    },
+    onClickToLink(url) {
+      url.length > 0 ? this.$router.push(url) : '';
     },
   },
 });

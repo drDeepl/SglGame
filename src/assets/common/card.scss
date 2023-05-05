@@ -69,17 +69,31 @@
 }
 
 .story-card {
-  background-color: $beige-color;
+  // background-color: $beige-color;
+  background-color: $color-crema-transparent;
   cursor: pointer;
   margin: 1em !important;
-  width: 20em;
-  height: 12em;
+  max-width: 20em;
+  max-height: 12em;
   display: flex !important;
   justify-content: center;
   align-content: center !important;
   border-radius: 10px;
 }
 
+.story-card-add {
+  width: 20em;
+  height: 12em;
+}
+
 .story-card:hover {
   border: 2px solid $color-green;
+}
+
+.card-story-actions {
+  background-color: $color-white !important;
+}
+
+.card-story-menu {
+  align-items: end;
 }

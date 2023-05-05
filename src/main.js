@@ -6,11 +6,12 @@ import router from '@/router/index';
 
 import {
   Dismiss28Regular,
-  AddCircle20Regular,
+  AddSquareMultiple16Filled,
   Add16Filled,
   PlayCircle16Regular,
   Edit16Regular,
   Delete16Regular,
+  MoreCircle20Regular,
 } from '@vicons/fluent';
 import './assets/main.scss';
 
@@ -48,6 +49,7 @@ import CodeBlock from '@/UI/CodeBlock.vue';
 const app = createApp(App);
 
 // setupInterceptors(store);
+app.component('icon-menu-story', MoreCircle20Regular);
 app.component('icon-delete', Delete16Regular);
 app.component('n-scrollbar', NScrollbar);
 app.component('n-upload', NUpload);
@@ -78,7 +80,7 @@ app.component('c-form', FormDialog);
 app.component('n-spin', NSpin);
 app.component('icon-edit', Edit16Regular);
 app.component('icon-close', Dismiss28Regular);
-app.component('icon-add', AddCircle20Regular);
+app.component('icon-add', AddSquareMultiple16Filled);
 app.component('icon-add-plus', Add16Filled);
 app.component('icon-play', PlayCircle16Regular);
 app.component('n-space', NSpace);

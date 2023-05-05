@@ -7,6 +7,19 @@
 }
 
 .container-card-stories {
+  margin: 1em 1em;
   display: grid !important;
   grid-template-columns: 1fr 1fr !important;
+  gap: 1em;
+}
+
+.container-header-profile {
+  height: 21em;
+}
+
+@media screen and (max-width: 1280px) {
+  .container-card-stories {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+  }
 }
