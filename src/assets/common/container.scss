@@ -23,6 +23,15 @@
   top: 39%;
 }
 
+.container-cards {
+  padding-top: 1em;
+  padding-bottom: 1em !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
 @media screen and (max-width: 1280px) {
   .container-card-stories {
     display: grid !important;

@@ -12,6 +12,7 @@ import {
   Edit16Regular,
   Delete16Regular,
   MoreCircle20Regular,
+  IosArrowLtr24Regular,
 } from '@vicons/fluent';
 import './assets/main.scss';
 
@@ -46,11 +47,14 @@ import {
   NScrollbar,
   NEmpty,
   NResult,
+  NPagination,
 } from 'naive-ui';
 import CodeBlock from '@/UI/CodeBlock.vue';
 const app = createApp(App);
 
 // setupInterceptors(store);
+
+app.component('n-pagination', NPagination);
 app.component('n-result', NResult);
 app.component('n-empty', NEmpty);
 app.component('icon-menu-story', MoreCircle20Regular);
@@ -67,6 +71,8 @@ app.component('n-dialog', NDialog);
 app.component('n-rate', NRate);
 app.component('n-popover', NPopover);
 app.component('n-icon', NIcon);
+app.component('icon-arrow-left', IosArrowLtr24Regular);
+
 app.component('n-layout-header', NLayoutHeader);
 app.component('n-layout-sider', NLayoutSider);
 app.component('n-layout-content', NLayoutContent);

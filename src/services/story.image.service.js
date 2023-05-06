@@ -29,8 +29,17 @@ class ServiceStoryImage {
     );
     if (response.status === 200) {
       logR('error', 'SERVICE.STORY.IMAGE: todo findStoryImageById');
-      return new Blob(response.data);
+      const data = response.data;
+      let bytes = new Uint8Array(data.length / 2);
+      for (var i = 0; i < data.length; i += 2) {
+        bytes[i / 2] = parseInt(data.substring(i, i + 2), /* base = */ 16);
+      }
+      // Make a Blob from the bytes
+      let blob = new Blob([bytes], {type: 'image/jpg'});
+      response.data = blob;
+      // Use createObjectURL to make a URL for the blob
     }
+    return response;
   }
 
   async deleteStoryImg(storyId) {
