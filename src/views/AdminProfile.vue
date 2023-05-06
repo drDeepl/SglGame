@@ -54,7 +54,10 @@
               </n-space>
             </div>
             <n-scrollbar>
-              <div class="container-card-stories">
+              <div
+                class="container-card-stories"
+                v-if="arrays.stories.length > 0"
+              >
                 <card-story
                   v-for="story in arrays.stories"
                   :key="story.id"
@@ -83,7 +86,7 @@
                         circle
                         size="tiny"
                         ghost
-                        @click="onClickDeleteStory"
+                        @click="onClickDeleteStory(story)"
                       >
                         <n-icon size="20" color="red">
                           <icon-delete />
@@ -93,31 +96,43 @@
                   </n-popconfirm>
                 </card-story>
               </div>
+              <div v-else class="container-empty">
+                <n-empty description="Список историй пуст" class=""> </n-empty>
+              </div>
             </n-scrollbar>
           </div>
         </n-layout-header>
         <n-layout-content></n-layout-content>
       </n-layout>
+
       <c-form
         v-if="forms.createStory.active"
         :isActive="forms.createStory.active"
+        :isSuccess="forms.isSuccess.active"
         title="Создание истории"
+        successTitle="История создана"
+        successDescription="Добавить к истории обложку?"
         :itemModel="forms.createStory.model"
         labelApplyButton="Создать"
         :applyFunction="onClickApplyCreateStory"
         :cancelFunction="onClickCancelCreateStory"
       >
-        <n-upload
-          v-model:file-list="arrays.fileList"
-          @preview="onUploadFile"
-          :default-upload="true"
-          :file-list="arrays.fileList"
-          list-type="image-card"
-          :max="1"
-          :data="dataImage"
-        >
-          Загрузить картинку
-        </n-upload>
+        <n-space justify="center">
+          <!--   -->
+          <n-upload
+            v-if="forms.isSuccess.active"
+            v-model:file-list="arrays.fileList"
+            :action="`http://localhost:8080/api/userDB/stories_images/create?story_id=${currentStoryId}`"
+            :headers="{Authorization: accessToken}"
+            :default-upload="true"
+            :file-list="arrays.fileList"
+            list-type="image-card"
+            :max="1"
+            @finish="onUploadFileFinish"
+          >
+            Загрузить обложку
+          </n-upload>
+        </n-space>
       </c-form>
 
       <c-form
@@ -138,7 +153,7 @@
           :max="1"
           :data="dataImage"
         >
-          Загрузить картинку
+          Добавить обложку
         </n-upload>
       </c-form>
     </n-layout>
@@ -147,12 +162,11 @@
 
 <script type="text/javascript">
 import {defineComponent} from 'vue';
-import {mapGetters} from 'vuex';
 
 import {NAvatar} from 'naive-ui';
 import CardStory from '@/UI/CardStory.vue';
 
-import {logR, getBinaryFromFile} from '@/services/utils';
+import {logR} from '@/services/utils';
 import CreateStory from '@/models/model.create.story';
 import ServiceStoryImage from '@/services/story.image.service';
 import StoryService from '@/services/story.service';
@@ -163,32 +177,26 @@ export default defineComponent({
     return {
       sidebar: {active: false, rows: []},
       render: {main: false},
+      currentStoryId: null,
       forms: {
         createStory: {active: false, model: CreateStory},
         updateStory: {active: false, model: CreateStory, selectedStoryId: null},
+        isSuccess: {active: false, message: ''},
       },
-      dataImage: {},
       arrays: {
         fileList: [],
-        stories: [
-          {
-            id: 0,
-            title: 'Murder_Mystery',
-            difficulty: 'Some difficultys',
-            description:
-              'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-            story_text: 'Some text',
-            answer: 'answer1',
-          },
-        ],
+        stories: [],
       },
     };
   },
 
   computed: {
-    ...mapGetters({
-      getUserToken: 'auth/GET_TOKEN_USER',
-    }),
+    accessToken() {
+      return 'Bearer ' + this.$store.state.auth.tokenUser.accessToken;
+    },
+    tokenUser() {
+      return this.$store.state.auth.tokenUser;
+    },
     userData() {
       return this.$store.state.auth.tokenData
         ? this.$store.state.auth.tokenData
@@ -209,14 +217,11 @@ export default defineComponent({
   },
 
   methods: {
-    async onUploadFile(data) {
+    clearCurrentStoryId() {
+      this.currentStoryId = null;
+    },
+    onUploadFileFinish() {
       logR('warn', 'onUploadFile');
-      console.log(data);
-      console.log(this.dataImage);
-      console.log(this.fileList);
-      const file = data.file;
-      const binary = await getBinaryFromFile(file);
-      console.log(binary);
     },
     onClickCreateStory() {
       logR('ADMIN PROFILE:onCLickCreateStory');
@@ -225,28 +230,32 @@ export default defineComponent({
     },
     async onClickApplyCreateStory(dataForm) {
       logR('warn', 'ADMIN PROFILE:onClickApplyCreateStory');
+      console.log(ServiceStoryImage);
+      console.log(dataForm);
 
       const response = await this.$store.dispatch(
         'story/createStory',
         dataForm
       );
       if (response.status == 200) {
-        console.log(response);
-        if (this.arrays.fileList.length > 0) {
-          let file = this.arrays.fileList[0].file;
-          // TODO: создать запрос на загрузку изображения
-          let binaryFile = await getBinaryFromFile(file);
-          console.log(binaryFile);
-          await ServiceStoryImage.uploadImage(binaryFile);
-          // TODO: создать запрос на загрузку изображения
-        }
+        const splitResponse = response.data.split(':');
+        const storyId = Number(splitResponse.at(1));
+        this.currentStoryId = storyId;
+        this.forms.isSuccess.active = true;
+        dataForm['id'] = storyId;
+        this.arrays.stories.push(dataForm);
       } else {
         this.$store.commit('notification/SET_ACTIVE_ERROR', response.message);
       }
     },
+    clearSuccessForm() {
+      this.forms.isSuccess.active = false;
+      this.forms.isSuccess.message = '';
+    },
     onClickCancelCreateStory() {
       logR('warn', 'PROFILE:onClickCancelCreateStory');
       this.forms.createStory.active = false;
+      this.clearSuccessForm();
     },
     onClickStory() {
       logR('error', 'todo:ADMIN PROFILE:onClickStory');
@@ -266,8 +275,21 @@ export default defineComponent({
       logR('warn', 'AdminProfile: onClickCancelUpdateStory');
       this.forms.updateStory.active = false;
     },
-    onClickDeleteStory() {
+    async onClickDeleteStory(storyData) {
       console.error('todo: onClickDeleteStory');
+      console.log(storyData);
+      const stories = this.arrays.stories;
+      const storyId = storyData.id;
+
+      const response = await StoryService.storyDelete(storyId);
+      console.log(response);
+      if (response.status == 200) {
+        const filteredStories = stories.filter((story) => {
+          return story.id != storyId;
+        });
+
+        this.arrays.stories = filteredStories;
+      }
     },
     onClickToLink(url) {
       url.length > 0 ? this.$router.push(url) : '';

@@ -17,6 +17,12 @@
   height: 21em;
 }
 
+.container-empty {
+  width: 100%;
+  position: absolute;
+  top: 39%;
+}
+
 @media screen and (max-width: 1280px) {
   .container-card-stories {
     display: grid !important;

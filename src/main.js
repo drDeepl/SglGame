@@ -44,11 +44,15 @@ import {
   NImage,
   NUpload,
   NScrollbar,
+  NEmpty,
+  NResult,
 } from 'naive-ui';
 import CodeBlock from '@/UI/CodeBlock.vue';
 const app = createApp(App);
 
 // setupInterceptors(store);
+app.component('n-result', NResult);
+app.component('n-empty', NEmpty);
 app.component('icon-menu-story', MoreCircle20Regular);
 app.component('icon-delete', Delete16Regular);
 app.component('n-scrollbar', NScrollbar);

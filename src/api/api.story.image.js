@@ -6,8 +6,9 @@ class ApiStoryImage {
   async upload(dataForm) {
     const storyId = dataForm.storyId;
     const image = dataForm.image;
-    return instance.post(API_PATH + '/upload?id_stories=' + storyId, {
-      file: image,
+    const payload = {file: image};
+    return instance.post(API_PATH + '/create', payload, {
+      params: {story_id: storyId},
     });
   }
 

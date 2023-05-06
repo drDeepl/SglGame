@@ -23,7 +23,7 @@ class ApiStory {
   }
   async delete(storyId) {
     logR('warn', 'API.STORY: deleting story');
-    return instance.delete(path + '/delete', storyId);
+    return instance.delete(path + '/delete/' + storyId);
   }
 }
 

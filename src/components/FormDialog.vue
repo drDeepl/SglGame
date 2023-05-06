@@ -6,6 +6,7 @@
     :title="title"
   >
     <n-card
+      v-if="!isSuccess"
       class="border-top-green card-main-layer"
       type="dialog"
       :title="title"
@@ -57,6 +58,28 @@
         </n-scrollbar>
       </n-form>
     </n-card>
+    <n-card v-else class="border-top-green card-main-layer" title=" ">
+      <template #header-extra>
+        <n-button
+          quaternary
+          circle
+          type="error"
+          :focusable="false"
+          @click="onClickCancelButton"
+        >
+          <icon-close style="width: 1.7em" />
+        </n-button>
+      </template>
+      <n-result
+        status="success"
+        :title="successTitle"
+        :description="successDescription"
+      >
+        <template #footer>
+          <slot></slot>
+        </template>
+      </n-result>
+    </n-card>
   </n-modal>
 </template>
 
@@ -71,9 +94,24 @@ export default defineComponent({
     'n-form': NForm,
   },
   props: {
-    isActive: {type: Boolean, default: false},
+    isActive: {type: Boolean, required: false, default: false},
+    isSuccess: {type: Boolean, required: false, default: false},
 
     title: {
+      type: String,
+      required: false,
+      default() {
+        return '';
+      },
+    },
+    successTitle: {
+      type: String,
+      required: false,
+      default() {
+        return '';
+      },
+    },
+    successDescription: {
       type: String,
       required: false,
       default() {

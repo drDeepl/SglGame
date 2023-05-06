@@ -3,9 +3,9 @@ import ServiceDownloadFIle from './download.service';
 import {decorateResponseApi, logR} from './utils';
 
 class ServiceStoryImage {
-  async uploadImg(idStory, image) {
+  async uploadImage(idStory, image) {
     const data = {storyId: idStory, image: image};
-    const response = await decorateResponseApi(ApiStoryImage, data);
+    const response = await decorateResponseApi(ApiStoryImage.upload, data);
     return response;
   }
 
@@ -31,12 +31,6 @@ class ServiceStoryImage {
       logR('error', 'SERVICE.STORY.IMAGE: todo findStoryImageById');
       return new Blob(response.data);
     }
-  }
-
-  async uploadImage(file) {
-    logR('warn', 'STORY.IMAGE.SERIVCE: uploadImage');
-    const response = await decorateResponseApi(ApiStoryImage.upload, file);
-    return response;
   }
 
   async deleteStoryImg(storyId) {
