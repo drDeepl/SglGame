@@ -22,8 +22,11 @@
           <icon-close style="width: 1.7em" />
         </n-button>
       </template>
-
-      <n-form ref="formRef" :model="formValue" :rules="toValidate ? rules : {}">
+      <n-form
+        ref="formRef"
+        :model="formValue.values"
+        :rules="toValidate ? rules : {}"
+      >
         <n-scrollbar style="max-height: 30em">
           <div
             class="form-field"
@@ -40,10 +43,14 @@
                 v-if="field == 'password'"
                 type="password"
                 show-password-on="click"
-                v-model:value="formValue[field]"
+                v-model:value="formValue.values[field]"
                 placeholder=""
               />
-              <n-input v-else v-model:value="formValue[field]" placeholder="" />
+              <n-input
+                v-else
+                v-model:value="formValue.values[field]"
+                placeholder=""
+              />
             </n-form-item>
           </div>
           <n-space vertical>
@@ -164,9 +171,14 @@ export default defineComponent({
 
       status.running = false;
     };
-
+    const resetDataForm = function () {
+      for (let prop in values.value) {
+        values.value[prop] = '';
+      }
+    };
     const onClickCancelButton = function () {
       logR('warn', 'FormDialog: onclickCancelButton');
+      resetDataForm();
       props.cancelFunction();
     };
 

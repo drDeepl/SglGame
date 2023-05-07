@@ -45,13 +45,9 @@ class StoryService {
     return response;
   }
 
-  async storyUpdate(formData) {
+  async updateStory(formData) {
     logR('warn', 'STORY.SERVICE.Update');
-    let response = await decorateResponseApi(ApiStory.update, formData).catch(
-      (resp) => {
-        console.log(resp);
-      }
-    );
+    let response = await decorateResponseApi(ApiStory.update, formData);
     response.status == 200
       ? (response.message = 'Успешно')
       : (response.message = 'Произошла ошибка во время обновления истории');

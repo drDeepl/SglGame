@@ -10,7 +10,6 @@
           :src="require('@/assets/img/add-story.jpg')"
           class="story-card-img"
         />
-        <!-- <img v-else :src="imageSrc" class="story-card-img" /> -->
         <div v-else class="story-img">
           <img class="img-downloaded story-card-img" />
         </div>
@@ -22,7 +21,7 @@
 <script>
 import {defineComponent} from 'vue';
 import ServiceStoryImage from '@/services/story.image.service';
-// import ServiceDownloadFile from '@/services/download.service';
+
 export default defineComponent({
   props: {
     title: {type: String, required: true},

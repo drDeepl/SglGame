@@ -132,7 +132,6 @@
         </n-layout-header>
         <n-layout-content></n-layout-content>
       </n-layout>
-
       <c-form
         v-if="forms.createStory.active"
         :isActive="forms.createStory.active"
@@ -150,7 +149,7 @@
           <n-upload
             v-if="forms.isSuccess.active"
             v-model:file-list="arrays.fileList"
-            :action="`http://localhost:8080/api/userDB/stories_images/create?story_id=${currentStoryId}`"
+            :action="`${API_URL}/userDB/stories_images/create?story_id=${currentStoryId}`"
             :headers="{Authorization: accessToken}"
             :default-upload="true"
             :file-list="arrays.fileList"
@@ -173,13 +172,13 @@
         :cancelFunction="onClickCancelUpdateStory"
       >
         <n-upload
+          :action="`${API_URL}/userDB/stories_images/update?story_id=${currentStoryId}`"
+          :headers="{Authorization: accessToken}"
           v-model:file-list="arrays.fileList"
-          @preview="onUploadFile"
           :default-upload="true"
           :file-list="arrays.fileList"
           list-type="image-card"
           :max="1"
-          :data="dataImage"
         >
           Добавить обложку
         </n-upload>
@@ -192,17 +191,22 @@
 import {defineComponent} from 'vue';
 
 import {NAvatar} from 'naive-ui';
-import CardStory from '@/UI/CardStory.vue';
+import CardStory from '@/components/CardStory.vue';
 
 import {logR} from '@/services/utils';
 import CreateStory from '@/models/model.create.story';
 import ServiceStoryImage from '@/services/story.image.service';
 import StoryService from '@/services/story.service';
+import {API_URL} from '@/api/main';
 
 export default defineComponent({
-  components: {'n-avatar': NAvatar, 'card-story': CardStory},
+  components: {
+    'n-avatar': NAvatar,
+    'card-story': CardStory,
+  },
   data() {
     return {
+      API_URL,
       sidebar: {active: false, rows: []},
       render: {main: false},
       currentStoryId: null,
@@ -323,11 +327,17 @@ export default defineComponent({
       for (let prop in this.forms.updateStory.model.data) {
         this.forms.updateStory.model.data[prop] = dataStory[prop];
       }
+      this.currentStoryId = dataStory.id;
       this.forms.updateStory.active = true;
     },
     async onClickApplyUpdateStory(dataStory) {
       logR('warn', 'AdminProfile: onClickApplyUpdateStory');
-      console.log(dataStory);
+      dataStory['id'] = this.currentStoryId;
+      const response = await StoryService.updateStory(dataStory);
+      if (response.status != 200) {
+        this.$store.commit('notification/SET_ACTIVE_ERROR', response.message);
+      }
+      this.forms.updateStory.active = false;
     },
     onClickCancelUpdateStory() {
       logR('warn', 'AdminProfile: onClickCancelUpdateStory');
