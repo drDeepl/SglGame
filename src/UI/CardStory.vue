@@ -43,14 +43,6 @@ export default defineComponent({
     if (response.status != 200) {
       this.imageNotFound = true;
     } else {
-      //   const url =
-      //     'http://localhost:8080/api/userDB/stories_images/findByStoryId/' +
-      //     this.storyId;
-      //   const file = await ServiceDownloadFile.downloadFileInUint8Array(url);
-      //   const b64 = Buffer.from(file).toString('base64');
-      //   document.querySelector('.img-story-card').src =
-      //     'data:image/jpeg;base64,' + b64;
-      // }
       const b64 = Buffer.from(response.data).toString('base64');
       document.querySelector('.img-downloaded').src =
         'data:image/jpeg;base64,' + b64;
