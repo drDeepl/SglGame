@@ -1,16 +1,23 @@
 import {logR} from './utils';
 
 class ServiceDownloadFile {
-  async downloadFileInUint8Array(url) {
+  async downloadFileInUint8Array(url, options) {
     // NOTE: функция скачивает файл и возвращает массив Uint8Array
 
     logR('warn', 'ServiceDownload: downloadFile');
     logR('log', 'URL\n' + url);
-    const response = await fetch(url).catch((error) => console.log(error));
+    let result = {status: 200, data: null};
+    const response = await fetch(url, options);
+    console.log('fetch response', response);
+    if (response.status != 200) {
+      result.status = response.status;
+      return result;
+    }
     const reader = response.body.getReader();
     // INFO: Получаю длину ответа
     // TODO: Вынести в отдельную функцию =================================================================
     const contentLength = +response.headers.get('Content-Length');
+
     let receivedLength = 0; // INFO: количество байт, полученных на данный момент
     console.log(reader);
     let chunks = [];
@@ -35,7 +42,8 @@ class ServiceDownloadFile {
       position += chunk.length;
     }
     // FIXME: prepare chunksAll in file
-    return fileUint8Array;
+    result.data = fileUint8Array;
+    return result;
   }
 }
 
