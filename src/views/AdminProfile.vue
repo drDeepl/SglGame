@@ -54,48 +54,62 @@
             </div>
             <n-scrollbar>
               <div v-if="arrays.stories.length > 0" class="container-cards">
-                <div class="container-card-stories">
-                  <card-story
-                    v-for="story in arrays.stories.slice(
-                      getSliceStoriesForView.start,
-                      getSliceStoriesForView.end
-                    )"
+                <n-spin
+                  v-if="
+                    forms.updateStory.active ||
+                    forms.createStory.active ||
+                    states.delete.story
+                  "
+                ></n-spin>
+                <div v-else class="container-card-stories">
+                  <div
+                    v-for="story in arrays.stories[
+                      storiesBlock.currentPage - 1
+                    ]"
                     :key="story.id"
-                    :title="story.title"
-                    :storyId="story.id"
-                    :description="story.description"
-                    :difficulty="story.difficulty"
                   >
-                    <n-popconfirm :show-icon="false">
-                      <template #trigger>
-                        <n-icon size="30" color="white" class="card-story-menu">
-                          <icon-menu-story />
-                        </n-icon>
-                      </template>
-                      <template #action>
-                        <n-button
-                          circle
-                          size="tiny"
-                          ghost
-                          @click="onClickUpdateStory(story)"
-                        >
-                          <n-icon size="20" color="orange">
-                            <icon-edit />
+                    <card-story
+                      v-if="!storiesBlock.render"
+                      :title="story.title"
+                      :storyId="story.id"
+                      :description="story.description"
+                      :difficulty="story.difficulty"
+                    >
+                      <n-popconfirm :show-icon="false">
+                        <template #trigger>
+                          <n-icon
+                            size="30"
+                            color="white"
+                            class="card-story-menu"
+                          >
+                            <icon-menu-story />
                           </n-icon>
-                        </n-button>
-                        <n-button
-                          circle
-                          size="tiny"
-                          ghost
-                          @click="onClickDeleteStory(story)"
-                        >
-                          <n-icon size="20" color="red">
-                            <icon-delete />
-                          </n-icon>
-                        </n-button>
-                      </template>
-                    </n-popconfirm>
-                  </card-story>
+                        </template>
+                        <template #action>
+                          <n-button
+                            circle
+                            size="tiny"
+                            ghost
+                            @click="onClickUpdateStory(story)"
+                          >
+                            <n-icon size="20" color="orange">
+                              <icon-edit />
+                            </n-icon>
+                          </n-button>
+                          <n-button
+                            circle
+                            size="tiny"
+                            ghost
+                            @click="onClickDeleteStory(story)"
+                          >
+                            <n-icon size="20" color="red">
+                              <icon-delete />
+                            </n-icon>
+                          </n-button>
+                        </template>
+                      </n-popconfirm>
+                    </card-story>
+                  </div>
                 </div>
                 <n-space justify="center" align="center">
                   <n-button
@@ -156,9 +170,15 @@
             list-type="image-card"
             :max="1"
             @finish="onUploadFileFinish"
+            @remove="onClickRemoveImage"
           >
             Загрузить обложку
           </n-upload>
+          <n-button
+            v-if="arrays.fileList.length > 0"
+            @click="onClickCancelCreateStory"
+            >Готово!</n-button
+          >
         </n-space>
       </c-form>
 
@@ -171,17 +191,27 @@
         :applyFunction="onClickApplyUpdateStory"
         :cancelFunction="onClickCancelUpdateStory"
       >
-        <n-upload
-          :action="`${API_URL}/userDB/stories_images/update?story_id=${currentStoryId}`"
-          :headers="{Authorization: accessToken}"
-          v-model:file-list="arrays.fileList"
-          :default-upload="true"
-          :file-list="arrays.fileList"
-          list-type="image-card"
-          :max="1"
-        >
-          Добавить обложку
-        </n-upload>
+        <n-space justify="center">
+          <n-upload
+            :action="`${API_URL}/userDB/stories_images/${
+              currentStoryHasImg ? 'update' : 'create'
+            }?story_id=${currentStoryId}`"
+            :headers="{Authorization: accessToken}"
+            v-model:file-list="arrays.fileList"
+            :default-upload="true"
+            :file-list="arrays.fileList"
+            list-type="image-card"
+            :max="1"
+            @finish="onUploadFileFinish"
+            @remove="onClickRemoveImage"
+          >
+            {{ currentStoryHasImg ? 'Обновить обложку' : 'Добавить обложку' }}
+          </n-upload>
+          <n-alert
+            type="warning"
+            title="После выбора картинки обложка будет автоматически обновлена"
+          ></n-alert>
+        </n-space>
       </c-form>
     </n-layout>
   </div>
@@ -193,7 +223,7 @@ import {defineComponent} from 'vue';
 import {NAvatar} from 'naive-ui';
 import CardStory from '@/components/CardStory.vue';
 
-import {logR} from '@/services/utils';
+import {logR, toChunks} from '@/services/utils';
 import CreateStory from '@/models/model.create.story';
 import ServiceStoryImage from '@/services/story.image.service';
 import StoryService from '@/services/story.service';
@@ -209,21 +239,25 @@ export default defineComponent({
       API_URL,
       sidebar: {active: false, rows: []},
       render: {main: false},
+      states: {delete: {story: false}},
       currentStoryId: null,
+      currentStoryHasImg: false,
       storiesBlock: {
+        render: false,
         countPage: 1,
-        currentStartIdEl: 0,
+
         currentPage: 1,
         countStoriesPage: 4,
       },
       forms: {
-        createStory: {active: false, model: CreateStory},
-        updateStory: {active: false, model: CreateStory, selectedStoryId: null},
+        createStory: {active: false, model: {}},
+        updateStory: {active: false, model: {}, selectedStory: {}},
         isSuccess: {active: false, message: ''},
       },
       arrays: {
         fileList: [],
         stories: [],
+        idsImagesStories: [],
       },
     };
   },
@@ -240,14 +274,6 @@ export default defineComponent({
         ? this.$store.state.auth.tokenData
         : null;
     },
-    getSliceStoriesForView() {
-      return {
-        start: this.storiesBlock.currentStartIdEl,
-        end:
-          this.storiesBlock.currentStartIdEl +
-          this.storiesBlock.countStoriesPage,
-      };
-    },
   },
   async created() {
     // TODO: Подгрузка историй с бека
@@ -256,15 +282,17 @@ export default defineComponent({
       this.$router.push({name: 'home'});
     } else {
       this.sidebar.rows = this.$store.state.user.userSidebar.admin;
-      const responseStories = await StoryService.getStories();
-      // const responseStoriesImage = await ServiceStoryImage.get
-      if (responseStories.status == 200) {
-        const countPage = Math.ceil(
-          responseStories.data.length / this.storiesBlock.countStoriesPage
-        );
-        this.storiesBlock.countPage = countPage;
-        this.arrays.stories = responseStories.data;
-      }
+      this.forms.createStory.model = new CreateStory();
+      const stories = await StoryService.getStories();
+      const idsImagesStories = await ServiceStoryImage.getIdsImagesStories();
+
+      console.log('STORIES\n', stories);
+      const chunksStories = toChunks(stories, 4);
+      console.log('CHUNKS\n', chunksStories);
+      this.arrays.stories = chunksStories.reverse();
+      this.arrays.idsImagesStories = idsImagesStories;
+
+      this.storiesBlock.countPage = chunksStories.length;
     }
     this.render.main = false;
   },
@@ -274,23 +302,31 @@ export default defineComponent({
       this.currentStoryId = null;
     },
     updateCountPageInStoriesBox() {
-      const countPageStories = Math.ceil(
-        this.arrays.stories.length / this.storiesBlock.countStoriesPage
-      );
-      console.error('COUNT PAGES\n', countPageStories);
-      this.storiesBlock.countPage = countPageStories;
+      const lengthStories = this.arrays.stories.length;
+      this.storiesBlock.countPage = lengthStories;
     },
     onUploadFileFinish() {
       logR('warn', 'onUploadFile');
+      console.log(this.currentStoryId);
+      this.arrays.idsImagesStories.push(this.currentStoryId);
+    },
+    async onClickRemoveImage() {
+      logR('warn', 'OnClickRemove');
+      await ServiceStoryImage.deleteStoryImg(this.currentStoryId);
     },
     onClickCreateStory() {
       logR('ADMIN PROFILE:onCLickCreateStory');
       this.forms.createStory.active = true;
-      console.log(this.createStory);
+    },
+    onClickCancelCreateStory() {
+      logR('warn', 'PROFILE:onClickCancelCreateStory');
+      this.forms.createStory.active = false;
+      this.forms.createStory.model = new CreateStory();
+      this.arrays.fileList = [];
+      this.clearSuccessForm();
     },
     async onClickApplyCreateStory(dataForm) {
       logR('warn', 'ADMIN PROFILE:onClickApplyCreateStory');
-      console.log(ServiceStoryImage);
       console.log(dataForm);
 
       const response = await this.$store.dispatch(
@@ -298,13 +334,29 @@ export default defineComponent({
         dataForm
       );
       if (response.status == 200) {
+        let firstPageStories = this.arrays.stories[0];
         const splitResponse = response.data.split(':');
         const storyId = Number(splitResponse.at(1));
         dataForm['id'] = storyId;
 
-        this.arrays.stories.splice(this.arrays.stories.length, 0, dataForm);
         this.currentStoryId = storyId;
         this.forms.isSuccess.active = true;
+        if (this.arrays.stories.length == 0) {
+          this.arrays.stories.push([dataForm]);
+        } else {
+          console.log('ARRAYS STORIES\n', this.arrays.stories);
+          const firstArrayLength = firstPageStories.length;
+          console.log('LAST ELEMENT LENGTH\n', firstArrayLength);
+          if (firstArrayLength < this.storiesBlock.countStoriesPage) {
+            console.log('laste element lestt');
+            firstPageStories.push(dataForm);
+            this.arrays.stories[0] = firstPageStories;
+          } else {
+            this.arrays.stories.push([dataForm]);
+          }
+        }
+
+        // this.onClickCancelCreateStory();
         this.updateCountPageInStoriesBox();
       } else {
         this.$store.commit('notification/SET_ACTIVE_ERROR', response.message);
@@ -314,19 +366,26 @@ export default defineComponent({
       this.forms.isSuccess.active = false;
       this.forms.isSuccess.message = '';
     },
-    onClickCancelCreateStory() {
-      logR('warn', 'PROFILE:onClickCancelCreateStory');
-      this.forms.createStory.active = false;
-      this.clearSuccessForm();
-    },
+
     onClickStory() {
       logR('error', 'todo:ADMIN PROFILE:onClickStory');
     },
     onClickUpdateStory(dataStory) {
       console.error('todo: onClickUpdateStory');
-      for (let prop in this.forms.updateStory.model.data) {
-        this.forms.updateStory.model.data[prop] = dataStory[prop];
+
+      const model = new CreateStory();
+      for (let prop in model.data) {
+        model.data[prop] = dataStory[prop];
       }
+
+      this.forms.updateStory.model = model;
+      const idsImagesStories = this.arrays.idsImagesStories;
+      console.log(idsImagesStories);
+      this.currentStoryHasImg = idsImagesStories.find(
+        (element) => element == dataStory.id
+      )
+        ? true
+        : false;
       this.currentStoryId = dataStory.id;
       this.forms.updateStory.active = true;
     },
@@ -337,27 +396,39 @@ export default defineComponent({
       if (response.status != 200) {
         this.$store.commit('notification/SET_ACTIVE_ERROR', response.message);
       }
-      this.forms.updateStory.active = false;
+
+      const stories = this.arrays.stories[this.storiesBlock.currentPage - 1];
+      const idUpdateStory = stories.findIndex(
+        (story) => story.id == this.currentStoryId
+      );
+      stories.splice(idUpdateStory, 1, dataStory);
+      this.onClickCancelUpdateStory();
     },
     onClickCancelUpdateStory() {
       logR('warn', 'AdminProfile: onClickCancelUpdateStory');
       this.forms.updateStory.active = false;
+      this.arrays.fileList = [];
     },
     async onClickDeleteStory(storyData) {
+      this.states.delete.story = true;
       console.error('todo: onClickDeleteStory');
       console.log(storyData);
-      const stories = this.arrays.stories;
+
       const storyId = storyData.id;
 
       const response = await StoryService.storyDelete(storyId);
       console.log(response);
       if (response.status == 200) {
-        const filteredStories = await stories.filter((story) => {
-          return story.id != storyId;
-        });
-        this.arrays.stories = filteredStories;
+        const stories = await StoryService.getStories();
+        const storiesChunks = toChunks(
+          stories,
+          this.storiesBlock.countStoriesPage
+        );
+
+        this.arrays.stories = storiesChunks;
         this.updateCountPageInStoriesBox();
       }
+      this.states.delete.story = false;
     },
     onClickToLink(url) {
       url.length > 0 ? this.$router.push(url) : '';
@@ -367,21 +438,17 @@ export default defineComponent({
       logR('warn', 'AdminProfile: onClickNextPageStory');
       // storiesBlock: {
       //   countPage: 1,
-      //   currentStartIdEl: 0,
+
       //   currentPage: 1,
       //   countStoriesPage: 4,
       // },
 
       this.storiesBlock.currentPage += 1;
-      const idElStarted =
-        this.storiesBlock.currentStartIdEl + this.storiesBlock.countStoriesPage;
-      this.storiesBlock.currentStartIdEl = idElStarted;
     },
 
     onClickPrevPageStory() {
       logR('warn', 'AdminProfile: onClickPrevPageStory');
       this.storiesBlock.currentPage -= 1;
-      this.storiesBlock.currentStartIdEl -= this.storiesBlock.countStoriesPage;
     },
   },
 });

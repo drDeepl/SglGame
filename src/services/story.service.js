@@ -3,16 +3,12 @@ import {decorateResponseApi, logR} from './utils';
 class StoryService {
   async getStories() {
     logR('warn', 'STORY.SERVICE.getStories');
-    let response = await decorateResponseApi(ApiStory.getStories).catch(
-      (resp) => {
-        console.log(resp);
-      }
-    );
-    response.status == 200
-      ? (response.message = 'Успешно')
-      : (response.message = 'Произошла ошибка при получения списка историй');
+    let response = await decorateResponseApi(ApiStory.getStories);
+    if (response.status != 200) {
+      return [];
+    }
     console.log(response);
-    return response;
+    return response.data;
   }
 
   async getStoryById(storyId) {

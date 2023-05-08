@@ -30,7 +30,7 @@
         <n-scrollbar style="max-height: 30em">
           <div
             class="form-field"
-            v-for="field in Object.keys(itemModel.data)"
+            v-for="field in Object.keys(itemModel.labels)"
             :key="field"
           >
             <n-form-item
@@ -153,9 +153,6 @@ export default defineComponent({
     let formValue = reactive({values});
     const running = ref(false);
     const status = reactive({running});
-    const onClickSubmit = function () {
-      console.log(formRef.value?.validate());
-    };
 
     const onClickApplyButton = async function () {
       // NOTE: applyFUnction возвращает объект {ok:true}
@@ -166,19 +163,14 @@ export default defineComponent({
         .catch((resp) => resp.length > 0);
 
       if (!isValid) {
-        await props.applyFunction(formValue);
+        await props.applyFunction(formValue.values);
       }
 
       status.running = false;
     };
-    const resetDataForm = function () {
-      for (let prop in values.value) {
-        values.value[prop] = '';
-      }
-    };
+
     const onClickCancelButton = function () {
       logR('warn', 'FormDialog: onclickCancelButton');
-      resetDataForm();
       props.cancelFunction();
     };
 
@@ -187,7 +179,6 @@ export default defineComponent({
       status,
       formRef,
       formValue,
-      onClickSubmit,
       rules: props.itemModel.rules,
       onClickApplyButton,
       onClickCancelButton,

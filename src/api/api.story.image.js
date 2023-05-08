@@ -1,5 +1,5 @@
 import instance from './main';
-import ServiceDownloadFile from '@/services/download.service';
+
 const API_PATH = '/userDB/stories_images';
 
 class ApiStoryImage {
@@ -16,14 +16,15 @@ class ApiStoryImage {
     return instance.post(API_PATH + '/update', dataForm);
   }
 
-  async findByStoryId(storyId, options) {
-    return ServiceDownloadFile.downloadFileInUint8Array(
-      instance.getUri() + API_PATH + '/findByStoryId/' + storyId,
-      options
-    );
-    // return instance.get(API_PATH + '/findByStoryId/' + storyId);
+  async findByStoryId(storyId) {
+    return instance.get(API_PATH + '/findByStoryId/' + storyId, {
+      responseType: 'arraybuffer',
+    });
   }
 
+  async getIdsImagesStories() {
+    return instance.get(API_PATH + '/listID');
+  }
   async delete(imageId) {
     return instance.delete(API_PATH + '/delete/' + imageId);
   }

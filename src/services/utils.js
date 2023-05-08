@@ -14,19 +14,26 @@ export function logR(type, msg) {
 }
 
 export const decorateResponseApi = async function (func, context) {
-  let response = {status: 404, data: null, message: ''};
+  // let response = {status: 404, data: null, message: ''};
   const token = TokenService.getLocalAccessToken();
   console.log('token\n', token);
   const config = {headers: {Authorization: token}};
-  const responseWrap = await func(context, config).catch((resp) => {
+  const response = await func(context, config).catch((resp) => {
     console.error('DECORATE RESPONSE API\n', resp);
-    return {status: 404};
+    if (resp.status) {
+      return {status: resp.status};
+    } else {
+      return {status: resp.response.status};
+    }
   });
-  if (responseWrap.status == 200) {
-    response.status = responseWrap.status;
-    response.data = responseWrap.data;
-    return response;
+  if (response.status != 200) {
+    return {status: response.status, data: null};
   }
+  // if (responseWrap.status == 200) {
+  //   response.status = responseWrap.status;
+  //   response.data = responseWrap.data;
+  //   return response;
+  // }
   return response;
 };
 
@@ -82,4 +89,12 @@ export const getBinaryFromFile = function (file) {
 
     reader.readAsBinaryString(file);
   });
+};
+
+export const toChunks = function (arr, size) {
+  const chunks = [];
+  for (let i = 0; i < arr.length; i += size) {
+    chunks.push(arr.slice(i, i + size));
+  }
+  return chunks;
 };

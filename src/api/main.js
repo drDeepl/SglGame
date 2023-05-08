@@ -1,5 +1,6 @@
 import axios from 'axios';
 import TokenService from '@/services/token.service';
+import {extractJWT} from '@/services/utils';
 
 export const API_URL = 'http://localhost:8080/api';
 
@@ -12,9 +13,12 @@ const instance = axios.create({
 });
 
 instance.interceptors.request.use(function (config) {
-  // console.warn('CONFIG\n', config);
   let accessToken = TokenService.getLocalAccessToken();
-  console.warn('API INSTANCE ACCESS TOKEN\n', accessToken);
+  const lifeTimeAccess = extractJWT(accessToken).exp * 1000;
+  const difference = lifeTimeAccess - Date.now();
+  console.error('DIFFERENCE', difference);
+
+  // console.warn('API INSTANCE ACCESS TOKEN\n', accessToken);
   let auth = accessToken ? 'Bearer ' + accessToken : null;
   config.headers.Authorization = auth;
   return config;

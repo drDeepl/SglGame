@@ -48,12 +48,14 @@ import {
   NEmpty,
   NResult,
   NPagination,
+  NSkeleton,
+  NTooltip,
 } from 'naive-ui';
 import CodeBlock from '@/UI/CodeBlock.vue';
 const app = createApp(App);
 
 // setupInterceptors(store);
-
+app.component('n-skeleton', NSkeleton);
 app.component('n-pagination', NPagination);
 app.component('n-result', NResult);
 app.component('n-empty', NEmpty);
@@ -70,6 +72,7 @@ app.component('n-alert', NAlert);
 app.component('n-dialog', NDialog);
 app.component('n-rate', NRate);
 app.component('n-popover', NPopover);
+app.component('n-tooltip', NTooltip);
 app.component('n-icon', NIcon);
 app.component('icon-arrow-left', IosArrowLtr24Regular);
 

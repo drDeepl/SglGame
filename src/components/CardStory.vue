@@ -10,9 +10,7 @@
           :src="require('@/assets/img/add-story.jpg')"
           class="story-card-img"
         />
-        <div v-else class="story-img">
-          <img class="img-downloaded story-card-img" />
-        </div>
+        <img v-else class="img-downloaded story-card-img" />
       </template>
     </n-card>
   </div>
@@ -28,27 +26,29 @@ export default defineComponent({
     storyId: {type: Number, required: true},
     difficulty: {type: String, required: true},
     description: {type: String, required: true},
+    hasImage: {type: Boolean, default: false},
   },
   data() {
     return {
       render: false,
       imageNotFound: false,
-      imageSrc: '',
     };
   },
   async created() {
     this.render = true;
+    console.log(this.title);
     const response = await ServiceStoryImage.findStoryImageById(this.storyId);
     if (response.status != 200) {
       this.imageNotFound = true;
     } else {
-      const b64 = Buffer.from(response.data).toString('base64');
-      document.querySelector('.img-downloaded').src =
-        'data:image/jpeg;base64,' + b64;
+      // const b64 = Buffer.from(response.data).toString('base64');
+      console.log('RESPONSE IMAGE\n', response);
+      console.log(this.storyId);
+      this.render = false;
+      document.querySelector(
+        '.img-downloaded'
+      ).src = `data:${response.type};base64,${response.data}`;
     }
-    console.log('RESPONSE IMAGE\n', response);
-    console.log(this.storyId);
-    this.render = false;
   },
 });
 </script>

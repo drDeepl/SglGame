@@ -14,8 +14,24 @@ class ServiceStoryImage {
     const options = {
       headers: {Authorization: 'Bearer ' + TokenService.getLocalAccessToken()},
     };
-    const response = await ApiStoryImage.findByStoryId(storyId, options);
-    return response;
+    const result = {status: 200, data: null, type: null, message: ''};
+    const response = await ApiStoryImage.findByStoryId(storyId, options).catch(
+      (error) => {
+        console.log(error);
+        if (error.status) {
+          result.status = error.status;
+        }
+        if (error.code) {
+          result.status = error.response.status;
+        }
+      }
+    );
+    if (result.status === 200) {
+      result.type = response.headers['content-type'];
+      result.data = Buffer.from(response.data, 'binary').toString('base64');
+    }
+    console.error('findStoryImageById', result);
+    return result;
   }
 
   async updateImage(context) {
@@ -26,6 +42,18 @@ class ServiceStoryImage {
   async deleteStoryImg(storyId) {
     const response = await decorateResponseApi(ApiStoryImage.delete, storyId);
     return response;
+  }
+
+  async getIdsImagesStories() {
+    const response = await decorateResponseApi(
+      ApiStoryImage.getIdsImagesStories
+    );
+
+    if (response.status === 200) {
+      return response.data;
+    } else {
+      return [];
+    }
   }
 }
 

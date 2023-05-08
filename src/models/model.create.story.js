@@ -38,4 +38,4 @@ class CreateStory {
   }
 }
 
-export default new CreateStory();
+export default CreateStory;
