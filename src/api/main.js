@@ -12,15 +12,28 @@ const instance = axios.create({
   headers: {Authorization: accessToken},
 });
 
-instance.interceptors.request.use(function (config) {
-  let accessToken = TokenService.getLocalAccessToken();
-  const lifeTimeAccess = extractJWT(accessToken).exp * 1000;
-  const difference = lifeTimeAccess - Date.now();
-  console.error('DIFFERENCE', difference);
+instance.interceptors.request.use(async function (config) {
+  const token = TokenService.getToken();
+  let accessToken = token.accessToken;
+  if (accessToken) {
+    const lifeTimeAccess = extractJWT(accessToken).exp * 1000;
+    const difference = lifeTimeAccess - Date.now() - 10000;
+    console.log('DIFFERENCE', difference);
+    let auth = accessToken ? 'Bearer ' + accessToken : null;
+    if (difference < 0) {
+      const newTokenResponse = await axios.post(
+        `${API_URL}/auth/getNewAccessToken`,
+        {
+          refreshToken: token.refreshToken,
+        }
+      );
+      const accessTokenJSON = newTokenResponse.data;
+      auth = accessTokenJSON.type + ' ' + accessTokenJSON.accessToken;
+      TokenService.updateLocalAccessToken(accessTokenJSON.accessToken);
+    }
+    config.headers.Authorization = auth;
+  }
 
-  // console.warn('API INSTANCE ACCESS TOKEN\n', accessToken);
-  let auth = accessToken ? 'Bearer ' + accessToken : null;
-  config.headers.Authorization = auth;
   return config;
 });
 

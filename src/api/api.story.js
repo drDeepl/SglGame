@@ -1,6 +1,7 @@
 import {logR} from '@/services/utils';
 import instance from './main';
 const path = '/userDB/stories';
+// FIX: /api/userDB/stories/delete/{id}
 
 class ApiStory {
   async getStories() {

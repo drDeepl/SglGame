@@ -10,7 +10,7 @@ class CreateStory {
 
     this.labels = {
       title: 'Название',
-      difficulty: 'Уровень сложности',
+      difficulty: 'Уровень сложности от 1 до 5',
       description: 'Описание истории',
       story_text: 'Текст истории',
       answer: 'Ответ',
@@ -20,8 +20,14 @@ class CreateStory {
       title: {required: true, message: 'Необходимое поле', trigger: 'blur'},
       difficulty: {
         required: true,
-        message: 'Необходимое поле',
-        trigger: 'blur',
+        validator(rule, value) {
+          if (!value) {
+            return new Error('Необходимое поле');
+          } else if (!/^-?\d+$/.test(value)) {
+            return new Error('Необходимо ввести число от 1 до 5 включительно');
+          }
+          return true;
+        },
       },
       description: {
         required: true,
