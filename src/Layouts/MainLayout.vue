@@ -162,6 +162,7 @@ export default defineComponent( {
       const currentDate = Date.now();
       const userExp = this.userData.exp *1000// INFO: default userData.exp in seconds, aftetr * 1000 will milliseconds
       const differenceTime = userExp - currentDate
+      let intervalForUpdateToken = differenceTime;
       console.log(`Difference time${differenceTime}`)
       if((userExp - currentDate) < 0){
 
@@ -169,14 +170,25 @@ export default defineComponent( {
         const refreshTokenExp = refreshToken.exp * 1000;
         const differenceTimeRefresh = refreshTokenExp - currentDate;
         if(differenceTimeRefresh < 0){
-          console.log('REFRESH MORE CURRUENT DATE');
+          console.log('REFRESH MORE CURRUNT DATE');
           this.$store.commit('auth/REMOVE_TOKEN');
         }
         else{
-          await AuthService.updateAccessToken();
+          const accessToken = await AuthService.updateAccessToken();
+          const userDataFromAccess = extractJWT(accessToken);
+          const lifeTimeToken = userDataFromAccess.exp * 1000;
           console.log(tokenUser.accessToken);
-          this.$store.commit("auth/UPDATE_ACCESS_TOKEN");
+
+          intervalForUpdateToken = lifeTimeToken - Date.now() - 10000;
+          console.error("Access update through: ", intervalForUpdateToken);
         }
+
+          this.timerForUpdateAccessToken = setInterval(() => {
+          AuthService.updateAccessToken();
+          this.$store.commit("auth/UPDATE_ACCESS_TOKEN");
+
+        }, intervalForUpdateToken);
+
       }
     }
     this.render.main = false;

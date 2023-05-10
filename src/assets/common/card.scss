@@ -82,6 +82,10 @@
   border-radius: 10px;
 }
 
+.soft-shadow {
+  box-shadow: rgba(0, 0, 0, 0.25) 0px 25px 50px -12px !important;
+}
+
 .card-header-story {
   background-color: $color-white;
   margin-bottom: 1em;

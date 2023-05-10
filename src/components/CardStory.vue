@@ -1,6 +1,6 @@
 <template>
   <div>
-    <n-card class="story-card" :title="title">
+    <n-card class="story-card soft-shadow" :title="title">
       <template #header-extra>
         <slot></slot>
       </template>
@@ -41,7 +41,6 @@ export default defineComponent({
     if (response.status != 200) {
       this.imageNotFound = true;
     } else {
-      // const b64 = Buffer.from(response.data).toString('base64');
       console.log('RESPONSE IMAGE\n', response);
       console.log(this.storyId);
       this.render = false;

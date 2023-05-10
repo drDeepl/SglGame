@@ -38,3 +38,20 @@
     grid-template-columns: 1fr 1fr !important;
   }
 }
+
+.empty-stories-container {
+  margin-top: 2em;
+}
+
+.preview-story-container {
+  margin: 1em 2em;
+}
+
+.preview-story-content {
+  display: flex;
+  justify-content: space-around;
+}
+
+.pagination-container {
+  margin-top: 1em;
+}

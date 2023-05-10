@@ -436,13 +436,6 @@ export default defineComponent({
 
     onClickNextPageStory() {
       logR('warn', 'AdminProfile: onClickNextPageStory');
-      // storiesBlock: {
-      //   countPage: 1,
-
-      //   currentPage: 1,
-      //   countStoriesPage: 4,
-      // },
-
       this.storiesBlock.currentPage += 1;
     },
 

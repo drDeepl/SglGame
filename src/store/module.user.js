@@ -1,28 +1,11 @@
 import UserService from '@/services/user.service';
-
+import {tabsByRole} from '@/_config';
 export const user = {
   namespaced: true,
   state() {
     return {
       userData: null,
-      userSidebar: {
-        admin: [
-          {
-            id: 0,
-            title: 'Панель администратора',
-            lock: false,
-            url: '/admin',
-          },
-          {
-            id: 1,
-            title: 'Редактирование таблиц',
-            lock: false,
-            url: '/database',
-          },
-          {id: 0, title: 'К историям', lock: false, url: '/stories'},
-        ],
-        user: [{id: 0, title: 'К историям', lock: false, url: '/stories'}],
-      },
+      userSidebar: tabsByRole,
     };
   },
   actions: {
