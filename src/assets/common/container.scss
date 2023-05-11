@@ -55,3 +55,27 @@
 .pagination-container {
   margin-top: 1em;
 }
+
+// .story-chema-container {
+//   max-width: 10em;
+//   max-height: 10em;
+// }
+
+.story-image-container > img {
+  width: 30em;
+  height: 20em;
+}
+
+.story-description-block-container {
+  width: 33.5em;
+}
+
+.rotate-0-deg {
+  rotate: 0deg;
+  transition: rotate 0.5s;
+}
+
+.rotate-180-deg {
+  rotate: 180deg;
+  transition: rotate 0.5s;
+}

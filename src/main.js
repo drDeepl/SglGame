@@ -13,6 +13,7 @@ import {
   Delete16Regular,
   MoreCircle20Regular,
   IosArrowLtr24Regular,
+  Triangle48Regular,
 } from '@vicons/fluent';
 import './assets/main.scss';
 
@@ -50,11 +51,13 @@ import {
   NPagination,
   NSkeleton,
   NTooltip,
+  NCollapseTransition,
 } from 'naive-ui';
 import CodeBlock from '@/UI/CodeBlock.vue';
 const app = createApp(App);
 
 // setupInterceptors(store);
+app.component('n-collapse-transition', NCollapseTransition);
 app.component('n-skeleton', NSkeleton);
 app.component('n-pagination', NPagination);
 app.component('n-result', NResult);
@@ -75,7 +78,7 @@ app.component('n-popover', NPopover);
 app.component('n-tooltip', NTooltip);
 app.component('n-icon', NIcon);
 app.component('icon-arrow-left', IosArrowLtr24Regular);
-
+app.component('icon-triangle-up', Triangle48Regular);
 app.component('n-layout-header', NLayoutHeader);
 app.component('n-layout-sider', NLayoutSider);
 app.component('n-layout-content', NLayoutContent);

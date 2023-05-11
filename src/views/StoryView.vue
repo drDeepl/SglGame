@@ -23,7 +23,7 @@
           :key="story.id"
         >
           <card-story
-            @click="onClickHistory(story)"
+            @click="onClickStory(story)"
             class="cursor-layout"
             v-if="!render.storiesBlock"
             :title="story.title"
@@ -65,7 +65,7 @@
         class="card-story-main-layer"
         v-for="story in arrays.story"
         :key="story"
-        @click="onClickHistory(story)"
+        @click="onClickStory(story)"
       >
         <n-popover trigger="hover">
           <template #trigger>
@@ -91,7 +91,7 @@
   >
     <n-card
       class="card-main-layer-history border-top-yellow"
-      :title="story.title"
+      :title="story.data.title"
       role="dialog"
       size="huge"
     >
@@ -120,44 +120,60 @@
         <n-spin v-if="story.loadProgress == 100 && story.loadData"></n-spin>
       </n-space>
       <div v-else class="history-card-content">
-        <n-descriptions>
+        {{ story.data }}
+        <!-- <n-descriptions>
           <n-descriptions-item label-align="center">
-            {{ story.description }}
+            {{ story.data.description }}
           </n-descriptions-item>
-        </n-descriptions>
-        <div class="history-schema-img">Тут будет схема бд</div>
-        <n-alert
-          width="100%"
-          v-if="codemirror.error.active"
-          :title="codemirror.error.message"
-          closable
-          type="warning"
-          :on-close="
-            () => {
-              (codemirror.error.active = false),
-                (codemirror.error.message = '');
-            }
-          "
-        >
-        </n-alert>
-        <n-code-block
-          :onClickRunCodeFunc="onClickRunCode"
-          :onClickClearCodeFunc="onClickClearCode"
-          :loadApply="render.story.runCode"
-        >
-          <!-- <n-button @click="fakeData()">Случайные данные</n-button>  -->
-        </n-code-block>
+          <n-descriptions-item>{{ story.data.story_text }}</n-descriptions-item>
+        </n-descriptions> -->
+        <n-space justify="center" align="center" vertical>
+          <collapsed-card
+            v-for="prop in ['description', 'story_text']"
+            :key="prop"
+            :title="story.model.labels[prop]"
+          >
+            {{ story.data[prop] }}
+          </collapsed-card>
+          <collapsed-card title="Схема базы данных">
+            <n-image
+              object-fit="cover"
+              class="story-image-container"
+              :src="require('@/assets/img/schema_db.jpg')"
+            ></n-image>
+          </collapsed-card>
+          <n-alert
+            width="100%"
+            v-if="codemirror.error.active"
+            :title="codemirror.error.message"
+            closable
+            type="warning"
+            :on-close="
+              () => {
+                (codemirror.error.active = false),
+                  (codemirror.error.message = '');
+              }
+            "
+          >
+          </n-alert>
+          <n-code-block
+            :onClickRunCodeFunc="onClickRunCode"
+            :onClickClearCodeFunc="onClickClearCode"
+            :loadApply="render.story.runCode"
+          >
+          </n-code-block>
 
-        <!-- <n-space justify="space-around"> -->
-        <n-space justify="space-between">
-          <n-input
-            v-model:value="codemirror.answer"
-            placeholder="Ответ:"
-          ></n-input>
+          <n-space justify="space-between">
+            <n-input
+              v-model:value="codemirror.answer"
+              placeholder="Ответ:"
+            ></n-input>
 
-          <n-button>Отправить</n-button>
+            <n-button>Отправить</n-button>
+          </n-space>
         </n-space>
       </div>
+
       <div style="margin-top: 1em">
         <n-data-table
           ref="table"
@@ -187,7 +203,8 @@ import DatabaseManager from '@/database/DatabaseManager';
 import ServiceDatabase from '@/services/service.database';
 import StoryService from '@/services/story.service';
 // import ServiceDownloadFile from '@/services/download.service';
-
+import CreateStory from '@/models/model.create.story';
+import {API_URL} from '@/api/main';
 import {
   logR,
   prepareDataTable,
@@ -198,11 +215,12 @@ import {defineComponent} from 'vue';
 
 // import CodeBlock from '@/UI/CodeBlock.vue';
 import CardStory from '@/components/CardStory.vue';
+import CollapsedCard from '@/UI/CollapsedCard.vue';
 import {changeColor} from 'seemly';
 import {useThemeVars} from 'naive-ui';
 
 export default defineComponent({
-  components: {'card-story': CardStory},
+  components: {'card-story': CardStory, 'collapsed-card': CollapsedCard},
   data() {
     return {
       render: {
@@ -225,11 +243,11 @@ export default defineComponent({
       },
       story: {
         active: false,
-        title: '',
-        description: '',
+        data: {},
         loadData: false,
         loadProgress: 0,
         db: null,
+        model: new CreateStory(),
       },
       codemirror: {
         columns: [],
@@ -315,14 +333,15 @@ export default defineComponent({
         );
       }
     },
-    async onClickHistory(story) {
+    async onClickStory(story) {
       // FIX: =========================================
-      logR('warn', 'NAVBAR: onClickHistory');
+      logR('warn', 'NAVBAR: onClickStory');
+      this.story.data = story;
       this.story.loadData = true;
       this.story.active = true;
       console.log(story);
       try {
-        const urlToDb = 'http://localhost:8080/api/fileDB/get';
+        const urlToDb = `${API_URL}/fileDB/get`;
         const response2DownloadDb = await ServiceDatabase.downloadFile(
           urlToDb
         ).catch((error) => {
@@ -345,8 +364,6 @@ export default defineComponent({
         this.createErrorAlert('Что-то пошло не так');
         this.story.active = false;
       } finally {
-        this.story.title = story.title;
-        this.story.description = story.description;
         this.story.loadData = false;
       }
 

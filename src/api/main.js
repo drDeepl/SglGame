@@ -2,7 +2,7 @@ import axios from 'axios';
 import TokenService from '@/services/token.service';
 import {extractJWT} from '@/services/utils';
 
-export const API_URL = 'http://localhost:8080/api';
+export const API_URL = 'http://194.67.121.7:8080/api';
 
 axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
 const token = TokenService.getToken();
@@ -14,8 +14,9 @@ const instance = axios.create({
 
 instance.interceptors.request.use(async function (config) {
   const token = TokenService.getToken();
-  let accessToken = token.accessToken;
-  if (accessToken) {
+
+  if (token) {
+    let accessToken = token.accessToken;
     const lifeTimeAccess = extractJWT(accessToken).exp * 1000;
     const difference = lifeTimeAccess - Date.now() - 10000;
     console.log('DIFFERENCE', difference);
