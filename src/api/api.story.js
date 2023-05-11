@@ -26,6 +26,12 @@ class ApiStory {
     logR('warn', 'API.STORY: deleting story');
     return instance.delete(path + '/delete/' + storyId);
   }
+  async checkAnswer(dataForm) {
+    const storyId = dataForm.storyId;
+    const answer = dataForm.answer;
+    logR('warn', 'API.STORY: checking answer');
+    return instance.post(`${path}/checkAnswer/${storyId}`, {answer: answer});
+  }
 }
 
 export default new ApiStory();

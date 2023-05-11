@@ -51,6 +51,12 @@ class StoryService {
     return response;
   }
 
+  async checkStoryAnswer(payload) {
+    logR('warn', 'STORY.SERVICE: checkStoryAnswer');
+    const response = await decorateResponseApi(ApiStory.checkAnswer, payload);
+    return response;
+  }
+
   async storyDelete(storyId) {
     logR('warn', 'STORY.SERVICE.Delete');
     let response = await decorateResponseApi(ApiStory.delete, storyId).catch(

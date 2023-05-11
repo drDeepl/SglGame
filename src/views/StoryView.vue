@@ -202,18 +202,13 @@ import {mapGetters} from 'vuex';
 import DatabaseManager from '@/database/DatabaseManager';
 import ServiceDatabase from '@/services/service.database';
 import StoryService from '@/services/story.service';
-// import ServiceDownloadFile from '@/services/download.service';
+
 import CreateStory from '@/models/model.create.story';
 import {API_URL} from '@/api/main';
-import {
-  logR,
-  prepareDataTable,
-  sqlQueryIsValidate,
-  toChunks,
-} from '@/services/utils';
+
+import {logR, prepareDataTable, toChunks} from '@/services/utils';
 import {defineComponent} from 'vue';
 
-// import CodeBlock from '@/UI/CodeBlock.vue';
 import CardStory from '@/components/CardStory.vue';
 import CollapsedCard from '@/UI/CollapsedCard.vue';
 import {changeColor} from 'seemly';
@@ -255,7 +250,7 @@ export default defineComponent({
         pagination: {pageSize: 5},
         answer: '',
         isWork: false,
-        error: {active: false, message: ''},
+        error: {active: false, message: []},
       },
 
       tab: 0,
@@ -297,6 +292,9 @@ export default defineComponent({
       return this.$store.state.auth.tokenData
         ? this.$store.state.auth.tokenData
         : null;
+    },
+    getErrors() {
+      return this.$store.state.story.errors;
     },
   },
 
@@ -366,8 +364,6 @@ export default defineComponent({
       } finally {
         this.story.loadData = false;
       }
-
-      // FIX: =========================================
     },
     onClickClearCode() {
       this.codemirror.data = [];
@@ -377,33 +373,32 @@ export default defineComponent({
     async onClickRunCode(query) {
       logR('warn', 'NAVBAR: onClickRunCode');
       this.render.story.runCode = true;
+      let errors = this.getErrors;
       try {
-        const responseQueryValidate = sqlQueryIsValidate(query);
-        console.log('RESPONSE VALIDATE QUERY\n', responseQueryValidate);
-
-        if (responseQueryValidate.isValid) {
-          const data = this.story.db.exec(query);
-
-          console.log(data);
-          // TODO: parse response ============================================
-          const columns = data[0].columns;
-          const values = data[0].values;
-          const result = prepareDataTable(columns, values);
-          this.codemirror.columns = result.tableHeader;
-          this.codemirror.data = result.array_vals;
-          this.codemirror.isWork = true;
-          this.render.story.runCode = false;
-        } else {
-          this.codemirror.error.active = true;
-          this.codemirror.error.message = responseQueryValidate.message;
-        }
+        const data = this.story.db.exec(query);
+        console.log(data);
+        // TODO: parse response ============================================
+        const columns = data[0].columns;
+        const values = data[0].values;
+        const result = prepareDataTable(columns, values);
+        this.codemirror.columns = result.tableHeader;
+        this.codemirror.data = result.array_vals;
+        this.codemirror.isWork = true;
+        this.render.story.runCode = false;
       } catch (e) {
-        console.log(e);
-        // this.alert.error.active = true;
-        // this.alert.error.message = 'Что-то пошло не так...';
+        if (/(no such table)/.test(e)) {
+          errors.push('Такой таблицы не существует');
+        }
       } finally {
         this.render.story.runCode = false;
       }
+    },
+
+    async onClickSendAnswer(answer) {
+      logR('warn', 'StoryView: onClickSendAnswer');
+      const payload = {storyId: this.story.data.id, answer: answer};
+      const response = await StoryService.checkStoryNaswer(payload);
+      console.log('RESPONSE FROM CHECK STORY ANSWER\n' + response);
     },
     onClickCloseHistory() {
       logR('warn', 'MainLayout: onClickCloseHistory');

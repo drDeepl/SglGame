@@ -3,7 +3,9 @@ import {logR} from '@/services/utils';
 export const story = {
   namespaced: true,
   state() {
-    return {};
+    return {
+      errors: [],
+    };
   },
 
   actions: {
@@ -13,6 +15,17 @@ export const story = {
       return response;
     },
   },
-  getters: {},
-  mutations: {},
+  getters: {
+    GET_ERRORS: (state) => {
+      return state.errors;
+    },
+  },
+  mutations: {
+    SET_ERRORS: function (state, errors) {
+      state.errors = errors;
+    },
+    CLEAR_ERRORS: function (state) {
+      state.errors = [];
+    },
+  },
 };

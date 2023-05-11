@@ -2,7 +2,6 @@ import {createApp} from 'vue';
 import App from './App.vue';
 import store from '@/store';
 import router from '@/router/index';
-// import setupInterceptors from '@/services/setupInterceptors';
 
 import {
   Dismiss28Regular,
@@ -56,7 +55,6 @@ import {
 import CodeBlock from '@/UI/CodeBlock.vue';
 const app = createApp(App);
 
-// setupInterceptors(store);
 app.component('n-collapse-transition', NCollapseTransition);
 app.component('n-skeleton', NSkeleton);
 app.component('n-pagination', NPagination);

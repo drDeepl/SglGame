@@ -12,6 +12,7 @@
     "codemirror-editor-vue3": "^2.3.0",
     "core-js": "^3.8.3",
     "fs": "^0.0.1-security",
+    "js-sql-parser": "^1.4.1",
     "jwtextract": "^1.0.2",
     "naive-ui": "^2.34.3",
     "node-polyfill-webpack-plugin": "^2.0.1",

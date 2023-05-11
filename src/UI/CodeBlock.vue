@@ -8,10 +8,37 @@
       height="13vh"
       min-width="20em"
     />
-    <n-space class="codeblock-action">
-      <n-button :loading="loadApply" @click="onClickRunCode"
-        >Выполнить</n-button
+
+    <n-collapse-transition :show="getErrors.length > 0">
+      <n-alert
+        v-if="getErrors.length > 0"
+        title="Что-то пошло не так..."
+        type="error"
+        closable
+        @close="$store.commit('story/CLEAR_ERRORS')"
       >
+        <n-space vertical>
+          <span v-for="(error, id) in getErrors" :key="id">{{ error }}</span>
+        </n-space>
+      </n-alert>
+    </n-collapse-transition>
+    <n-space class="codeblock-action">
+      <n-popover trigger="hover" class="border-left-red">
+        <template #trigger>
+          <div>
+            <n-button
+              :disabled="!codeIsValid"
+              :loading="loadApply"
+              @click="onClickRunCode"
+              >Выполнить</n-button
+            >
+          </div>
+        </template>
+
+        <span class="primary-font-color">
+          {{ codeIsValid ? 'Получить таблицу' : 'Некорретный запрос' }}
+        </span>
+      </n-popover>
       <n-button :disabled="loadApply" @click="onClickClearCode"
         >Очистить</n-button
       >
@@ -22,34 +49,77 @@
 
 <script lang="js">
 import {defineComponent} from 'vue';
-import {ref} from 'vue';
+// import {ref} from 'vue';
 import {logR} from '@/services/utils';
 import Codemirror from 'codemirror-editor-vue3';
 import 'codemirror/addon/display/placeholder.js';
 import 'codemirror/mode/sql/sql.js';
 import 'codemirror/addon/display/placeholder.js';
 import 'codemirror/theme/idea.css';
+import parser from 'js-sql-parser';
+
 export default defineComponent({
   components: {Codemirror},
   props: {
     onClickRunCodeFunc: {type: Function, required: false},
     onClickClearCodeFunc: {type: Function, required: false},
     loadApply: {type: Boolean, required: false},
+    errorsMsg: {type: Array, required: false, default(){return []}}
   },
-  setup() {
-    const code = ref(``);
-    return {
-      code,
+  data(){
+    return{
+      codeIsValid: false,
+
+      code: '',
       cmOptions: {
         mode: 'sql', // Language mode
         theme: 'idea' // Theme
       }
-    };
+    }
+  },
+
+  watch:{
+    code(value){
+      const lowerCaseValue = value.toLowerCase();
+      const isValidQuery = /(select)+.+(from)\s+./.test(lowerCaseValue);
+      // console.log(isValidQuery);
+      if(isValidQuery){
+        this.codeIsValid = true;
+      }
+      else{
+        this.codeIsValid = false;
+      }
+    }
+  },
+  computed: {
+    getErrors(){
+      return this.$store.state.story.errors
+    }
   },
   methods: {
     async onClickRunCode() {
       logR("warn", "CodeMirror: onClickRunCode")
-      await this.onClickRunCodeFunc(this.code);
+      let errors = this.getErrors;
+      try {
+        const ast = parser.parse(this.code);
+        const selectCount = ast.value.selectItems.value.length;
+        const fromCount = ast.value.from.value.length;
+        // console.log(`SELECT COUNT: ${selectCount}\nFROM COUNT: ${fromCount}`);
+        if(selectCount > 1){
+
+          errors.push('За один раз можно выполнить только один запрос c SELECT')
+        }
+      else if(fromCount > 1){
+          errors.push("Объединение таблиц запрещено")
+        }
+        else{
+          await this.onClickRunCodeFunc(this.code);
+        }
+
+      } catch (e) {
+        errors.push('За один раз возможно выполнить только один запрос');
+      }
+
 
     },
     onClickClearCode(){
