@@ -100,6 +100,16 @@
       type="error"
     >
     </n-modal>
+    <n-modal
+      v-if="successAlertActive.active"
+      v-model:show="successAlertActive.active"
+      :title="successAlertActive.message"
+      :mask-closable="false"
+      preset="dialog"
+      @positive-click="onClickCancelSuccessAlert"
+      type="success"
+    >
+    </n-modal>
   </div>
 
   <!-- // NOTE: блок с всплывающими оповещениями -->
@@ -231,7 +241,8 @@ export default defineComponent( {
   computed: {
     ...mapGetters({
 
-      errorAlertActive: 'notification/GET_STATE_ERROR'
+      errorAlertActive: 'notification/GET_STATE_ERROR',
+      successAlertActive: 'notification/GET_STATE_SUCCESS'
     }),
     accessToken(){
       return this.$store.state.auth.tokenUser ? this.$store.state.auth.tokenUser.accessToken : null
@@ -255,6 +266,10 @@ export default defineComponent( {
       this.alert.error.active = false;
       this.alert.error.message = '';
       this.$store.commit('notification/REMOVE_STATE_ERROR');
+    },
+    onClickCancelSuccessAlert(){
+      this.$store.commit('notification/REMOVE_STATE_SUCCESS');
+
     },
       onClickToProfile(){
         const role = this.userData.role

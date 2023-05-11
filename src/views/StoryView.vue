@@ -165,11 +165,11 @@
 
           <n-space justify="space-between">
             <n-input
-              v-model:value="codemirror.answer"
+              v-model:value="story.answer"
               placeholder="Ответ:"
             ></n-input>
 
-            <n-button>Отправить</n-button>
+            <n-button @click="onClickSendAnswer">Отправить</n-button>
           </n-space>
         </n-space>
       </div>
@@ -243,12 +243,12 @@ export default defineComponent({
         loadProgress: 0,
         db: null,
         model: new CreateStory(),
+        answer: '',
       },
       codemirror: {
         columns: [],
         data: [],
         pagination: {pageSize: 5},
-        answer: '',
         isWork: false,
         error: {active: false, message: []},
       },
@@ -394,11 +394,16 @@ export default defineComponent({
       }
     },
 
-    async onClickSendAnswer(answer) {
+    async onClickSendAnswer() {
       logR('warn', 'StoryView: onClickSendAnswer');
+      const answer = this.story.answer;
       const payload = {storyId: this.story.data.id, answer: answer};
-      const response = await StoryService.checkStoryNaswer(payload);
-      console.log('RESPONSE FROM CHECK STORY ANSWER\n' + response);
+      const response = await StoryService.checkStoryAnswer(payload);
+      console.log('RESPONSE FROM CHECK STORY ANSWER\n');
+      console.log(response);
+      if (response.status == 200) {
+        this.$store.commit('notification/SET_ACTIVE_SUCCESS', response.data);
+      }
     },
     onClickCloseHistory() {
       logR('warn', 'MainLayout: onClickCloseHistory');

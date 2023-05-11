@@ -2,6 +2,7 @@ import {createApp} from 'vue';
 import App from './App.vue';
 import store from '@/store';
 import router from '@/router/index';
+import Particles from 'vue3-particles';
 
 import {
   Dismiss28Regular,
@@ -102,4 +103,5 @@ app.component('n-button', NButton);
 
 app.use(router);
 app.use(store);
+app.use(Particles);
 app.mount('#app');
