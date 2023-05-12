@@ -21,7 +21,9 @@
                   userData ? userData.sub : ''
                 }}</span>
                 <span class="profile_role">{{
-                  userData.role.split('_')[1].toLowerCase()
+                  userData.role.split('_')[1].toLowerCase() == 'user'
+                    ? 'игрок'
+                    : 'администратор'
                 }}</span>
               </n-space>
             </n-space>

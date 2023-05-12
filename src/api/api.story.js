@@ -9,6 +9,11 @@ class ApiStory {
     return instance.get(path + '/index');
   }
 
+  async getStoriesForUser() {
+    logR('warn', 'getStoriesForUser');
+    return instance.get(path + '/listStory');
+  }
+
   async getStoryById(id) {
     logR('warn', 'API.STORY:getStoryById');
     return instance.get(path + '/getById/' + id);

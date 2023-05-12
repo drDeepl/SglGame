@@ -11,6 +11,16 @@ class StoryService {
     return response.data;
   }
 
+  async getStoriesForUser() {
+    logR('warn', 'getStoriesForUser');
+    let response = await decorateResponseApi(ApiStory.getStoriesForUser);
+    if (response.status != 200) {
+      return [];
+    }
+    console.log(response);
+    return response.data;
+  }
+
   async getStoryById(storyId) {
     logR('warn', 'STORY.SERVICE.createStory');
     let response = await decorateResponseApi(

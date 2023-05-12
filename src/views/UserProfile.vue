@@ -3,10 +3,8 @@
     <n-spin size="large"></n-spin
   ></n-modal>
   <div v-else class="page-content">
-    <n-layout has-sider>
-      <n-layout-sider
-        :style="sidebar.active ? 'min-width: 25em' : 'min-width: 10em'"
-      >
+    <n-layout has-sider v-if="userData">
+      <n-layout-sider>
         <n-card>
           <template #header>
             <n-space horizontal align="center">
@@ -18,12 +16,16 @@
               >
                 <span>{{ userData.sub.slice(0, 2) }}</span>
               </n-avatar>
-              <n-space vertical>
-                <span class="profile_username">{{ userData.sub }}</span>
-                <span class="profile_role">{{
-                  userData.role.split('_')[1].toLowerCase()
+              <div class="info-user-container">
+                <span class="profile_username">{{
+                  userData ? userData.sub : ''
                 }}</span>
-              </n-space>
+                <span class="profile_role">{{
+                  userData.role.split('_')[1].toLowerCase() == 'user'
+                    ? 'игрок'
+                    : 'администратор'
+                }}</span>
+              </div>
             </n-space>
           </template>
 
@@ -39,114 +41,190 @@
         </n-card>
       </n-layout-sider>
       <n-layout>
-        <n-layout-header class="img-header-profile">
-          <n-space justify="center" align="center">
-            <n-popover trigger="hover">
-              <template #trigger>
-                <div
-                  class="profile-story"
-                  @click="onClickStory"
-                  v-for="story in arrays.stories"
-                  :key="story.id"
-                >
-                  <span>{{ story.title }}</span>
-                  <img
-                    class="profile-story-img"
-                    :src="
-                      require('@/assets/img/history_' +
-                        story.title.toLowerCase() +
-                        '.jpg')
-                    "
-                  />
+        <n-layout-header class="img-header-profile container-header-profile">
+          <div class="header-image">
+            <n-scrollbar>
+              <div v-if="arrays.stories.length > 0" class="container-cards">
+                <n-spin
+                  v-if="
+                    forms.updateStory.active ||
+                    forms.createStory.active ||
+                    states.delete.story
+                  "
+                ></n-spin>
+                <div v-else class="container-card-stories">
+                  <div
+                    v-for="story in arrays.stories[
+                      storiesBlock.currentPage - 1
+                    ]"
+                    :key="story.id"
+                  >
+                    <card-story
+                      v-if="!storiesBlock.render"
+                      :title="story.title"
+                      :storyId="story.id"
+                      :description="story.description"
+                      :difficulty="story.difficulty"
+                    >
+                    </card-story>
+                  </div>
                 </div>
-              </template>
-              <span></span>
-            </n-popover>
-          </n-space>
+                <n-space justify="center" align="center">
+                  <n-button
+                    class="icon-layout-pagination"
+                    :disabled="storiesBlock.currentPage == 1"
+                    @click="onClickPrevPageStory"
+                  >
+                    <n-icon size="20" color="black">
+                      <icon-arrow-left />
+                    </n-icon>
+                  </n-button>
+                  <span class="font-bold font-color-white">{{
+                    storiesBlock.currentPage + '/' + storiesBlock.countPage
+                  }}</span>
+                  <n-button
+                    class="icon-layout-pagination icon-right-arrow"
+                    text
+                    :disabled="
+                      storiesBlock.currentPage >= storiesBlock.countPage
+                    "
+                    @click="onClickNextPageStory"
+                  >
+                    <n-icon size="20" color="black">
+                      <icon-arrow-left />
+                    </n-icon>
+                  </n-button>
+                </n-space>
+              </div>
+              <div v-else class="container-empty">
+                <n-empty description="Список историй пуст" class=""> </n-empty>
+              </div>
+            </n-scrollbar>
+          </div>
         </n-layout-header>
         <n-layout-content></n-layout-content>
       </n-layout>
     </n-layout>
-
-    <c-form
-      v-if="forms.createStory.active"
-      :isActive="forms.createStory.active"
-      title="Создание истории"
-      :itemModel="forms.createStory.model"
-      labelApplyButton="Создать"
-      :applyFunction="onClickApplyCreateStory"
-      :cancelFunction="onClickCancelCreateStory"
-    >
-    </c-form>
   </div>
 </template>
 
 <script type="text/javascript">
 import {defineComponent} from 'vue';
-import {mapGetters} from 'vuex';
+
 import {NAvatar} from 'naive-ui';
-import {logR} from '@/services/utils';
+import CardStory from '@/components/CardStory.vue';
+
+import {logR, toChunks} from '@/services/utils';
 import CreateStory from '@/models/model.create.story';
+import ServiceStoryImage from '@/services/story.image.service';
+import StoryService from '@/services/story.service';
+import {API_URL} from '@/api/main';
 
 export default defineComponent({
-  components: {'n-avatar': NAvatar},
+  components: {
+    'n-avatar': NAvatar,
+    'card-story': CardStory,
+  },
   data() {
     return {
+      API_URL,
       sidebar: {active: false, rows: []},
       render: {main: false},
-      forms: {createStory: {active: false, model: CreateStory}},
+      states: {delete: {story: false}},
+      currentStoryId: null,
+      currentStoryHasImg: false,
+      storiesBlock: {
+        render: false,
+        countPage: 1,
+
+        currentPage: 1,
+        countStoriesPage: 4,
+      },
+      forms: {
+        createStory: {active: false, model: {}},
+        updateStory: {active: false, model: {}, selectedStory: {}},
+        isSuccess: {active: false, message: ''},
+      },
       arrays: {
-        stories: [
-          {
-            id: 0,
-            title: 'Murder_Mystery',
-            difficulty: 'Some difficultys',
-            description:
-              'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-            story_text: 'Some text',
-            answer: 'answer1',
-          },
-        ],
+        fileList: [],
+        stories: [],
+        idsImagesStories: [],
       },
     };
   },
 
   computed: {
-    ...mapGetters({
-      getUserToken: 'auth/GET_TOKEN_USER',
-      userData: 'auth/GET_DATA_LOGIN',
-    }),
+    accessToken() {
+      return 'Bearer ' + this.$store.state.auth.tokenUser.accessToken;
+    },
+    tokenUser() {
+      return this.$store.state.auth.tokenUser;
+    },
+    userData() {
+      return this.$store.state.auth.tokenData
+        ? this.$store.state.auth.tokenData
+        : null;
+    },
   },
   async created() {
     // TODO: Подгрузка историй с бека
+    logR('warn', 'USER.PROFILE: created');
     this.render.main = true;
-    console.log(this.userData);
     if (!this.userData) {
       this.$router.push({name: 'home'});
     } else {
+      console.log(this.userData);
       this.sidebar.rows = this.$store.state.user.userSidebar.user;
+      this.forms.createStory.model = new CreateStory();
+      const stories = await StoryService.getStoriesForUser();
+      const idsImagesStories = await ServiceStoryImage.getIdsImagesStories();
+
+      console.log('STORIES\n', stories);
+      const chunksStories = toChunks(stories, 4);
+      console.log('CHUNKS\n', chunksStories);
+      this.arrays.stories = chunksStories.reverse();
+      this.arrays.idsImagesStories = idsImagesStories;
+
+      this.storiesBlock.countPage = chunksStories.length;
     }
     this.render.main = false;
   },
 
   methods: {
-    onClickCreateStory() {
-      logR('PROFILE:onCLickCreateStory');
+    clearCurrentStoryId() {
+      this.currentStoryId = null;
     },
-    onClickInfoStory() {
-      logR('PROFILE:onClickInfoStory');
+    updateCountPageInStoriesBox() {
+      const lengthStories = this.arrays.stories.length;
+      this.storiesBlock.countPage = lengthStories;
     },
-    onClickStory() {
-      logR('warn', 'PROFILE:onClickStory');
+    onUploadFileFinish() {
+      logR('warn', 'onUploadFile');
+      console.log(this.currentStoryId);
+      this.arrays.idsImagesStories.push(this.currentStoryId);
+    },
 
-      if (this.userData.role == 'ROLE_ADMIN') {
-        this.forms.createStory.active = true;
-      } else {
-        console.error('TODO:onClickStory by User');
-      }
+    clearSuccessForm() {
+      this.forms.isSuccess.active = false;
+      this.forms.isSuccess.message = '';
     },
+
+    onClickStory() {
+      logR('error', 'todo:ADMIN PROFILE:onClickStory');
+    },
+
     onClickToLink(url) {
       url.length > 0 ? this.$router.push(url) : '';
+    },
+
+    onClickNextPageStory() {
+      logR('warn', 'AdminProfile: onClickNextPageStory');
+      this.storiesBlock.currentPage += 1;
+    },
+
+    onClickPrevPageStory() {
+      logR('warn', 'AdminProfile: onClickPrevPageStory');
+      this.storiesBlock.currentPage -= 1;
     },
   },
 });

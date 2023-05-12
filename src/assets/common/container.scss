@@ -79,3 +79,8 @@
   rotate: 180deg;
   transition: rotate 0.5s;
 }
+
+.info-user-container {
+  display: flex;
+  flex-direction: column;
+}

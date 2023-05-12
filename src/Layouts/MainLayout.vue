@@ -334,14 +334,15 @@ export default defineComponent( {
 
       if(response.status == 200){
         console.log("STATUS: 200\n",dataForm);
-        const responseLogIn = await this.$store.dispatch('auth/login',dataForm);
-        logR('log', "MAINLAYOUT response login\n", responseLogIn)
+        await this.onClickApplyLogIn(dataForm)
+        // const responseLogIn = await this.$store.dispatch('auth/login',dataForm);
+        // logR('log', "MAINLAYOUT response login\n", responseLogIn)
 
-        if(responseLogIn.status == 200){
-          this.forms.runSuccess = true;
-        this.$router.push({name: this.role[this.userData.role]});
+        // if(responseLogIn.status == 200){
+        //   this.forms.runSuccess = true;
+        // this.$router.push({name: this.role[this.userData.role]});
 
-        }
+        // }
       }
       else{
         this.$store.commit("notification/SET_ACTIVE_ERROR", response.message);

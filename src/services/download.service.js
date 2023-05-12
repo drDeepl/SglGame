@@ -1,5 +1,5 @@
 import {logR} from './utils';
-
+import instance from '@/api/main';
 class ServiceDownloadFile {
   async downloadFileInUint8Array(url, options) {
     // NOTE: функция скачивает файл и возвращает массив Uint8Array
@@ -44,6 +44,13 @@ class ServiceDownloadFile {
     // FIXME: prepare chunksAll in file
     result.data = fileUint8Array;
     return result;
+  }
+
+  async donwloadFile() {
+    const response = await instance.get('/fileDB/get', {
+      responseType: 'arraybuffer',
+    });
+    return response;
   }
 }
 

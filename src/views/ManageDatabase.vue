@@ -81,11 +81,14 @@ import {mapGetters} from 'vuex';
 import {NAvatar} from 'naive-ui';
 import {logR} from '@/services/utils';
 import CreateStory from '@/models/model.create.story';
+import ServiceDownloadFile from '@/services/download.service';
+import DatabaseManager from '@/database/DatabaseManager';
 
 export default defineComponent({
   components: {'n-avatar': NAvatar},
   data() {
     return {
+      db: null,
       sidebar: {active: false, rows: []},
       render: {main: false},
       forms: {createTable: {active: false, model: CreateStory}},
@@ -118,7 +121,14 @@ export default defineComponent({
       this.$router.push({name: 'home'});
     } else {
       // const dataUser = this.$store.state.auth.dataLogin;
+      // FIX: ===================================================
+      const fileDb = await ServiceDownloadFile.donwloadFile();
+      const db = await DatabaseManager.createDatabase(fileDb.data);
 
+      this.db = db;
+      const tablesGame = db.exec('SELECT * FROM interview;');
+      // FIX: ===================================================
+      console.log('TABLES\n', tablesGame);
       this.sidebar.rows = this.sidebar.rows =
         this.$store.state.user.userSidebar.admin;
     }
