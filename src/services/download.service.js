@@ -48,7 +48,7 @@ class ServiceDownloadFile {
 
   async donwloadFile() {
     const response = await instance.get('/fileDB/get', {
-      responseType: 'arraybuffer',
+      responseType: 'blob',
     });
     return response;
   }

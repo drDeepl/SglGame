@@ -1,7 +1,9 @@
 .database-icon-table {
-  background-color: $color-light-green-transparent;
+  // background-color: $color-light-green-transparent;
+  border: 2px solid $color-red;
   border-radius: 100%;
   padding: 0.19em;
+  cursor: pointer;
 }
 
 .database-add-table {

@@ -98,3 +98,16 @@ export const toChunks = function (arr, size) {
   }
   return chunks;
 };
+
+export const blobToUint8Array = function (blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = function () {
+      resolve(new Uint8Array(this.result));
+    };
+    reader.onerror = function () {
+      reject(this.error);
+    };
+    reader.readAsArrayBuffer(blob);
+  });
+};

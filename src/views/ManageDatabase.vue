@@ -41,24 +41,86 @@
       <n-layout>
         <n-layout-header>
           {{ $router.currentRoute._value.name }}
-          <n-space justify="start">
-            <n-card
-              class="database-add-table"
-              hoverable
-              @click="onClickCreateTable"
-            >
-              <!-- <template #footer> -->
-              <n-space justify="center" align="center" vertical>
-                <span class="database-add-table-header">Добавить таблицу</span>
-                <n-icon size="35" color="black" class="database-icon-table">
+
+          <n-space justify="center">
+            <n-scrollbar>
+              <div class="container-card-stories container-header-profile">
+                <n-card
+                  v-for="(table, id) in arrays.tables"
+                  :key="id"
+                  class="database-add-table"
+                  hoverable
+                  @click="onClickTableCard(table)"
+                >
+                  <!-- <template #footer> -->
+                  <n-space justify="center" align="center" vertical>
+                    <span class="database-add-table-header">{{ table }}</span>
+                    <!-- <n-icon size="35" color="black" class="database-icon-table">
                   <icon-add-plus />
-                </n-icon>
-              </n-space>
-              <!-- </template> -->
-            </n-card>
+                </n-icon> -->
+                  </n-space>
+                  <!-- </template> -->
+                </n-card>
+              </div>
+            </n-scrollbar>
           </n-space>
         </n-layout-header>
-        <n-layout-content></n-layout-content>
+        <n-layout-content>
+          <n-table v-if="tableBlock.dataTable.length > 0">
+            <thead>
+              <th v-for="header in tableBlock.headersTable" :key="header">
+                {{ header }}
+              </th>
+              <th>
+                <n-icon size="18" color="grey" class="database-icon-table">
+                  <icon-add-plus />
+                </n-icon>
+              </th>
+            </thead>
+            <tbody>
+              <tr
+                v-for="(row, id) in tableBlock.dataTable"
+                :key="`row_${id}`"
+                class="hover-container"
+              >
+                <td v-for="(columnValue, id) in row" :key="`columnValue_${id}`">
+                  {{ columnValue }}
+                </td>
+                <td>
+                  <n-popconfirm :show-icon="false">
+                    <template #trigger>
+                      <n-icon size="28" color="grey" class="card-story-menu">
+                        <icon-menu-story />
+                      </n-icon>
+                    </template>
+                    <template #action>
+                      <n-button
+                        circle
+                        size="tiny"
+                        ghost
+                        @click="onClickUpdateTableCard(row)"
+                      >
+                        <n-icon size="20" color="orange">
+                          <icon-edit />
+                        </n-icon>
+                      </n-button>
+                      <n-button
+                        circle
+                        size="tiny"
+                        ghost
+                        @click="onClickDeleteTableCard(row)"
+                      >
+                        <n-icon size="20" color="red">
+                          <icon-delete />
+                        </n-icon>
+                      </n-button>
+                    </template>
+                  </n-popconfirm>
+                </td>
+              </tr>
+            </tbody>
+          </n-table>
+        </n-layout-content>
       </n-layout>
     </n-layout>
 
@@ -80,9 +142,8 @@ import {defineComponent} from 'vue';
 import {mapGetters} from 'vuex';
 import {NAvatar} from 'naive-ui';
 import {logR} from '@/services/utils';
-import CreateStory from '@/models/model.create.story';
-import ServiceDownloadFile from '@/services/download.service';
-import DatabaseManager from '@/database/DatabaseManager';
+
+import TableService from '@/services/tables.service';
 
 export default defineComponent({
   components: {'n-avatar': NAvatar},
@@ -91,18 +152,27 @@ export default defineComponent({
       db: null,
       sidebar: {active: false, rows: []},
       render: {main: false},
-      forms: {createTable: {active: false, model: CreateStory}},
+      forms: {createRow: {active: false, model: null}},
+      tableBlock: {
+        managerTable: null,
+        dataTable: [],
+        headersTable: [],
+      },
+
       arrays: {
-        stories: [
-          {
-            id: 0,
-            title: 'Murder_Mystery',
-            difficulty: 'Some difficultys',
-            description:
-              'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-            story_text: 'Some text',
-            answer: 'answer1',
-          },
+        tables: [
+          'address',
+          'city',
+          'crime_scene_report',
+          'driver_license',
+          'educational_institution',
+          'event_checkin',
+          'interview',
+          'organization',
+          'person',
+          'pet',
+          'students',
+          'workers',
         ],
       },
     };
@@ -122,13 +192,9 @@ export default defineComponent({
     } else {
       // const dataUser = this.$store.state.auth.dataLogin;
       // FIX: ===================================================
-      const fileDb = await ServiceDownloadFile.donwloadFile();
-      const db = await DatabaseManager.createDatabase(fileDb.data);
 
-      this.db = db;
-      const tablesGame = db.exec('SELECT * FROM interview;');
       // FIX: ===================================================
-      console.log('TABLES\n', tablesGame);
+
       this.sidebar.rows = this.sidebar.rows =
         this.$store.state.user.userSidebar.admin;
     }
@@ -140,16 +206,30 @@ export default defineComponent({
       logR('warn', 'onClickToLink');
       url.length > 0 ? this.$router.push(url) : '';
     },
-
-    onClickApplyCreateTable() {
-      logR('warn', 'ManageDatabase:onClickApplyCreateTable');
+    async onClickTableCard(tableController) {
+      logR('warn', 'ManageDatabase:onClickTableCard');
+      const tableService = new TableService(tableController);
+      const data = await tableService.getRows();
+      this.tableBlock.dataTable = data;
+      this.tableBlock.headersTable = Object.keys(data[0]);
     },
 
-    onClickCancelCreateTable() {
-      logR('warn', 'ManageDatabase:onClickCancelCreate');
+    onClickUpdateTableCard(rowData) {
+      logR('warn', 'ManageDatabase:onClickApplyTableCard');
+      console.log(rowData);
     },
-    onClickCreateTable() {
-      logR('warn', 'ManageDatabase:onClickCreateTable');
+
+    onClickApplyTableCard() {
+      logR('warn', 'ManageDatabase:onClickUpdateTableCard');
+    },
+
+    onClickCancelTableCard() {
+      logR('warn', 'ManageDatabase:onClickCancelTableCard');
+    },
+
+    onClickDeleteTableCard(rowData) {
+      logR('warn', 'ManageDatabase:onClickDeleteTableCard');
+      console.log(rowData);
     },
   },
 });

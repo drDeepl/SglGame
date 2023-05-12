@@ -84,3 +84,11 @@
   display: flex;
   flex-direction: column;
 }
+
+.hover-container {
+  background-color: $color-white;
+}
+
+.hover-container:hover > * {
+  background-color: $color-grey-shadow !important;
+}

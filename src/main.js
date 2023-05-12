@@ -26,6 +26,7 @@ import {
   NCard,
   NProgress,
   NDataTable,
+  NTable,
   NInput,
   NDrawer,
   NDrawerContent,
@@ -55,6 +56,7 @@ import {
 import CodeBlock from '@/UI/CodeBlock.vue';
 const app = createApp(App);
 
+app.component('n-table', NTable);
 app.component('n-collapse-transition', NCollapseTransition);
 app.component('n-skeleton', NSkeleton);
 app.component('n-pagination', NPagination);
