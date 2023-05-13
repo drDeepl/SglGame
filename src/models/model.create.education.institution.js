@@ -1,14 +1,14 @@
 class CreateEducationInstitution {
   constructor() {
     this.data = {
-      edu_id: 0,
-      name: 'string',
-      address_id: 0,
+      edu_id: null,
+      name: '',
+      address_id: null,
     };
 
     this.labels = {
-      edu_id: 'Идентификатор образоательного учреждения',
-      name: 'Название образоательного учреждения',
+      edu_id: 'Идентификатор образовательного учреждения',
+      name: 'Название образовательного учреждения',
       address_id: 'Идентификатор адреса',
     };
 

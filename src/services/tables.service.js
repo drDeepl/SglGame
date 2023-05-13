@@ -26,7 +26,11 @@ class TableService {
 
   async createRow(data) {
     logR('warn', 'Table.Service:createRow');
-    const response = await decorateResponseApi(ApiTables.create, data);
+    const response = await decorateResponseApi(
+      ApiTables.create,
+      this.controllerName,
+      data
+    );
     return response;
   }
   async updateRow(modelUpdate) {

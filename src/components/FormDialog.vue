@@ -12,6 +12,7 @@
       :title="title"
     >
       <template #header-extra>
+        {{ status.running }}
         <n-button
           quaternary
           circle
@@ -45,11 +46,13 @@
                 show-password-on="click"
                 v-model:value="formValue.values[field]"
                 placeholder=""
+                :disabled="status.running"
               />
               <n-input
                 v-else
                 v-model:value="formValue.values[field]"
                 placeholder=""
+                :disabled="status.running"
               />
             </n-form-item>
           </div>
@@ -103,7 +106,7 @@ export default defineComponent({
   props: {
     isActive: {type: Boolean, required: false, default: false},
     isSuccess: {type: Boolean, required: false, default: false},
-
+    isLoading: {type: Boolean, required: false, default: false},
     title: {
       type: String,
       required: false,
@@ -151,7 +154,7 @@ export default defineComponent({
     const formRef = ref(null);
     const values = ref(props.itemModel.data);
     let formValue = reactive({values});
-    const running = ref(false);
+    const running = ref(props.isLoading);
     const status = reactive({running});
 
     const onClickApplyButton = async function () {
