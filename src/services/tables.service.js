@@ -1,5 +1,5 @@
 import ApiTables from '@/api/api.tables';
-import {decorateResponseApi} from './utils';
+
 import {logR} from './utils';
 
 class TableService {
@@ -13,8 +13,10 @@ class TableService {
       (error) => {
         if (error.status) {
           result.status = error.status;
+          return {status: error.status};
         } else {
           result.status = error.response.status;
+          return {status: error.response.status};
         }
       }
     );
@@ -26,23 +28,65 @@ class TableService {
 
   async createRow(data) {
     logR('warn', 'Table.Service:createRow');
-    const response = await decorateResponseApi(
-      ApiTables.create,
-      this.controllerName,
-      data
+    let result = {status: null, message: 'Что-то пошло не так...'};
+    const response = await ApiTables.create(this.controllerName, data).catch(
+      (error) => {
+        if (error.status) {
+          result.status = error.status;
+          return {status: error.status};
+        } else {
+          result.status = error.response.status;
+          return {status: error.response.status};
+        }
+      }
     );
-    return response;
+    if (response.status === 200) {
+      return response.data;
+    }
+    return result;
   }
   async updateRow(modelUpdate) {
     logR('warn', 'Table.Service:updateRow');
-    const response = await decorateResponseApi(ApiTables.update, modelUpdate);
-    return response;
+    let result = {status: null, message: 'Что-то пошло не так...'};
+    const response = await ApiTables.update(
+      this.controllerName,
+      modelUpdate
+    ).catch((error) => {
+      if (error.status) {
+        result.status = error.status;
+        return {status: error.status};
+      } else {
+        result.status = error.response.status;
+        return {status: error.response.status};
+      }
+    });
+    if (response.status === 200) {
+      return response.data;
+    }
+    return result;
   }
 
   async deleteRow(modelDelete) {
     logR('warn', 'Table.Service:deleteRow');
-    const response = await decorateResponseApi(ApiTables.delete, modelDelete);
-    return response;
+    let result = {status: null, message: 'Что-то пошло не так...'};
+    const response = await ApiTables.delete(
+      this.controllerName,
+      modelDelete
+    ).catch((error) => {
+      console.log('ERROR REQUEST', error);
+      if (error.status) {
+        result.status = error.status;
+        return {status: error.status};
+      } else {
+        result.status = error.response.status;
+        return {status: error.response.status};
+      }
+    });
+    if (response.status === 200) {
+      return response.data;
+    }
+    console.log(response);
+    return result;
   }
 }
 

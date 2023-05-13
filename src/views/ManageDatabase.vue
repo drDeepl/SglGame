@@ -65,8 +65,7 @@
           </n-space>
         </n-layout-header>
         <n-layout-content>
-          {{ forms.createRow.model }}
-          <n-table v-if="tableBlock.dataTable.length > 0">
+          <n-table v-if="tableBlock.dataTable.length > 0 && !tableBlock.render">
             <thead>
               <th v-for="header in tableBlock.headersTable" :key="header">
                 {{ header }}
@@ -103,7 +102,7 @@
                         circle
                         size="tiny"
                         ghost
-                        @click="onClickUpdateTableCard(row)"
+                        @click="onClickUpdateRow(row)"
                       >
                         <n-icon size="20" color="orange">
                           <icon-edit />
@@ -125,6 +124,9 @@
               </tr>
             </tbody>
           </n-table>
+          <n-space justify="center">
+            <n-spin v-if="tableBlock.render"></n-spin>
+          </n-space>
         </n-layout-content>
       </n-layout>
     </n-layout>
@@ -139,6 +141,18 @@
       :applyFunction="onClickApplyCreateRow"
       :cancelFunction="onClickCancelCreateRow"
       :hideProps="forms.createRow.hideRow"
+    >
+    </c-form>
+    <c-form
+      v-if="forms.updateRow.active"
+      :isActive="forms.updateRow.active"
+      title="Создание таблицы"
+      :itemModel="forms.updateRow.model"
+      :isLoading="forms.updateRow.load"
+      labelApplyButton="Создать"
+      :applyFunction="onClickApplyUpdateRow"
+      :cancelFunction="onClickCancelUpdateRow"
+      :hideProps="forms.updateRow.hideRow"
     >
     </c-form>
   </div>
@@ -173,8 +187,16 @@ export default defineComponent({
       render: {main: false},
       forms: {
         createRow: {active: false, load: false, model: null, hideRow: null},
+        updateRow: {
+          active: false,
+          load: false,
+          model: null,
+          hideRow: null,
+          selectedData: {},
+        },
       },
       tableBlock: {
+        render: false,
         serviceTable: null,
         currentTableName: '',
         dataTable: [],
@@ -237,12 +259,32 @@ export default defineComponent({
   },
 
   methods: {
+    createErrorNotificationIfNonOk(response) {
+      logR('warn', 'createErrorNotificationIfNonOk');
+      console.log(response);
+      if (response != 'OK') {
+        this.$store.commit('notification/SET_ACTIVE_ERROR', response.message);
+        return true;
+      } else {
+        return false;
+      }
+    },
     onClickToLink(url) {
       logR('warn', 'onClickToLink');
       url.length > 0 ? this.$router.push(url) : '';
     },
+    async updateDataTable() {
+      logR('warn', 'updateDataTable');
+      this.tableBlock.render = true;
+      const data = await this.tableBlock.serviceTable.getRows();
+      this.tableBlock.dataTable = data;
+      this.tableBlock.headersTable = Object.keys(data[0]);
+      this.tableBlock.render = false;
+    },
     async onClickTableCard(tableController) {
       logR('warn', 'ManageDatabase:onClickTableCard');
+
+      this.tableBlock.currentTableName = tableController;
       console.log(tableController);
       let hideRow = {};
       if (tableController === 'educational_institution') {
@@ -260,14 +302,14 @@ export default defineComponent({
       }
 
       this.forms.createRow.hideRow = hideRow;
+      this.forms.updateRow.hideRow = hideRow;
       const modelTable = this.tableBlock.modelsTable[tableController];
       this.forms.createRow.model = new modelTable();
+      // this.forms.updateRow.model = new modelTable();
       const tableService = new TableService(tableController);
-      const data = await tableService.getRows();
       this.tableBlock.serviceTable = tableService;
       this.tableBlock.currentTableName = tableController;
-      this.tableBlock.dataTable = data;
-      this.tableBlock.headersTable = Object.keys(data[0]);
+      await this.updateDataTable();
     },
 
     onClickUpdateTableCard(rowData) {
@@ -284,8 +326,12 @@ export default defineComponent({
       logR('warn', 'ManageDatabase:onClickApplyCreateRow');
       this.forms.createRow.load = true;
       console.log(dataForm);
+
       const response = await this.tableBlock.serviceTable.createRow(dataForm);
       console.log(response);
+      this.createErrorNotificationIfNonOk(response);
+      await this.updateDataTable();
+      this.forms.createRow.load = false;
     },
 
     onClickCancelCreateRow() {
@@ -293,17 +339,61 @@ export default defineComponent({
       this.forms.createRow.active = false;
     },
 
-    onClickApplyTableCard() {
-      logR('warn', 'ManageDatabase:onClickUpdateTableCard');
+    onClickUpdateRow(dataRow) {
+      logR('warn', 'ManageDatabase:onClickUpdateRow');
+      console.log(dataRow);
+      const tableController = this.tableBlock.currentTableName;
+      const modelTable = this.tableBlock.modelsTable[tableController];
+      const model = new modelTable();
+      console.log(model);
+      for (let prop in model.data) {
+        model.data[prop] = dataRow[prop];
+      }
+      this.forms.updateRow.model = model;
+      this.forms.updateRow.active = true;
     },
 
-    onClickCancelTableCard() {
-      logR('warn', 'ManageDatabase:onClickCancelTableCard');
+    async onClickApplyUpdateRow(dataForm) {
+      logR('warn', 'ManageDatabase:onClickApplyUpdateRow');
+      this.forms.updateRow.load = true;
+      console.log(dataForm);
+
+      const response = await this.tableBlock.serviceTable.updateRow(dataForm);
+      console.log(response);
+      this.createErrorNotificationIfNonOk(response);
+      this.forms.updateRow.load = false;
+      await this.updateDataTable();
+      this.forms.updateRow.active = false;
     },
 
-    onClickDeleteTableCard(rowData) {
+    onClickCancelUpdateRow() {
+      logR('warn', 'ManageDatabase:onClickCancelUpdateRow');
+      this.forms.updateRow.active = false;
+    },
+
+    async onClickDeleteTableCard(rowData) {
       logR('warn', 'ManageDatabase:onClickDeleteTableCard');
-      console.log(rowData);
+      this.tableBlock.render = true;
+      let itemId = null;
+      const tableController = this.tableBlock.currentTableName;
+      if (tableController === 'educational_institution') {
+        itemId = rowData[`edu_id`];
+      } else if (tableController === 'crime_scene_report') {
+        itemId = rowData[`csr_id`];
+      } else if (tableController === 'event_checkin') {
+        itemId = rowData[`ec_id`];
+      } else if (tableController === 'driver_license') {
+        itemId = rowData[`license_id`];
+      } else if (tableController === 'pet') {
+        itemId = rowData[`id`];
+      } else {
+        itemId = rowData[`${tableController}_id`];
+      }
+      const response = await this.tableBlock.serviceTable.deleteRow(itemId);
+      await this.updateDataTable();
+      this.createErrorNotificationIfNonOk(response);
+
+      this.tableBlock.render = false;
     },
   },
 });

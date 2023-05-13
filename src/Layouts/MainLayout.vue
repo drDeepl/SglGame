@@ -166,11 +166,12 @@ export default defineComponent( {
     logR('warn', "MAINLAYOUT: created");
     this.render.main = true;
     let tokenUser = this.$store.state.auth.tokenUser
-
+    console.log("TOKEN USER: ", tokenUser)
     if(tokenUser){
 
       const currentDate = Date.now();
-      const userExp = this.userData.exp *1000// INFO: default userData.exp in seconds, aftetr * 1000 will milliseconds
+      // INFO: default userData.exp in seconds, aftetr * 1000 will milliseconds
+      const userExp = this.userData.exp *1000
       const differenceTime = userExp - currentDate
       let intervalForUpdateToken = differenceTime;
       console.log(`Difference time${differenceTime}`)

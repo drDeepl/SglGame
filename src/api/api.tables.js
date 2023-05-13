@@ -11,7 +11,7 @@ class ApiTables {
   }
 
   async update(controllerName, modelUpdate) {
-    return instance.put(`${API_PATH}/${controllerName}/update`, modelUpdate);
+    return instance.post(`${API_PATH}/${controllerName}/update`, modelUpdate);
   }
 
   async delete(controllerName, idRow) {

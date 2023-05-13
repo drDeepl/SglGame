@@ -28,6 +28,7 @@ instance.interceptors.request.use(async function (config) {
           refreshToken: token.refreshToken,
         }
       );
+      console.log('NEW TOKEN RESPONSE', newTokenResponse);
       const accessTokenJSON = newTokenResponse.data;
       auth = accessTokenJSON.type + ' ' + accessTokenJSON.accessToken;
       TokenService.updateLocalAccessToken(accessTokenJSON.accessToken);

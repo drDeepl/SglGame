@@ -12,7 +12,6 @@
       :title="title"
     >
       <template #header-extra>
-        {{ status.running }}
         <n-button
           quaternary
           circle
