@@ -19,6 +19,12 @@ class UserService {
   async login(dataForm) {
     return decorateResponseApi(ApiUser.login, dataForm);
   }
+
+  async getUsers() {
+    logR('warn', 'USER.SERVICE: getUsers');
+    const response = await decorateResponseApi(ApiUser.users);
+    return response.status === 200 ? response.data : [];
+  }
 }
 
 export default new UserService();

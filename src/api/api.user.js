@@ -13,6 +13,11 @@ class ApiUser {
     console.log(response);
     return response;
   }
+
+  async users() {
+    logR('warn', 'API.USERS: userss');
+    return instance.get(`${path}/index`);
+  }
 }
 
 export default new ApiUser();

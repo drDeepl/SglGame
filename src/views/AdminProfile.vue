@@ -47,7 +47,12 @@
               class="profile-story-box story-card story-card-add"
               @click="onClickCreateStory"
             >
-              <n-space justify="center" align="center" vertical>
+              <n-space
+                justify="center"
+                align="center"
+                vertical
+                class="header-card-container"
+              >
                 <span class="font-header-card"> Создать историю </span>
                 <n-icon size="50" color="white">
                   <icon-add />
@@ -146,7 +151,52 @@
             </n-scrollbar>
           </div>
         </n-layout-header>
-        <n-layout-content></n-layout-content>
+        <n-layout-content class="user-profile-content-container">
+          <collapsed-card title="Список пользователей">
+            <!-- {{ arrays.users }} -->
+            <n-space justify="center">
+              <n-scrollbar style="height: 20em">
+                <n-table>
+                  <thead>
+                    <tr>
+                      <th
+                        v-for="(propHeader, id) in arrays.usersHeaders"
+                        :key="`th_${id}`"
+                      >
+                        {{ usersBlock.model.labels[propHeader] }}
+                        <!-- {{ prop }} -->
+                      </th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr
+                      v-for="user in arrays.users"
+                      :key="user.id"
+                      class="hover-container"
+                    >
+                      <td
+                        v-for="(propUser, id) in arrays.usersHeaders"
+                        :key="`td_${id}`"
+                      >
+                        <span v-if="propUser == 'role'">
+                          {{
+                            user[propUser] == 'ROLE_USER'
+                              ? 'пользователь'
+                              : 'администратор'
+                          }}
+                        </span>
+                        <span v-else>
+                          {{ user[propUser] }}
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </n-table>
+              </n-scrollbar>
+            </n-space>
+          </collapsed-card>
+        </n-layout-content>
       </n-layout>
       <c-form
         v-if="forms.createStory.active"
@@ -224,17 +274,22 @@ import {defineComponent} from 'vue';
 
 import {NAvatar} from 'naive-ui';
 import CardStory from '@/components/CardStory.vue';
+import CollapsedCard from '@/UI/CollapsedCard.vue';
 
 import {logR, toChunks} from '@/services/utils';
 import CreateStory from '@/models/model.create.story';
+import User from '@/models/model.user';
+
 import ServiceStoryImage from '@/services/story.image.service';
 import StoryService from '@/services/story.service';
+import UserService from '@/services/user.service';
 import {API_URL} from '@/api/main';
 
 export default defineComponent({
   components: {
     'n-avatar': NAvatar,
     'card-story': CardStory,
+    'collapsed-card': CollapsedCard,
   },
   data() {
     return {
@@ -251,6 +306,7 @@ export default defineComponent({
         currentPage: 1,
         countStoriesPage: 4,
       },
+      usersBlock: {model: User},
       forms: {
         createStory: {active: false, model: {}},
         updateStory: {active: false, model: {}, selectedStory: {}},
@@ -260,6 +316,8 @@ export default defineComponent({
         fileList: [],
         stories: [],
         idsImagesStories: [],
+        users: [],
+        usersHeaders: [],
       },
     };
   },
@@ -287,13 +345,14 @@ export default defineComponent({
       this.forms.createStory.model = new CreateStory();
       const stories = await StoryService.getStories();
       const idsImagesStories = await ServiceStoryImage.getIdsImagesStories();
-
+      const users = await UserService.getUsers();
+      this.arrays.users = users;
       console.log('STORIES\n', stories);
       const chunksStories = toChunks(stories, 4);
       console.log('CHUNKS\n', chunksStories);
       this.arrays.stories = chunksStories.reverse();
       this.arrays.idsImagesStories = idsImagesStories;
-
+      this.arrays.usersHeaders = Object.keys(User.labels);
       this.storiesBlock.countPage = chunksStories.length;
     }
     this.render.main = false;
