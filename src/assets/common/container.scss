@@ -92,3 +92,25 @@
 .hover-container:hover > * {
   background-color: $color-grey-shadow !important;
 }
+
+.user-progress-container .n-progress-graph-line-rail {
+  background-color: rgba(53, 53, 53, 0.5) !important;
+}
+
+.user-progress-container .n-progress-icon {
+  font-weight: bold;
+}
+.user-progress-container .n-progress-graph-line-fill {
+  background-color: $color-acid-green !important;
+}
+
+.stats-block-container {
+  width: 40em;
+  height: 60em;
+}
+
+.user-profile-content-container {
+  margin-right: 3em;
+  padding-right: 2em;
+  padding-left: 2em;
+}

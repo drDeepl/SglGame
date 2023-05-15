@@ -111,3 +111,11 @@ export const blobToUint8Array = function (blob) {
     reader.readAsArrayBuffer(blob);
   });
 };
+
+export const decorateResponseDataArray = function (response) {
+  if (response.status === 200) {
+    return response.data;
+  } else {
+    return [];
+  }
+};

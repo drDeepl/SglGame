@@ -35,7 +35,13 @@ class ApiStory {
     const storyId = dataForm.storyId;
     const answer = dataForm.answer;
     logR('warn', 'API.STORY: checking answer');
-    return instance.post(`${path}/checkAnswer/${storyId}`, {answer: answer});
+    console.log('PAYLOAD');
+    console.log(dataForm);
+    return instance.post(
+      `${path}/checkAnswer/${storyId}`,
+      {answer: answer}
+      // {params: {storyId: storyId}}
+    );
   }
 }
 

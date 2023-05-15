@@ -1,15 +1,5 @@
 <template>
   <div>
-    <!-- <n-image
-          class="carousel-img"
-          preview-disabled
-          lazy
-          v-for="story in arrays.story"
-          :key="story.id"
-          :src="require('@/assets/img/history_' + story.title + '.jpg')"
-        >
-          <n-upload></n-upload>
-        </n-image> -->
     <n-empty
       v-if="arrays.stories.length == 0"
       size="huge"
@@ -59,29 +49,6 @@
         </n-button>
       </n-space>
     </div>
-
-    <!-- <n-carousel show-arrow>
-      <div
-        class="card-story-main-layer"
-        v-for="story in arrays.story"
-        :key="story"
-        @click="onClickStory(story)"
-      >
-        <n-popover trigger="hover">
-          <template #trigger>
-            <div>
-              <div class="card-title-story">
-                <span> story {{ story.title.replace('_', ' ') }} </span>
-              </div>
-              <img
-                class="card-history-img"
-                :src="require('@/assets/img/history_' + history.title + '.jpg')"
-              />
-            </div>
-          </template>
-          <n-rate readonly :default-value="story.difficulty"></n-rate
-        ></n-popover>
-      </div> -->
   </div>
 
   <n-modal
@@ -120,13 +87,6 @@
         <n-spin v-if="story.loadProgress == 100 && story.loadData"></n-spin>
       </n-space>
       <div v-else class="history-card-content">
-        {{ story.data }}
-        <!-- <n-descriptions>
-          <n-descriptions-item label-align="center">
-            {{ story.data.description }}
-          </n-descriptions-item>
-          <n-descriptions-item>{{ story.data.story_text }}</n-descriptions-item>
-        </n-descriptions> -->
         <n-space justify="center" align="center" vertical>
           <collapsed-card
             v-for="prop in ['description', 'story_text']"
@@ -164,12 +124,17 @@
           </n-code-block>
 
           <n-space justify="space-between">
-            <n-input
-              v-model:value="story.answer"
-              placeholder="Ответ:"
-            ></n-input>
-
-            <n-button @click="onClickSendAnswer">Отправить</n-button>
+            <n-form-item
+              :validation-status="story.validateAnswer.status"
+              :feedback="story.validateAnswer.message"
+            >
+              <!-- :status="story.validateAnswer.status" -->
+              <n-input
+                v-model:value="story.answer"
+                placeholder="Ответ:"
+              ></n-input>
+              <n-button @click="onClickSendAnswer">Отправить</n-button>
+            </n-form-item>
           </n-space>
         </n-space>
       </div>
@@ -244,6 +209,7 @@ export default defineComponent({
         db: null,
         model: new CreateStory(),
         answer: '',
+        validateAnswer: {status: '', message: ''},
       },
       codemirror: {
         columns: [],
@@ -272,7 +238,7 @@ export default defineComponent({
       return;
     }
 
-    const stories = await StoryService.getStories();
+    const stories = await StoryService.getStoriesForUser();
     console.log('CREATED: stories\n', stories);
     const chunksStories = toChunks(stories, 4);
     console.log('CHUNKS\n', chunksStories);
@@ -326,9 +292,9 @@ export default defineComponent({
         receivedLength += value.length;
         const percentage = (receivedLength * 100) / contentLength;
         this.story.loadProgress = Math.round(percentage);
-        console.log(
-          `Получено ${receivedLength} из ${contentLength} = ${percentage}%`
-        );
+        // console.log(
+        //   `Получено ${receivedLength} из ${contentLength} = ${percentage}%`
+        // );
       }
     },
     async onClickStory(story) {
@@ -402,12 +368,25 @@ export default defineComponent({
       console.log('RESPONSE FROM CHECK STORY ANSWER\n');
       console.log(response);
       if (response.status == 200) {
-        this.$store.commit('notification/SET_ACTIVE_SUCCESS', response.data);
+        this.$store.commit(
+          'notification/SET_ACTIVE_SUCCESS',
+          `${response.data}`
+        );
+        // this.story.validateAnswer.status = 'success';
+        // this.story.validateAnswer.message = 'Ответ верный!';
+        this.story.answer = '';
+        return;
       }
+
+      this.story.validateAnswer.status = 'error';
+      this.story.validateAnswer.message = 'Неправильный ответ';
     },
     onClickCloseHistory() {
       logR('warn', 'MainLayout: onClickCloseHistory');
       this.story.active = false;
+      this.story.validateAnswer.status = '';
+      this.story.validateAnswer.message = '';
+      this.story.answer = '';
       this.onClickClearCode();
     },
     onClickNextPageStory() {
@@ -418,6 +397,10 @@ export default defineComponent({
     onClickPrevPageStory() {
       logR('warn', 'StoryView: onClickPrevPageStory');
       this.storiesBlock.currentPage -= 1;
+    },
+    onClickInputAnswer() {
+      logR('warn', 'StoryView: onClickInputAnswer');
+      this.story.answerIsValid = '';
     },
   },
 });
