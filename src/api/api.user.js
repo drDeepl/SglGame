@@ -18,6 +18,15 @@ class ApiUser {
     logR('warn', 'API.USERS: userss');
     return instance.get(`${path}/index`);
   }
+  async update(payload) {
+    logR('warn', 'API.USERS: update');
+    return instance.post(`${path}/update`, payload);
+  }
+
+  async delete(userId) {
+    logR('warn', 'API.USERS:delete');
+    return instance.delete(`${path}/delete/${userId}`);
+  }
 }
 
 export default new ApiUser();

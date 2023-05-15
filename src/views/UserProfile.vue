@@ -65,7 +65,7 @@
                     ]"
                     :key="story.id"
                   >
-                    <n-popover trigger="hover">
+                    <n-popover trigger="click">
                       <template #trigger>
                         <card-story
                           @click="onClickStory(story.id)"
@@ -286,7 +286,9 @@ export default defineComponent({
 
     async onClickStory(storyId) {
       logR('error', 'todo:ADMIN PROFILE:onClickStory');
-      const response = await UserStatsService.getStatsByStoryId(storyId);
+      const response = await UserStatsService.getStatsForUsersByStoryId(
+        storyId
+      );
       console.log(response);
     },
 

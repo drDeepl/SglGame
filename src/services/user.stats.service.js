@@ -46,6 +46,18 @@ class UserStatsService {
     return decorateResponseDataArray(response);
   }
 
+  async getStatsForUsersByStoryId(storyId) {
+    logR('warn', 'getStatsForUsersByStoryId');
+    const response = await decorateResponseApi(
+      ApiUserStatsByStory.getMyStatsByStoryId,
+      storyId
+    );
+    if (response.status === 200) {
+      return response.data;
+    }
+    return [];
+  }
+
   async deleteStats(storyId) {
     logR('warn', 'deleteStats');
     const response = await decorateResponseApi(

@@ -152,10 +152,19 @@
           </div>
         </n-layout-header>
         <n-layout-content class="user-profile-content-container">
-          <collapsed-card title="Список пользователей">
-            <!-- {{ arrays.users }} -->
-            <n-space justify="center">
-              <n-scrollbar style="height: 20em">
+          <n-space justify="center">
+            <collapsed-card title="Список пользователей">
+              <!-- {{ arrays.users }} -->
+
+              <n-skeleton
+                v-if="usersBlock.render"
+                style="
+                  height: 20em;
+                  width: 100%;
+                  border-radius: 10px !important;
+                "
+              ></n-skeleton>
+              <n-scrollbar style="height: 20em" v-else>
                 <n-table>
                   <thead>
                     <tr>
@@ -163,9 +172,10 @@
                         v-for="(propHeader, id) in arrays.usersHeaders"
                         :key="`th_${id}`"
                       >
-                        {{ usersBlock.model.labels[propHeader] }}
+                        {{ forms.updateUser.model.labels[propHeader] }}
                         <!-- {{ prop }} -->
                       </th>
+                      <th></th>
                     </tr>
                   </thead>
 
@@ -190,12 +200,47 @@
                           {{ user[propUser] }}
                         </span>
                       </td>
+                      <td>
+                        <n-popconfirm :show-icon="false">
+                          <template #trigger>
+                            <n-icon
+                              size="28"
+                              color="grey"
+                              class="card-story-menu"
+                            >
+                              <icon-menu-story />
+                            </n-icon>
+                          </template>
+                          <template #action>
+                            <n-button
+                              circle
+                              size="tiny"
+                              ghost
+                              @click="onClickUpdateUser(user)"
+                            >
+                              <n-icon size="20" color="orange">
+                                <icon-edit />
+                              </n-icon>
+                            </n-button>
+                            <n-button
+                              circle
+                              size="tiny"
+                              ghost
+                              @click="onClickDeleteUser(user.id)"
+                            >
+                              <n-icon size="20" color="red">
+                                <icon-delete />
+                              </n-icon>
+                            </n-button>
+                          </template>
+                        </n-popconfirm>
+                      </td>
                     </tr>
                   </tbody>
                 </n-table>
               </n-scrollbar>
-            </n-space>
-          </collapsed-card>
+            </collapsed-card>
+          </n-space>
         </n-layout-content>
       </n-layout>
       <c-form
@@ -265,6 +310,18 @@
           ></n-alert>
         </n-space>
       </c-form>
+
+      <c-form
+        v-if="forms.updateUser.active"
+        :isActive="forms.updateUser.active"
+        title="Редактирование истории"
+        :itemModel="forms.updateUser.model"
+        labelApplyButton="Обновить"
+        :applyFunction="onClickApplyUpdateUser"
+        :cancelFunction="onClickCancelUpdateUser"
+        :hideProps="{id: true, role: true}"
+      >
+      </c-form>
     </n-layout>
   </div>
 </template>
@@ -302,14 +359,14 @@ export default defineComponent({
       storiesBlock: {
         render: false,
         countPage: 1,
-
         currentPage: 1,
         countStoriesPage: 4,
       },
-      usersBlock: {model: User},
+      usersBlock: {render: false},
       forms: {
         createStory: {active: false, model: {}},
         updateStory: {active: false, model: {}, selectedStory: {}},
+        updateUser: {active: false, model: {}, selectedUser: {}},
         isSuccess: {active: false, message: ''},
       },
       arrays: {
@@ -350,15 +407,24 @@ export default defineComponent({
       console.log('STORIES\n', stories);
       const chunksStories = toChunks(stories, 4);
       console.log('CHUNKS\n', chunksStories);
+      const userModel = new User();
       this.arrays.stories = chunksStories.reverse();
       this.arrays.idsImagesStories = idsImagesStories;
-      this.arrays.usersHeaders = Object.keys(User.labels);
+      this.forms.updateUser.model = userModel;
+      this.arrays.usersHeaders = Object.keys(userModel.labels);
       this.storiesBlock.countPage = chunksStories.length;
     }
     this.render.main = false;
   },
 
   methods: {
+    createNotificationError() {
+      logR('warn', 'createNotificationError');
+      this.$store.commit(
+        'notification/SET_ACTIVE_ERROR',
+        'Что-то пошло не так...'
+      );
+    },
     clearCurrentStoryId() {
       this.currentStoryId = null;
     },
@@ -420,7 +486,8 @@ export default defineComponent({
         // this.onClickCancelCreateStory();
         this.updateCountPageInStoriesBox();
       } else {
-        this.$store.commit('notification/SET_ACTIVE_ERROR', response.message);
+        // this.$store.commit('notification/SET_ACTIVE_ERROR', response.message);
+        this.createNotificationError();
       }
     },
     clearSuccessForm() {
@@ -432,7 +499,7 @@ export default defineComponent({
       logR('error', 'todo:ADMIN PROFILE:onClickStory');
     },
     onClickUpdateStory(dataStory) {
-      console.error('todo: onClickUpdateStory');
+      logR('warn', 'onClickUpdateStory');
 
       const model = new CreateStory();
       for (let prop in model.data) {
@@ -503,6 +570,57 @@ export default defineComponent({
     onClickPrevPageStory() {
       logR('warn', 'AdminProfile: onClickPrevPageStory');
       this.storiesBlock.currentPage -= 1;
+    },
+    onClickUpdateUser(user) {
+      logR('warn', 'AdminProfile: onClickUpdateRow');
+      console.log(user);
+      this.forms.updateUser.active = true;
+      this.forms.updateUser.selectedUser = user;
+      const model = new User();
+      for (let prop in model.data) {
+        model.data[prop] = user[prop];
+      }
+
+      this.forms.updateUser.model = model;
+    },
+
+    onClickCancelUpdateUser() {
+      logR('warn', 'onClickCancelUpdateUser');
+      this.forms.updateUser.active = false;
+      this.forms.updateUser.selectedUser = {};
+    },
+
+    async updateArrayUsers() {
+      logR('warn', 'updateArrayUsers');
+      this.usersBlock.render = true;
+      const users = await UserService.getUsers();
+      if (users.length > 0) {
+        this.arrays.users = users.reverse();
+      }
+      this.usersBlock.render = false;
+    },
+
+    async onClickApplyUpdateUser(user) {
+      logR('warn', 'onClickApplyUpdateUser');
+      user['password'] = this.forms.updateUser.selectedUser.password;
+
+      console.log('USER FOR UPDATE:', user);
+      const response = await UserService.updateUser(user);
+      if (response.status == 200) {
+        await this.updateArrayUsers();
+      }
+      console.log(response);
+    },
+
+    async onClickDeleteUser(userId) {
+      logR('warn', 'AdminProfile: onClickDeleteUsesr');
+      const response = await UserService.deleteUser(userId);
+
+      if (response.status == 200) {
+        await this.updateArrayUsers();
+      } else {
+        this.createNotificationError();
+      }
     },
   },
 });

@@ -33,6 +33,11 @@ class ApiUserStatsByStory {
     logR('warn', 'getStatsByStoryId');
     return instance.get(`${path}/findByStoryId/${storyId}`);
   }
+
+  async getMyStatsByStoryId(storyId) {
+    logR('warn', 'getStatsForUsersByStoryId');
+    return instance.get(`${path}/findMyStatsByStoryId/${storyId}`);
+  }
   async delete(statsId) {
     logR('warn', 'deleteStats');
     return instance.delete(`${path}/delete/${statsId}`);

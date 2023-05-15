@@ -25,6 +25,21 @@ class UserService {
     const response = await decorateResponseApi(ApiUser.users);
     return response.status === 200 ? response.data : [];
   }
+
+  async updateUser(user) {
+    logR('warn', 'USER.SERVICE:updateUser');
+    // const data4Update = {username: user.username, password: user.password};
+    console.log('DATA USER');
+
+    const response = await decorateResponseApi(ApiUser.update, user);
+    return response;
+  }
+
+  async deleteUser(userId) {
+    logR('warn', 'USER.SERVICE:deleteUser');
+    const response = await decorateResponseApi(ApiUser.delete, userId);
+    return response;
+  }
 }
 
 export default new UserService();
