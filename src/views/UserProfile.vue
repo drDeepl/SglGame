@@ -79,11 +79,13 @@
                         </card-story>
                       </template>
                       <n-select
+                        v-if="storyStats.selectedStatsStory.length > 0"
                         :consistent-menu-width="false"
                         :options="storyStats.selectedStatsStory"
                         v-model:value="storyStats.selectedStats"
                       >
                       </n-select>
+                      <div v-else>Статистика по истории отсутствует</div>
                       <!-- <div v-if="dicts.stats[story.id]"></div> -->
                       <n-skeleton v-if="storyStats.render"></n-skeleton>
                       <div
@@ -134,7 +136,6 @@
                           </div>
                         </n-space>
                       </div>
-                      <div v-else>Статистика по истории отсутствует</div>
                     </n-popover>
                   </div>
                 </div>

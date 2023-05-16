@@ -1,4 +1,5 @@
 import TokenService from './token.service';
+
 import {isDevelop} from '@/_config';
 export function logR(type, msg) {
   // INFO: зато забавно
