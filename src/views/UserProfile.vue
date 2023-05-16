@@ -67,8 +67,8 @@
                   >
                     <n-popover trigger="click" overlap placement="top">
                       <template #trigger>
-                        <!-- @click="onClickStory(story.id)" -->
                         <card-story
+                          @click="onClickStory(story.id)"
                           class="cursor-layout"
                           v-if="!storiesBlock.render"
                           :title="story.title"
@@ -78,7 +78,19 @@
                         >
                         </card-story>
                       </template>
-                      <div v-if="dicts.stats[story.id]">
+                      <n-select
+                        :consistent-menu-width="false"
+                        :options="storyStats.selectedStatsStory"
+                        v-model:value="storyStats.selectedStats"
+                      >
+                      </n-select>
+                      <!-- <div v-if="dicts.stats[story.id]"></div> -->
+                      <n-skeleton v-if="storyStats.render"></n-skeleton>
+                      <div
+                        v-else-if="
+                          storyStats.currentStoryStats[storyStats.selectedStats]
+                        "
+                      >
                         <n-space vertical justify="center">
                           <div
                             class="stats-row-container"
@@ -94,25 +106,32 @@
                               v-if="stat == 'game_end_date'"
                               class="value-row"
                             >
-                              {{ dicts.stats[story.id][stat].split('T')[0] }}
+                              {{
+                                storyStats.currentStoryStats[
+                                  storyStats.selectedStats
+                                ][stat].split('T')[0]
+                              }}
                             </span>
                             <span
                               v-else-if="stat == 'is_completed'"
                               class="value-row"
                             >
-                              {{ dicts.stats[story.id][stat] ? 'Да' : 'Нет' }}
+                              {{
+                                storyStats.currentStoryStats[
+                                  storyStats.selectedStats
+                                ][stat]
+                                  ? 'Да'
+                                  : 'Нет'
+                              }}
                             </span>
                             <span v-else class="value-row">
-                              {{ dicts.stats[story.id][stat] }}
+                              {{
+                                storyStats.currentStoryStats[
+                                  storyStats.selectedStats
+                                ][stat]
+                              }}
                             </span>
                           </div>
-
-                          <!-- {{ forms.showStats.model.labels[stat] }}:
-                            {{
-                              stat == 'game_end_date'
-                                ? dicts.stats[story.id][stat].split('T')[0]
-                                : dicts.stats[story.id][stat]
-                            }} -->
                         </n-space>
                       </div>
                       <div v-else>Статистика по истории отсутствует</div>
@@ -213,6 +232,12 @@ export default defineComponent({
         countPage: 1,
         currentPage: 1,
         countStoriesPage: 4,
+      },
+      storyStats: {
+        render: false,
+        selectedStats: 'Прохождение',
+        selectedStatsStory: [],
+        currentStoryStats: {},
       },
       forms: {
         createStory: {active: false, model: {}},
@@ -335,10 +360,25 @@ export default defineComponent({
 
     async onClickStory(storyId) {
       logR('error', 'todo:ADMIN PROFILE:onClickStory');
-      const response = await UserStatsService.getStatsForUsersByStoryId(
+      (this.storyStats.selectedStats = 'Прохождение'),
+        (this.storyStats.render = true);
+      this.storyStats.selectedStatsStory = [];
+      this.storyStats.currentStoryStats = {};
+
+      const storyStats = await UserStatsService.getStatsForUsersByStoryId(
         storyId
       );
-      console.log(response);
+      let selectedStatsStory = [];
+      for (let i in storyStats) {
+        selectedStatsStory.push({
+          label: `Прохождение ${Number(i) + 1}`,
+          value: storyStats[i].id,
+        });
+        this.storyStats.currentStoryStats[storyStats[i].id] = storyStats[i];
+      }
+      this.storyStats.selectedStatsStory = selectedStatsStory;
+      console.log(storyStats);
+      this.storyStats.render = false;
     },
 
     onClickToLink(url) {

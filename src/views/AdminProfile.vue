@@ -180,11 +180,11 @@
                   </thead>
 
                   <tbody>
+                    <!-- @click="onClickRowUser(user)" -->
                     <tr
-                      @click="onClickRowUser(user)"
                       v-for="user in arrays.users"
                       :key="user.id"
-                      class="hover-container cursor-layout"
+                      class="hover-container"
                     >
                       <td
                         v-for="(propUser, id) in arrays.usersHeaders"

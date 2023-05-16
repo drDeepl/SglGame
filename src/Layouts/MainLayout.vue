@@ -56,7 +56,7 @@
   </n-navbar>
   <div class="main-content">
     <div
-      v-if="$router.currentRoute._value.name == 'home'"
+      v-if="$router.currentRoute.value.name == 'home'"
       class="main-preview-layout"
     >
       <div class="preview-description">
@@ -81,7 +81,11 @@
             <span class="primary-font-color"
               >Только авторизованные пользователи могут играть</span
             >
-            <n-button ghost round type="success" @click="onClickLogIn"
+            <n-button
+              ghost
+              round
+              type="success"
+              @click="onClickLogIn('stories')"
               >Войти</n-button
             >
           </n-space>
@@ -213,6 +217,7 @@ export default defineComponent( {
       todos: false,
       role: {"ROLE_ADMIN": 'admin', "ROLE_USER": 'user'},
       // NOTE: На время теста ===================
+      redirectAfterLogIn: '',
       render: {main: false},
       menubar: {},
       alert: {
@@ -254,15 +259,7 @@ export default defineComponent( {
 
   },
     methods: {
-      onClickToPlay(userData){
-        logR("warn", "MainLayout: onClickToPlay");
-        if(userData){
-          this.$router.push({name: "stories"})
-        }
-        this.onClickLogIn();
 
-
-      },
       onClickCancelErrorAlert() {
       this.alert.error.active = false;
       this.alert.error.message = '';
@@ -281,10 +278,21 @@ export default defineComponent( {
       this.activateBlock.avatar = true;
 
     },
-    onClickLogIn() {
+    onClickLogIn(redirectAfterLogIn) {
       logR('warn', 'NAVBAR: onClickLogIn');
       this.forms.logIn.active = true;
+      console.log("REDIRECT", redirectAfterLogIn)
+      if(typeof redirectAfterLogIn == 'string') {
+        this.redirectAfterLogIn = redirectAfterLogIn;
+      }
+      else{
+        this.redirectAfterLogIn = 'profile';
+      }
+
+
+
     },
+
     onClickCancelLogIn() {
       logR('warn', 'NAVBAR: onClickCancelLogin');
       this.forms.logIn.active = false;
@@ -309,16 +317,17 @@ export default defineComponent( {
         }, intervalForUpdateToken);
 
         // TODO: таймер на обновление токена
-
-        this.forms.runSucess = true;
-
-
+        let redirect = this.redirectAfterLogIn;
+        if(redirect == 'profile'){
+          redirect = this.role[this.userData.role]
+        }
+        this.$router.push({name: redirect});
       }
 
       else{
         this.$store.commit("notification/SET_ACTIVE_ERROR", response.message);
       }
-      this.forms.logIn.active = false;
+      this.onClickCancelLogIn();
       return response;
     },
     onClickRegister() {
