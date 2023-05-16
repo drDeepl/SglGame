@@ -181,9 +181,10 @@
 
                   <tbody>
                     <tr
+                      @click="onClickRowUser(user)"
                       v-for="user in arrays.users"
                       :key="user.id"
-                      class="hover-container"
+                      class="hover-container cursor-layout"
                     >
                       <td
                         v-for="(propUser, id) in arrays.usersHeaders"
@@ -322,6 +323,31 @@
         :hideProps="{id: true, role: true}"
       >
       </c-form>
+      <n-modal v-model:show="statsBlock.active" v-if="statsBlock.active">
+        <n-card
+          :title="`Статистика игрока ${statsBlock.currentUser.username}`"
+          :mask-closable="false"
+          class="card-main-layer"
+        >
+          <template #header-extra>
+            <n-button
+              quaternary
+              circle
+              type="error"
+              :focusable="false"
+              @click="onClickCancelStats"
+            >
+              <icon-close style="width: 1.7em" />
+            </n-button>
+          </template>
+          {{ statsBlock.selectedStory }}
+          <span>TODO: show stats</span>
+          <n-select
+            v-model:value="statsBlock.selectedStory"
+            :options="statsBlock.valueForSelect"
+          ></n-select>
+        </n-card>
+      </n-modal>
     </n-layout>
   </div>
 </template>
@@ -356,6 +382,12 @@ export default defineComponent({
       states: {delete: {story: false}},
       currentStoryId: null,
       currentStoryHasImg: false,
+      statsBlock: {
+        active: false,
+        valueForSelect: [],
+        currentUser: {},
+        selectedStory: null,
+      },
       storiesBlock: {
         render: false,
         countPage: 1,
@@ -376,6 +408,7 @@ export default defineComponent({
         users: [],
         usersHeaders: [],
       },
+      dicts: {stories: {}},
     };
   },
 
@@ -393,7 +426,6 @@ export default defineComponent({
     },
   },
   async created() {
-    // TODO: Подгрузка историй с бека
     this.render.main = true;
     if (!this.userData) {
       this.$router.push({name: 'home'});
@@ -401,6 +433,11 @@ export default defineComponent({
       this.sidebar.rows = this.$store.state.user.userSidebar.admin;
       this.forms.createStory.model = new CreateStory();
       const stories = await StoryService.getStories();
+      stories.forEach((story) => {
+        this.dicts.stories[story.id] = story;
+        const row = {label: story.title, value: story.id};
+        this.statsBlock.valueForSelect.push(row);
+      });
       const idsImagesStories = await ServiceStoryImage.getIdsImagesStories();
       const users = await UserService.getUsers();
       this.arrays.users = users;
@@ -621,6 +658,17 @@ export default defineComponent({
       } else {
         this.createNotificationError();
       }
+    },
+    onClickRowUser(user) {
+      logR('warn', 'onClickRowUser');
+      this.statsBlock.active = true;
+      this.statsBlock.currentUser = user;
+    },
+
+    onClickCancelStats() {
+      logR('warn', 'onClickCancelStats');
+      this.statsBlock.active = false;
+      this.statsBlock.currentUser = {};
     },
   },
 });

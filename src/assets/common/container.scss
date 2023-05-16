@@ -114,3 +114,14 @@
   padding-right: 2em;
   padding-left: 2em;
 }
+
+.stats-row-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.label-row {
+  font-weight: bold;
+  font-size: 0.8em;
+}

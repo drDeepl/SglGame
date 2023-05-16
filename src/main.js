@@ -53,10 +53,12 @@ import {
   NTooltip,
   NCollapseTransition,
   NFormItem,
+  NSelect,
 } from 'naive-ui';
 import CodeBlock from '@/UI/CodeBlock.vue';
 const app = createApp(App);
 
+app.component('n-select', NSelect);
 app.component('n-form-item', NFormItem);
 app.component('n-table', NTable);
 app.component('n-collapse-transition', NCollapseTransition);

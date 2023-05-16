@@ -65,10 +65,10 @@
                     ]"
                     :key="story.id"
                   >
-                    <n-popover trigger="click">
+                    <n-popover trigger="click" overlap placement="top">
                       <template #trigger>
+                        <!-- @click="onClickStory(story.id)" -->
                         <card-story
-                          @click="onClickStory(story.id)"
                           class="cursor-layout"
                           v-if="!storiesBlock.render"
                           :title="story.title"
@@ -78,7 +78,44 @@
                         >
                         </card-story>
                       </template>
-                      <span>{{ story }}</span>
+                      <div v-if="dicts.stats[story.id]">
+                        <n-space vertical justify="center">
+                          <div
+                            class="stats-row-container"
+                            v-for="(stat, id) in Object.keys(
+                              forms.showStats.model.labels
+                            )"
+                            :key="id"
+                          >
+                            <span class="label-row">
+                              {{ forms.showStats.model.labels[stat] }}
+                            </span>
+                            <span
+                              v-if="stat == 'game_end_date'"
+                              class="value-row"
+                            >
+                              {{ dicts.stats[story.id][stat].split('T')[0] }}
+                            </span>
+                            <span
+                              v-else-if="stat == 'is_completed'"
+                              class="value-row"
+                            >
+                              {{ dicts.stats[story.id][stat] ? 'Да' : 'Нет' }}
+                            </span>
+                            <span v-else class="value-row">
+                              {{ dicts.stats[story.id][stat] }}
+                            </span>
+                          </div>
+
+                          <!-- {{ forms.showStats.model.labels[stat] }}:
+                            {{
+                              stat == 'game_end_date'
+                                ? dicts.stats[story.id][stat].split('T')[0]
+                                : dicts.stats[story.id][stat]
+                            }} -->
+                        </n-space>
+                      </div>
+                      <div v-else>Статистика по истории отсутствует</div>
                     </n-popover>
                   </div>
                 </div>
@@ -142,12 +179,16 @@ import {defineComponent} from 'vue';
 import {NAvatar} from 'naive-ui';
 import CardStory from '@/components/CardStory.vue';
 
-import {logR, toChunks} from '@/services/utils';
 import CreateStory from '@/models/model.create.story';
+import UserStats from '@/models/model.user.stats';
+
 import ServiceStoryImage from '@/services/story.image.service';
 import StoryService from '@/services/story.service';
-import {API_URL} from '@/api/main';
+import {logR, toChunks} from '@/services/utils';
 import UserStatsService from '@/services/user.stats.service';
+
+import {API_URL} from '@/api/main';
+
 import Chart from 'chart.js/auto';
 
 export default defineComponent({
@@ -177,6 +218,7 @@ export default defineComponent({
         createStory: {active: false, model: {}},
         updateStory: {active: false, model: {}, selectedStory: {}},
         isSuccess: {active: false, message: ''},
+        showStats: {active: false, model: new UserStats()},
       },
       // INFO: Блок со статистикой===============
       statsBlock: {
@@ -199,6 +241,7 @@ export default defineComponent({
       },
       dicts: {
         stories: {},
+        stats: {},
       },
     };
   },
@@ -226,12 +269,18 @@ export default defineComponent({
       console.log(this.userData);
       const usersStats = await UserStatsService.getStatsCurrentUser();
       const stories = await StoryService.getStoriesForUser();
+      // INFO: DictsStories==========================================
+      // let dictsStats = {};
       stories.forEach((story) => {
-        this.dicts.stories[story.id] = story.title;
+        this.dicts.stories[story.id] = story;
       });
+
+      // INFO: DictsStories==========================================
       const labelsStats = usersStats.map((stats) => {
-        return this.dicts.stories[stats.story_id];
+        this.dicts.stats[stats.story_id] = stats;
+        return this.dicts.stories[stats.story_id].title;
       });
+
       const dataStats = usersStats.map((stats) => stats.scores);
       console.log('DATASTATS\n', dataStats);
       this.statsBlock.datasets[0].data = dataStats;
