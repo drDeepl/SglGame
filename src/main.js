@@ -13,6 +13,7 @@ import {
   MoreCircle20Regular,
   IosArrowLtr24Regular,
   Triangle48Regular,
+  Info16Regular,
 } from '@vicons/fluent';
 import './assets/main.scss';
 
@@ -99,6 +100,7 @@ app.component('n-modal', NModal);
 app.component('c-form', FormDialog);
 app.component('n-spin', NSpin);
 app.component('icon-edit', Edit16Regular);
+app.component('icon-info', Info16Regular);
 app.component('icon-close', Dismiss28Regular);
 app.component('icon-add', AddSquareMultiple16Filled);
 app.component('icon-add-plus', Add16Filled);

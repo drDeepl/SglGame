@@ -16,7 +16,7 @@ class UserRegister {
       username: {required: true, message: 'Необходимое поле', trigger: 'blur'},
       password: {
         required: true,
-        validator(rule, value) {
+        validator: (rule, value) => {
           if (!value) {
             return new Error('Необходимое поле');
           } else if (value.length <= 2) {

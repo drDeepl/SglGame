@@ -97,6 +97,16 @@
                             circle
                             size="tiny"
                             ghost
+                            @click="onClickInfoStory(story)"
+                          >
+                            <n-icon size="20" color="blue">
+                              <icon-info />
+                            </n-icon>
+                          </n-button>
+                          <n-button
+                            circle
+                            size="tiny"
+                            ghost
                             @click="onClickUpdateStory(story)"
                           >
                             <n-icon size="20" color="orange">
@@ -348,6 +358,32 @@
           ></n-select>
         </n-card>
       </n-modal>
+      <n-modal v-model:show="showInfo" :mask-closable="false">
+        <n-card title="Подробности по истории" class="card-main-layer">
+          <template #header-extra>
+            <n-button
+              quaternary
+              circle
+              type="error"
+              :focusable="false"
+              @click="showInfo = false"
+            >
+              <icon-close style="width: 1.7em" />
+            </n-button>
+          </template>
+          <n-descriptions :column="2" class="story-info-container">
+            <n-descriptions-item
+              v-for="(id, row) in forms.createStory.model.labels"
+              :key="`story_info_${id}`"
+            >
+              <template #label>
+                {{ forms.createStory.model.labels[row] }}
+              </template>
+              {{ storiesBlock.selectedStoryForShowInfo[row] }}
+            </n-descriptions-item>
+          </n-descriptions>
+        </n-card>
+      </n-modal>
     </n-layout>
   </div>
 </template>
@@ -377,6 +413,7 @@ export default defineComponent({
   data() {
     return {
       API_URL,
+      showInfo: false,
       sidebar: {active: false, rows: []},
       render: {main: false},
       states: {delete: {story: false}},
@@ -389,6 +426,7 @@ export default defineComponent({
         selectedStory: null,
       },
       storiesBlock: {
+        selectedStoryForShowInfo: {},
         render: false,
         countPage: 1,
         currentPage: 1,
@@ -532,9 +570,12 @@ export default defineComponent({
       this.forms.isSuccess.message = '';
     },
 
-    onClickStory() {
+    onClickInfoStory(story) {
       logR('error', 'todo:ADMIN PROFILE:onClickStory');
+      this.storiesBlock.selectedStoryForShowInfo = story;
+      this.showInfo = true;
     },
+
     onClickUpdateStory(dataStory) {
       logR('warn', 'onClickUpdateStory');
 
