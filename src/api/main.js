@@ -2,7 +2,7 @@ import axios from 'axios';
 import TokenService from '@/services/token.service';
 import {extractJWT} from '@/services/utils';
 
-export const API_URL = 'http://185.46.9.42:8081/api';
+export const API_URL = 'http://194.67.121.7:8081/api';
 
 axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
 const token = TokenService.getToken();
