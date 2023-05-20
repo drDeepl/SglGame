@@ -125,3 +125,18 @@
   font-weight: bold;
   font-size: 0.8em;
 }
+
+.story-info-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 100%;
+  // border: 2px solid $color-white;
+  // width: 2.2em;
+  // height: 2.2em;
+}
+.story-info-container > small {
+  text-align: center;
+  // color: $color-white;
+}

@@ -21,6 +21,10 @@
             :description="story.description"
             :difficulty="story.difficulty"
           >
+            <div class="story-info-container">
+              <small class="font-bold"></small>
+              <n-rate :value="story.difficulty" readonly></n-rate>
+            </div>
           </card-story>
         </div>
       </div>
