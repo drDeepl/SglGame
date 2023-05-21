@@ -80,14 +80,18 @@ export default defineComponent({
 
   watch:{
     code(value){
+      this.codeIsValid = false;
       const lowerCaseValue = value.toLowerCase();
       const isValidQuery = /(select)+.+(from)\s+./.test(lowerCaseValue);
       // console.log(isValidQuery);
       if(isValidQuery){
+        const isHaveJoin = /\s(join)\s/.test(lowerCaseValue);
+        if(isHaveJoin){
+          console.log(`Is have join: ${isHaveJoin}`)
+          return
+        }
         this.codeIsValid = true;
-      }
-      else{
-        this.codeIsValid = false;
+
       }
     }
   },
