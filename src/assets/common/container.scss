@@ -143,6 +143,8 @@
   // color: $color-white;
 }
 
-.preview-story-card-container {
-  margin-top: 0.5em;
+.preview-story-card-container > .n-card > .n-card-header {
+  padding-top: 0.5em;
+  display: flex !important;
+  flex-direction: column !important;
 }

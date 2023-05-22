@@ -2,15 +2,12 @@ import AuthService from '@/services/auth.service';
 import TokenService from '@/services/token.service';
 import {logR, extractJWT} from '@/services/utils';
 const initialTokenUser = TokenService.getToken();
-const initialTokenData = initialTokenUser
-  ? extractJWT(initialTokenUser.accessToken)
-  : null;
 export const auth = {
   namespaced: true,
   state() {
     return {
       tokenUser: initialTokenUser,
-      tokenData: initialTokenData,
+      tokenData: null,
     };
   },
 
@@ -24,7 +21,6 @@ export const auth = {
         context.commit('SET_TOKEN_USER', responseData);
         console.log(responseData);
         const userData = extractJWT(responseData.accessToken);
-
         logR('log', 'MODULE.AUTH: token\n', userData);
         context.commit('SET_DATA_LOGIN', userData);
       }

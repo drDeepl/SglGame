@@ -1,151 +1,155 @@
 <template>
-  <n-navbar>
-    <n-space justify="space-between" align="center">
-      <n-space justify="start">
-        <router-link to="/">
-          <n-button text>
-            <span style="color: whitesmoke">На главную</span>
-          </n-button>
-        </router-link>
+  <div>
+    <n-navbar>
+      <n-space justify="space-between" align="center">
+        <n-space justify="start">
+          <router-link to="/">
+            <n-button text>
+              <span style="color: whitesmoke">На главную</span>
+            </n-button>
+          </router-link>
+        </n-space>
+        <n-space justify="end">
+          <n-popconfirm
+            v-if="!userData"
+            class="navbar-popconfirm"
+            :show-icon="false"
+            positive-text="Вход"
+            :on-positive-click="onClickLogIn"
+            negative-text="Регистрация"
+            :on-negative-click="onClickRegister"
+          >
+            <template #trigger>
+              <n-avatar
+                @click="onClickAvatar"
+                class="user__avatar"
+                size="large"
+                round
+                :style="{backgroundColor: '#ee4540'}"
+              >
+                <span>?</span>
+              </n-avatar>
+            </template>
+          </n-popconfirm>
+          <n-popconfirm
+            v-else
+            class="navbar-popconfirm"
+            :show-icon="false"
+            positive-text="Личный кабинет"
+            :on-positive-click="onClickToProfile"
+            negative-text="Выйти"
+            :on-negative-click="onClickToExitProfile"
+          >
+            <template #trigger>
+              <n-avatar
+                @click="onClickAvatar"
+                class="user__avatar"
+                size="large"
+                round
+                :style="{backgroundColor: '#ee4540'}"
+              >
+                <span>
+                  {{ userData ? userData.sub.slice(0, 2) : '' }}
+                </span>
+              </n-avatar>
+            </template>
+          </n-popconfirm>
+        </n-space>
       </n-space>
-      <n-space justify="end">
-        <n-popconfirm
-          v-if="!userData"
-          class="navbar-popconfirm"
-          :show-icon="false"
-          positive-text="Вход"
-          :on-positive-click="onClickLogIn"
-          negative-text="Регистрация"
-          :on-negative-click="onClickRegister"
-        >
-          <template #trigger>
-            <n-avatar
-              @click="onClickAvatar"
-              class="user__avatar"
-              size="large"
-              round
-              :style="{backgroundColor: '#ee4540'}"
-            >
-              <span>?</span>
-            </n-avatar>
-          </template>
-        </n-popconfirm>
-        <n-popconfirm
-          v-else
-          class="navbar-popconfirm"
-          :show-icon="false"
-          positive-text="Личный кабинет"
-          :on-positive-click="onClickToProfile"
-          negative-text="Выйти"
-          :on-negative-click="onClickToExitProfile"
-        >
-          <template #trigger>
-            <n-avatar
-              @click="onClickAvatar"
-              class="user__avatar"
-              size="large"
-              round
-              :style="{backgroundColor: '#ee4540'}"
-            >
-              <span>{{ userData ? userData.sub.slice(0, 2) : '' }}</span>
-            </n-avatar>
-          </template>
-        </n-popconfirm>
-      </n-space>
-    </n-space>
-  </n-navbar>
-  <div class="main-content">
-    <div
-      v-if="$router.currentRoute.value.name == 'home'"
-      class="main-preview-layout"
-    >
-      <div class="preview-description">
-        <p>
-          Хотите проверить свой уровень знаний SQL? Тогда Вы точно по адресу!
-          Вам будут предложены различные сценарии, которые задуманы, как
-          самостоятельный урок по изучению концепций и команд SQL. Такая
-          увлекательная игра подойдёт как для опытных пользователей SQL, так и
-          для новичков.
-        </p>
-        <n-popover trigger="hover" class="border-left-red">
-          <template #trigger>
-            <n-button
-              color="#ee4540"
-              class="preview-btn"
-              @click="$router.push({name: 'stories'})"
-              >Играть</n-button
-            >
-          </template>
-          <span v-if="userData" class="primary-font-color"> Вперёд! </span>
-          <n-space v-else vertical>
-            <span class="primary-font-color"
-              >Только авторизованные пользователи могут играть</span
-            >
-            <n-button
-              ghost
-              round
-              type="success"
-              @click="onClickLogIn('stories')"
-              >Войти</n-button
-            >
-          </n-space>
-        </n-popover>
+    </n-navbar>
+    <div class="main-content">
+      <div
+        v-if="$router.currentRoute.value.name == 'home'"
+        class="main-preview-layout"
+      >
+        <div class="preview-description">
+          <p>
+            Хотите проверить свой уровень знаний SQL? Тогда Вы точно по адресу!
+            Вам будут предложены различные сценарии, которые задуманы, как
+            самостоятельный урок по изучению концепций и команд SQL. Такая
+            увлекательная игра подойдёт как для опытных пользователей SQL, так и
+            для новичков.
+          </p>
+          <n-popover trigger="hover" class="border-left-red">
+            <template #trigger>
+              <n-button
+                color="#ee4540"
+                class="preview-btn"
+                @click="$router.push({name: 'stories'})"
+                >Играть</n-button
+              >
+            </template>
+            <span v-if="userData" class="primary-font-color"> Вперёд! </span>
+            <n-space v-else vertical>
+              <span class="primary-font-color"
+                >Только авторизованные пользователи могут играть</span
+              >
+              <n-button
+                ghost
+                round
+                type="success"
+                @click="onClickLogIn('stories')"
+                >Войти</n-button
+              >
+            </n-space>
+          </n-popover>
+        </div>
+        <div class="main-preview"></div>
       </div>
-      <div class="main-preview"></div>
+      <router-view> </router-view>
+      <n-modal
+        v-if="errorAlertActive.active"
+        v-model:show="errorAlertActive.active"
+        :title="errorAlertActive.message"
+        :mask-closable="false"
+        preset="dialog"
+        @positive-click="onClickCancelErrorAlert"
+        type="error"
+      >
+      </n-modal>
+      <n-modal
+        v-if="successAlertActive.active"
+        v-model:show="successAlertActive.active"
+        :title="successAlertActive.message"
+        :mask-closable="false"
+        preset="dialog"
+        @positive-click="onClickCancelSuccessAlert"
+        type="success"
+      >
+      </n-modal>
     </div>
-    <router-view> </router-view>
-    <n-modal
-      v-if="errorAlertActive.active"
-      v-model:show="errorAlertActive.active"
-      :title="errorAlertActive.message"
-      :mask-closable="false"
-      preset="dialog"
-      @positive-click="onClickCancelErrorAlert"
-      type="error"
+
+    <!-- // NOTE: блок с всплывающими оповещениями -->
+
+    <!-- // NOTE: блок с формами -->
+    <c-form
+      v-if="forms.logIn.active"
+      :isActive="forms.logIn.active"
+      title="Вход"
+      :itemModel="forms.logIn.model"
+      :toValidate="false"
+      labelApplyButton="Войти"
+      :applyFunction="onClickApplyLogIn"
+      :cancelFunction="onClickCancelLogIn"
+      :isRunSuccess="forms.runSuccess"
+      :loading="forms.running"
     >
-    </n-modal>
-    <n-modal
-      v-if="successAlertActive.active"
-      v-model:show="successAlertActive.active"
-      :title="successAlertActive.message"
-      :mask-closable="false"
-      preset="dialog"
-      @positive-click="onClickCancelSuccessAlert"
-      type="success"
+    </c-form>
+
+    <c-form
+      v-if="forms.register.active"
+      :isActive="forms.register.active"
+      title="Регистрация"
+      :itemModel="forms.register.model"
+      :toValidate="true"
+      :hideProps="{role: true}"
+      labelApplyButton="Зарегистрироваться"
+      :applyFunction="onClickApplyRegister"
+      :cancelFunction="onClickCancelRegister"
+      :loading="forms.running"
     >
-    </n-modal>
+    </c-form>
   </div>
-
-  <!-- // NOTE: блок с всплывающими оповещениями -->
-
-  <!-- // NOTE: блок с формами -->
-  <c-form
-    v-if="forms.logIn.active"
-    :isActive="forms.logIn.active"
-    title="Вход"
-    :itemModel="forms.logIn.model"
-    :toValidate="false"
-    labelApplyButton="Войти"
-    :applyFunction="onClickApplyLogIn"
-    :cancelFunction="onClickCancelLogIn"
-    :isRunSuccess="forms.runSuccess"
-    :loading="forms.running"
-  >
-  </c-form>
-
-  <c-form
-    v-if="forms.register.active"
-    :isActive="forms.register.active"
-    title="Регистрация"
-    :itemModel="forms.register.model"
-    :toValidate="true"
-    :hideProps="{role: true}"
-    labelApplyButton="Зарегистрироваться"
-    :applyFunction="onClickApplyRegister"
-    :cancelFunction="onClickCancelRegister"
-    :loading="forms.running"
-  >
-  </c-form>
 </template>
 
 <script lang="js">
@@ -159,6 +163,7 @@ import {logR, extractJWT} from '@/services/utils';
 
 import UserService from "@/services/user.service";
 import AuthService from "@/services/auth.service";
+import TokenService from "@/services/token.service";
 
 import UserLogin from "@/models/model.user.login";
 import UserRegister from "@/models/model.user.register"
@@ -172,15 +177,16 @@ export default defineComponent( {
     let tokenUser = this.$store.state.auth.tokenUser
     console.log("TOKEN USER: ", tokenUser)
     if(tokenUser){
-
       const currentDate = Date.now();
-      // INFO: default userData.exp in seconds, aftetr * 1000 will milliseconds
-      const userExp = this.userData.exp *1000
+      // INFO: default userData.exp in seconds, after * 1000 will milliseconds
+      console.log("USERS TOKEN", tokenUser);
+      const userData = extractJWT(tokenUser.accessToken);
+      // const userExp = this.userData.exp *1000
+      const userExp = userData.exp *1000
       const differenceTime = userExp - currentDate
       let intervalForUpdateToken = differenceTime;
       console.log(`Difference time${differenceTime}`)
       if((userExp - currentDate) < 0){
-
         const refreshToken = extractJWT(tokenUser.refreshToken);
         const refreshTokenExp = refreshToken.exp * 1000;
         const differenceTimeRefresh = refreshTokenExp - currentDate;
@@ -193,7 +199,7 @@ export default defineComponent( {
           const userDataFromAccess = extractJWT(accessToken);
           const lifeTimeToken = userDataFromAccess.exp * 1000;
           console.log(tokenUser.accessToken);
-
+          this.$store.commit('auth/SET_DATA_LOGIN', userDataFromAccess)
           intervalForUpdateToken = lifeTimeToken - Date.now() - 10000;
           console.error("Access update through: ", intervalForUpdateToken);
         }
@@ -205,9 +211,12 @@ export default defineComponent( {
         }, intervalForUpdateToken);
 
       }
-    }
-    this.render.main = false;
 
+    }
+    console.log("END CREATED")
+    const user = TokenService.getUser();
+    this.$store.commit('auth/SET_DATA_LOGIN', user);
+    this.render.main = false;
   },
   data(){
     return{

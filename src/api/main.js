@@ -17,23 +17,25 @@ instance.interceptors.request.use(async function (config) {
 
   if (token) {
     let accessToken = token.accessToken;
-    const lifeTimeAccess = extractJWT(accessToken).exp * 1000;
-    const difference = lifeTimeAccess - Date.now() - 10000;
-    console.log('DIFFERENCE', difference);
-    let auth = accessToken ? 'Bearer ' + accessToken : null;
-    if (difference < 0) {
-      const newTokenResponse = await axios.post(
-        `${API_URL}/auth/getNewAccessToken`,
-        {
-          refreshToken: token.refreshToken,
-        }
-      );
-      console.log('NEW TOKEN RESPONSE', newTokenResponse);
-      const accessTokenJSON = newTokenResponse.data;
-      auth = accessTokenJSON.type + ' ' + accessTokenJSON.accessToken;
-      TokenService.updateLocalAccessToken(accessTokenJSON.accessToken);
+    if (token.accessToken) {
+      const lifeTimeAccess = extractJWT(accessToken).exp * 1000;
+      const difference = lifeTimeAccess - Date.now() - 10000;
+      console.log('DIFFERENCE', difference);
+      let auth = accessToken ? 'Bearer ' + accessToken : null;
+      if (difference < 0) {
+        const newTokenResponse = await axios.post(
+          `${API_URL}/auth/getNewAccessToken`,
+          {
+            refreshToken: token.refreshToken,
+          }
+        );
+        console.log('NEW TOKEN RESPONSE', newTokenResponse);
+        const accessTokenJSON = newTokenResponse.data;
+        auth = accessTokenJSON.type + ' ' + accessTokenJSON.accessToken;
+        TokenService.updateLocalAccessToken(accessTokenJSON.accessToken);
+      }
+      config.headers.Authorization = auth;
     }
-    config.headers.Authorization = auth;
   }
 
   return config;

@@ -1,12 +1,8 @@
 <template>
   <div>
     <n-card class="story-card soft-shadow" :title="title">
-      <!-- <template #header-extra>
-        <slot></slot>
-      </template> -->
-      <div class="preview-story-card-container">
-        <slot></slot>
-      </div>
+      <template #header-extra><slot></slot> </template>
+
       <template #cover>
         <img
           v-if="imageNotFound"

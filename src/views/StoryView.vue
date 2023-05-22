@@ -14,22 +14,23 @@
         >
           <card-story
             @click="onClickStory(story)"
-            class="cursor-layout"
+            class="cursor-layout preview-story-card-container"
             v-if="!render.storiesBlock"
+            :title="story.title"
             :storyId="story.id"
             :description="story.description"
             :difficulty="story.difficulty"
           >
             <div class="story-info-container">
-              <span class="font-bold">{{ story.title }}</span>
-              <n-rate :value="story.difficulty" readonly></n-rate>
+              <!-- <span class="font-bold">{{ story.title }}</span> -->
+              <n-rate :value="Number(story.difficulty)" readonly></n-rate>
             </div>
           </card-story>
         </div>
       </div>
       <n-space justify="end" align="center" class="pagination-container">
         <n-button
-          class="icon-layout-pagination soft-shadow"
+          class="icon-layout-pagination soft-shadow cursor-layout"
           :disabled="storiesBlock.currentPage == 1"
           @click="onClickPrevPageStory"
         >

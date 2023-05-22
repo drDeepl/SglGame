@@ -39,6 +39,8 @@ export const decorateResponseApi = async function (func, context) {
 };
 
 export const extractJWT = function (token) {
+  logR('warn', 'Service.Utils: ExtractJWT');
+  console.log('TOKEN', token);
   return JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
 };
 

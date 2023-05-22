@@ -4,13 +4,16 @@ import TokenService from './token.service';
 class AuthService {
   async login(dataForm) {
     logR('warn', 'AuthService: Login');
-    let response = await decorateResponseApi(ApiAuth.login, dataForm);
-    if (response.status == 200) {
-      console.log('AUTH.SERVICE.login: response', response);
-      TokenService.setUser(response.data);
-    } else {
-      response = {status: 404, data: null, message: 'Ошибка при входе'};
-    }
+    const response = await ApiAuth.login(dataForm).catch((error) => {
+      const resp = {status: null};
+      console.log(error);
+      if (error.status) {
+        resp.status = error.status;
+      } else {
+        resp.status = error.response.status;
+      }
+      return resp;
+    });
     return response;
   }
 
