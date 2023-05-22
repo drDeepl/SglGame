@@ -136,7 +136,13 @@
   // width: 2.2em;
   // height: 2.2em;
 }
-.story-info-container > small {
+.story-info-container > span {
   text-align: center;
+  font-size: 1.1em;
+  padding-bottom: 0.3em;
   // color: $color-white;
+}
+
+.preview-story-card-container {
+  margin-top: 0.5em;
 }

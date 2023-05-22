@@ -16,13 +16,12 @@
             @click="onClickStory(story)"
             class="cursor-layout"
             v-if="!render.storiesBlock"
-            :title="story.title"
             :storyId="story.id"
             :description="story.description"
             :difficulty="story.difficulty"
           >
             <div class="story-info-container">
-              <small class="font-bold"></small>
+              <span class="font-bold">{{ story.title }}</span>
               <n-rate :value="story.difficulty" readonly></n-rate>
             </div>
           </card-story>
@@ -61,6 +60,7 @@
     :mask-closable="false"
   >
     <n-card
+      id="scrollingCard"
       class="card-main-layer-history border-top-yellow"
       :title="story.data.title"
       role="dialog"
@@ -120,6 +120,16 @@
             "
           >
           </n-alert>
+          <div style="margin-top: 1em">
+            <n-data-table
+              id="data-table"
+              ref="table"
+              v-if="codemirror.isWork"
+              :columns="codemirror.columns"
+              :data="codemirror.data"
+              :pagination="codemirror.pagination"
+            ></n-data-table>
+          </div>
           <n-code-block
             :onClickRunCodeFunc="onClickRunCode"
             :onClickClearCodeFunc="onClickClearCode"
@@ -141,16 +151,6 @@
             </n-form-item>
           </n-space>
         </n-space>
-      </div>
-
-      <div style="margin-top: 1em">
-        <n-data-table
-          ref="table"
-          v-if="codemirror.isWork"
-          :columns="codemirror.columns"
-          :data="codemirror.data"
-          :pagination="codemirror.pagination"
-        ></n-data-table>
       </div>
     </n-card>
   </n-modal>
@@ -268,6 +268,13 @@ export default defineComponent({
     },
   },
 
+  watch: {
+    getErrors(value) {
+      if (value.length > 0) {
+        this.onClickClearCode();
+      }
+    },
+  },
   methods: {
     createErrorAlert(message) {
       this.alert.error.active = true;
@@ -280,7 +287,7 @@ export default defineComponent({
     async changeProgressDownloadFile(response) {
       const reader = response.body.getReader();
       // INFO: Получаю длину ответа
-      // TODO: Вынести в отдельную функцию =================================================================
+
       const contentLength = +response.headers.get('Content-Length');
       let receivedLength = 0; // INFO: количество байт, полученных на данный момент
       console.log(reader);
@@ -302,7 +309,6 @@ export default defineComponent({
       }
     },
     async onClickStory(story) {
-      // FIX: =========================================
       logR('warn', 'NAVBAR: onClickStory');
       this.story.data = story;
       this.story.loadData = true;
@@ -355,6 +361,8 @@ export default defineComponent({
         this.codemirror.data = result.array_vals;
         this.codemirror.isWork = true;
         this.render.story.runCode = false;
+        const scrollTable = document.getElementById('scrollingCard');
+        scrollTable.scrollTop = scrollTable.scrollHeight;
       } catch (e) {
         if (/(no such table)/.test(e)) {
           errors.push('Такой таблицы не существует');

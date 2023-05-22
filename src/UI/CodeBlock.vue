@@ -30,8 +30,9 @@
               :disabled="!codeIsValid"
               :loading="loadApply"
               @click="onClickRunCode"
-              >Выполнить</n-button
             >
+              Выполнить
+            </n-button>
           </div>
         </template>
 
@@ -68,7 +69,7 @@ export default defineComponent({
   },
   data(){
     return{
-      codeIsValid: false,
+      codeIsValid: true,
 
       code: '',
       cmOptions: {
@@ -79,21 +80,23 @@ export default defineComponent({
   },
 
   watch:{
-    code(value){
-      this.codeIsValid = false;
-      const lowerCaseValue = value.toLowerCase();
-      const isValidQuery = /(select)+.+(from)\s+./.test(lowerCaseValue);
-      // console.log(isValidQuery);
-      if(isValidQuery){
-        const isHaveJoin = /\s(join)\s/.test(lowerCaseValue);
-        if(isHaveJoin){
-          console.log(`Is have join: ${isHaveJoin}`)
-          return
-        }
-        this.codeIsValid = true;
+    // code(value){
+    //   this.codeIsValid = false;
+    //   const lowerCaseValue = value.toLowerCase();
+    //   const isValidQuery = /(select)+.+(from)\s+./.test(lowerCaseValue);
+    //   // console.log(isValidQuery);
+    //   if(isValidQuery){
 
-      }
-    }
+    //     console.log(`Decard: ${isDecard}`)
+    //     const isHaveJoin = /\s(cross)|(outer)\s(join)\s/.test(lowerCaseValue);
+    //     if(isHaveJoin){
+    //       console.log(`Is have join: ${isHaveJoin}`)
+    //       return
+    //     }
+    //     this.codeIsValid = true;
+
+    //   }
+    // }
   },
   computed: {
     getErrors(){
@@ -102,9 +105,21 @@ export default defineComponent({
   },
   methods: {
     async onClickRunCode() {
-      logR("warn", "CodeMirror: onClickRunCode")
-      let errors = this.getErrors;
-      try {
+      logR("warn", "CodeMirror: onClickRunCode");
+      this.$store.commit('story/CLEAR_ERRORS');
+      let errors = [];
+      const lowerCaseValue = this.code.toLowerCase();
+      const isValidQuery = /(select)+.+(from)\s+./.test(lowerCaseValue);
+      console.log("query is valid" + isValidQuery);
+      if(isValidQuery){
+        const isHaveJoin = /\s(cross)|(outer)\s(join)\s/.test(lowerCaseValue);
+        if(isHaveJoin){
+          console.log(`Is have join: ${isHaveJoin}`)
+          errors.push("Декартово произведение таблиц запрещено");
+          this.$store.commit('story/SET_ERRORS', errors);
+        }
+        else{
+        try {
         const ast = parser.parse(this.code);
         const selectCount = ast.value.selectItems.value.length;
         const fromCount = ast.value.from.value.length;
@@ -123,7 +138,16 @@ export default defineComponent({
       } catch (e) {
         errors.push('За один раз возможно выполнить только один запрос');
       }
+      finally{
+        this.$store.commit('story/SET_ERRORS', errors);
+      }
+    }
+      }
+      else{
+        errors.push('Некорректный запрос');
+        this.$store.commit('story/SET_ERRORS', errors);
 
+      }
 
     },
     onClickClearCode(){

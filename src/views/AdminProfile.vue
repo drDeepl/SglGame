@@ -351,7 +351,7 @@
             </n-button>
           </template>
           {{ statsBlock.selectedStory }}
-          <span>TODO: show stats</span>
+
           <n-select
             v-model:value="statsBlock.selectedStory"
             :options="statsBlock.valueForSelect"

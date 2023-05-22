@@ -1,9 +1,12 @@
 <template>
   <div>
     <n-card class="story-card soft-shadow" :title="title">
-      <template #header-extra>
+      <!-- <template #header-extra>
         <slot></slot>
-      </template>
+      </template> -->
+      <div class="preview-story-card-container">
+        <slot></slot>
+      </div>
       <template #cover>
         <img
           v-if="imageNotFound"
@@ -22,7 +25,7 @@ import ServiceStoryImage from '@/services/story.image.service';
 
 export default defineComponent({
   props: {
-    title: {type: String, required: true},
+    title: {type: String, required: false, default: null},
     storyId: {type: Number, required: true},
     difficulty: {type: String, required: true},
     description: {type: String, required: true},
