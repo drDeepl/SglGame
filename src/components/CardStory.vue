@@ -40,7 +40,6 @@ export default defineComponent({
     if (response.status != 200) {
       this.imageNotFound = true;
     } else {
-      console.log('RESPONSE IMAGE\n', response);
       console.log(this.storyId);
       this.render = false;
       document.querySelector(

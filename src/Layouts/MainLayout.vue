@@ -247,7 +247,7 @@ export default defineComponent( {
         },
         register: {
           active: false,
-          model: UserRegister,
+          model: null,
 
         }
       },
@@ -342,6 +342,8 @@ export default defineComponent( {
     onClickRegister() {
       logR('warn', 'onClickRegister');
       this.forms.register.active = true;
+      this.forms.register.model = new UserRegister();
+
     },
     async onClickApplyRegister(dataForm) {
       logR('warn', 'NAVBAR: onCLickApplyRegister');
@@ -354,14 +356,7 @@ export default defineComponent( {
       if(response.status == 200){
         console.log("STATUS: 200\n",dataForm);
         await this.onClickApplyLogIn(dataForm)
-        // const responseLogIn = await this.$store.dispatch('auth/login',dataForm);
-        // logR('log', "MAINLAYOUT response login\n", responseLogIn)
 
-        // if(responseLogIn.status == 200){
-        //   this.forms.runSuccess = true;
-        // this.$router.push({name: this.role[this.userData.role]});
-
-        // }
       }
       else{
         this.$store.commit("notification/SET_ACTIVE_ERROR", response.message);
@@ -373,6 +368,8 @@ export default defineComponent( {
     onClickCancelRegister() {
       logR('warn', 'NAVBAR: onClickCancelRegister');
       this.forms.register.active = false;
+      this.forms.register.model = null;
+
     },
 
     onClickToExitProfile(){

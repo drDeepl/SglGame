@@ -104,29 +104,8 @@
                             <span class="label-row">
                               {{ forms.showStats.model.labels[stat] }}
                             </span>
-                            <span
-                              v-if="stat == 'game_end_date'"
-                              class="value-row"
-                            >
-                              {{
-                                storyStats.currentStoryStats[
-                                  storyStats.selectedStats
-                                ][stat].split('T')[0]
-                              }}
-                            </span>
-                            <span
-                              v-else-if="stat == 'is_completed'"
-                              class="value-row"
-                            >
-                              {{
-                                storyStats.currentStoryStats[
-                                  storyStats.selectedStats
-                                ][stat]
-                                  ? 'Да'
-                                  : 'Нет'
-                              }}
-                            </span>
-                            <span v-else class="value-row">
+
+                            <span class="value-row">
                               {{
                                 storyStats.currentStoryStats[
                                   storyStats.selectedStats
@@ -172,21 +151,24 @@
             </n-scrollbar>
           </div>
         </n-layout-header>
+
         <n-layout-content class="user-profile-content-container">
-          <!-- <n-button @click="onPrintChart">График</n-button> -->
-          <n-card title="Cтатистика баллов" class="stats-block-container">
-            <template #header-extra>
-              <n-icon
-                size="15"
-                :class="`cursor-layout ${
-                  statsBlock.active ? 'rotate-0-deg' : 'rotate-180-deg'
-                }`"
-                @click="onClickChart"
-                ><icon-triangle-up color="black"
-              /></n-icon>
-            </template>
-            <canvas id="acquisitions"></canvas>
-          </n-card>
+          <n-space justify="center" align="center">
+            <n-card title="Cтатистика баллов" class="stats-block-container">
+              <template #header-extra>
+                <n-icon
+                  size="15"
+                  :class="`cursor-layout ${
+                    statsBlock.active ? 'rotate-0-deg' : 'rotate-180-deg'
+                  }`"
+                  @click="onClickChart"
+                  ><icon-triangle-up color="black"
+                /></n-icon>
+              </template>
+
+              <canvas id="acquisitions"></canvas>
+            </n-card>
+          </n-space>
         </n-layout-content>
       </n-layout>
     </n-layout>
@@ -250,6 +232,7 @@ export default defineComponent({
       statsBlock: {
         active: false,
         chart: null,
+        state: {createChart: false, clearChart: false},
         labels: [],
         datasets: [
           {
@@ -324,7 +307,7 @@ export default defineComponent({
       this.forms.createStory.model = new CreateStory();
       const progress = completeStories / countStories;
       console.log('USER PROGRESS\n', progress);
-      this.sidebar.userInfo.progress = progress * 100;
+      this.sidebar.userInfo.progress = Math.round(progress * 100);
 
       console.log(`COUNT STORIES\n${countStories}`);
       const idsImagesStories = await ServiceStoryImage.getIdsImagesStories();
@@ -361,8 +344,8 @@ export default defineComponent({
 
     async onClickStory(storyId) {
       logR('error', 'todo:ADMIN PROFILE:onClickStory');
-      (this.storyStats.selectedStats = 'Прохождение'),
-        (this.storyStats.render = true);
+      this.storyStats.selectedStats = 'Прохождение';
+      this.storyStats.render = true;
       this.storyStats.selectedStatsStory = [];
       this.storyStats.currentStoryStats = {};
 
@@ -371,11 +354,22 @@ export default defineComponent({
       );
       let selectedStatsStory = [];
       for (let i in storyStats) {
+        let statsOfStory = storyStats[i];
+        if (statsOfStory.is_completed) {
+          statsOfStory.game_end_date = statsOfStory.game_end_date.split('T')[0];
+          statsOfStory.is_completed = 'Да';
+        } else {
+          statsOfStory.is_completed = 'Нет';
+          statsOfStory.scores = 0;
+          statsOfStory.game_end_date = '';
+        }
+        console.error(statsOfStory);
         selectedStatsStory.push({
           label: `Прохождение ${Number(i) + 1}`,
-          value: storyStats[i].id,
+          value: statsOfStory.id,
         });
-        this.storyStats.currentStoryStats[storyStats[i].id] = storyStats[i];
+
+        this.storyStats.currentStoryStats[statsOfStory.id] = statsOfStory;
       }
       this.storyStats.selectedStatsStory = selectedStatsStory;
       console.log(storyStats);
@@ -410,10 +404,17 @@ export default defineComponent({
     async onClickChart() {
       logR('warn', 'UserProfile: onClickChart');
       this.statsBlock.active = !this.statsBlock.active;
+      console.log(this.statsBlock.chart.id);
       if (this.statsBlock.active) {
+        console.log('CREATE CHART');
+
         await this.createChart();
       } else {
-        this.statsBlock.chart.destroy();
+        console.log('DESTROYED CHART');
+        if (!this.statsBlock.chart.id) {
+          this.statsBlock.chart.destroy();
+          this.statsBlock.chart = null;
+        }
       }
     },
   },

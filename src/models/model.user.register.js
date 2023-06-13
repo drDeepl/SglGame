@@ -30,4 +30,4 @@ class UserRegister {
   }
 }
 
-export default new UserRegister();
+export default UserRegister;

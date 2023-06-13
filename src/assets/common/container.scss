@@ -105,15 +105,15 @@
 }
 
 .stats-block-container {
-  width: 40em;
-  height: 60em;
+  max-width: 39em;
+  max-height: 59em;
 }
 
-.user-profile-content-container {
-  margin-right: 3em;
-  padding-right: 2em;
-  padding-left: 2em;
-}
+// .user-profile-content-container {
+//   margin-right: 3em;
+//   // padding-right: 2em;
+//   padding-left: 2em;
+// }
 
 .stats-row-container {
   display: flex;
