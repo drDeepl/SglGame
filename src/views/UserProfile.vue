@@ -404,7 +404,7 @@ export default defineComponent({
     async onClickChart() {
       logR('warn', 'UserProfile: onClickChart');
       this.statsBlock.active = !this.statsBlock.active;
-      console.log(this.statsBlock.chart.id);
+
       if (this.statsBlock.active) {
         console.log('CREATE CHART');
 
@@ -413,7 +413,6 @@ export default defineComponent({
         console.log('DESTROYED CHART');
         if (!this.statsBlock.chart.id) {
           this.statsBlock.chart.destroy();
-          this.statsBlock.chart = null;
         }
       }
     },
