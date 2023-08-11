@@ -1,7 +1,8 @@
 // INFO: COLORS
 $color-yellow: #ffc03d;
 $color-grey: #5a6170;
-$color-red: #ee4540;
+$color-red: rgb(238, 68, 63);
+$color-red-shadow: rgba(238, 68, 63, 0.15);
 $color-green: #43d681;
 $color-light-green: #02febf;
 $color-acid-green: #5cff9c;
@@ -25,4 +26,5 @@ $smPhoneWidth: 320px;
 
 // INFO: border
 $border-radius: 19px;
+$border-radius-soft: 5px;
 $border-top-width: 6px;

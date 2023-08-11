@@ -7,10 +7,14 @@
 }
 
 .font-header-card {
-  font-size: calc(1em + 1vmin);
+  font-size: calc(1em + 0.8vmin);
   font-weight: bold;
 }
 
 .font-bold {
   font-weight: bold;
+}
+
+.font-red {
+  color: $color-red;
 }

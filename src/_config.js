@@ -1,5 +1,6 @@
+// import 'dotenv/config';
 export const isDevelop = true;
-
+export const urlApi = process.env.VUE_APP_PATH_API;
 export const tabsByRole = {
   admin: [
     {id: 0, title: 'К историям', lock: false, url: '/stories'},

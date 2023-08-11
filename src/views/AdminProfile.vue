@@ -4,8 +4,16 @@
   ></n-modal>
   <div v-else class="page-content">
     <n-layout has-sider v-if="userData">
-      <n-layout-sider>
-        <n-card>
+      <n-layout-sider
+        bordered
+        collapse-mode="width"
+        :collapsed="collapsed"
+        :collapsed-width="collapsed ? '.5em' : '6em'"
+        show-trigger
+        @collapse="collapsed = true"
+        @expand="collapsed = false"
+      >
+        <n-card v-if="!collapsed">
           <template #header>
             <n-space horizontal align="center">
               <n-avatar
@@ -34,9 +42,17 @@
             v-for="row in sidebar.rows"
             :key="row.id"
             @click="onClickToLink(row.url)"
+            @mouseover="onTextHover[row.url] = true"
+            @mouseleave="onTextHover[row.url] = false"
           >
             <span class="profile-sidebar-row-border"></span>
-            <span class="profile-sidebar-row-text">{{ row.title }}</span>
+            <span
+              :class="`profile-sidebar-row-text ${
+                onTextHover[row.url] ? 'font-red' : ''
+              }`"
+            >
+              {{ row.title }}
+            </span>
           </div>
         </n-card>
       </n-layout-sider>
@@ -156,7 +172,8 @@
                 </n-space>
               </div>
               <div v-else class="container-empty">
-                <n-empty description="Список историй пуст" class=""> </n-empty>
+                <n-empty description="Список историй пуст" class="empty-block">
+                </n-empty>
               </div>
             </n-scrollbar>
           </div>
@@ -413,6 +430,8 @@ export default defineComponent({
   data() {
     return {
       API_URL,
+      onTextHover: {},
+      collapsed: false,
       showInfo: false,
       sidebar: {active: false, rows: []},
       render: {main: false},

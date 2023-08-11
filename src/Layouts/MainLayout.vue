@@ -5,7 +5,7 @@
         <n-space justify="start">
           <router-link to="/">
             <n-button text>
-              <span style="color: whitesmoke">На главную</span>
+              <span style="color: whitesmoke;">На главную</span>
             </n-button>
           </router-link>
         </n-space>
@@ -168,11 +168,13 @@ import TokenService from "@/services/token.service";
 import UserLogin from "@/models/model.user.login";
 import UserRegister from "@/models/model.user.register"
 
+import {urlApi} from "@/_config"
 
 export default defineComponent( {
   components: {"n-avatar": NAvatar, "n-navbar": NavbarVertical},
   async created() {
     logR('warn', "MAINLAYOUT: created");
+    logR('warn', urlApi)
     this.render.main = true;
     let tokenUser = this.$store.state.auth.tokenUser
     console.log("TOKEN USER: ", tokenUser)
@@ -181,7 +183,6 @@ export default defineComponent( {
       // INFO: default userData.exp in seconds, after * 1000 will milliseconds
       console.log("USERS TOKEN", tokenUser);
       const userData = extractJWT(tokenUser.accessToken);
-      // const userExp = this.userData.exp *1000
       const userExp = userData.exp *1000
       const differenceTime = userExp - currentDate
       let intervalForUpdateToken = differenceTime;

@@ -4,10 +4,10 @@
 }
 
 .profile-sidebar-row-border {
-  border-right: 6px solid $color-red;
+  border-left: 6px solid $color-red;
   border-radius: 10px;
   padding: 0.5em 0.3em;
-  margin-left: -1em;
+  // margin-left: -1em;
   margin-right: 0.5em;
 }
 
@@ -28,17 +28,14 @@
   margin-bottom: 1.5em !important;
   cursor: pointer;
   z-index: -2;
-  padding-top: 0.5em;
-  padding-bottom: 0.5em;
+  margin-top: 0.3em;
+  padding-top: 0.3em;
+  padding-bottom: 0.3em;
 }
 
 .profile-sidebar-link:hover {
-  background-color: $color-grey-shadow;
+  background-color: $color-red-shadow;
   border-radius: 7px;
-}
-
-.profile-sidebar-link > .profile-sidebar-row-text:hover {
-  color: $color-red;
 }
 
 .img-header-profile {
